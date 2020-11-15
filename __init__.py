@@ -13,8 +13,8 @@ sbver = preferences.SUPPORTED_BLENDER_VERSION
 
 bl_info = {
     "name": "Camera Projection Painter",
-    "author": "Vlad Kuzmin (ssh4), Ivan Perevala (vanyOk)",
-    "version": (0, 1, 5),
+    "author": "Vlad Kuzmin (ssh4), Ivan Perevala (ivpe)",
+    "version": (0, 1, 7),
     "blender": (2, 83, 0),
     "description": "Expanding the capabilities of clone brush for working with photo scans",
     "location": "Tool settings > Camera Painter",

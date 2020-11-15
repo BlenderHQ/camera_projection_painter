@@ -96,7 +96,7 @@ class CPP_GT_current_image_preview(bpy.types.Gizmo):
 
     def setup(self):
         self.image_batch = batch_for_shader(
-            engine.shaders.getShader("current_image"), 'TRI_FAN',
+            engine.getCachedShader("current_image"), 'TRI_FAN',
             {"pos": ((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)),
              "uv": ((-0.5, -0.5), (0.5, -0.5), (0.5, 0.5), (-0.5, 0.5))})
 
@@ -109,7 +109,7 @@ class CPP_GT_current_image_preview(bpy.types.Gizmo):
             image = camera.cpp.image
 
             if image and image.cpp.valid:
-                shader = engine.shaders.getShader("current_image")
+                shader = engine.getCachedShader("current_image")
                 if shader is None:
                     return
                 

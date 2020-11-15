@@ -21,8 +21,8 @@ def get_camera_batches():
         (1, 2), (2, 3), (3, 4), (1, 4)
     )
 
-    shader_camera = engine.shaders.getShader("camera")
-    shader_camera_image_preview = engine.shaders.getShader("camera_image_preview")
+    shader_camera = engine.getCachedShader("camera")
+    shader_camera_image_preview = engine.getCachedShader("camera_image_preview")
 
     camera_wire_batch = batch_for_shader(
         shader_camera, 'LINES',
@@ -66,7 +66,7 @@ def get_axes_batch():
 
     indices = ((0, 1), (0, 2), (0, 3))
 
-    shader_axes = engine.shaders.getShader("axes")
+    shader_axes = engine.getCachedShader("axes")
 
     batch_axes = batch_for_shader(
         shader_axes, 'LINES',
@@ -86,9 +86,9 @@ def draw_cameras(self, context):
     clone_image = image_paint.clone_image
 
     # Shaders
-    shader_camera = engine.shaders.getShader("camera")
-    shader_camera_image_preview = engine.shaders.getShader("camera_image_preview")
-    shader_axes = engine.shaders.getShader("axes")
+    shader_camera = engine.getCachedShader("camera")
+    shader_camera_image_preview = engine.getCachedShader("camera_image_preview")
+    shader_axes = engine.getCachedShader("axes")
 
     # Batches
     axes_batch = self.axes_batch
