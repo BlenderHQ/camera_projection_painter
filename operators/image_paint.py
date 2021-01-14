@@ -33,7 +33,6 @@ class CPP_OT_image_paint(bpy.types.Operator):
             if context.scene.cpp.use_warning_action_lock:
                 return {'FINISHED'}
 
-        wm.cpp.is_image_paint = True
         bpy.ops.paint.image_paint('INVOKE_DEFAULT')
 
         return {'FINISHED'}

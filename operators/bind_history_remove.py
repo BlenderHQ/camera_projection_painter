@@ -11,17 +11,18 @@ class CPP_OT_bind_history_remove(bpy.types.Operator):
 
     def execute(self, context):
         if context.mode == 'PAINT_TEXTURE':
-            camera_object = context.scene.camera
+            camera_ob = context.scene.camera
         elif context.mode == 'OBJECT':
-            camera_object = context.active_object
-            if camera_object and camera_object.type != 'CAMERA':
-                camera_object = None
+            camera_ob = context.active_object
+            if camera_ob and camera_ob.type != 'CAMERA':
+                camera_ob = None
 
-        if camera_object:
-            camera = camera_object.data
+        if camera_ob is not None:
+            camera = camera_ob.data
             camera.cpp_bind_history.remove(self.index)
             if len(camera.cpp_bind_history):
-                camera.cpp.active_bind_index = min(max(self.index - 1, 0), len(camera.cpp_bind_history) - 1)
+                camera.cpp.active_bind_index = min(
+                    max(self.index - 1, 0), len(camera.cpp_bind_history) - 1)
             return {'FINISHED'}
         else:
             return {'CANCELLED'}

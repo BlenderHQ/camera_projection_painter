@@ -1,36 +1,35 @@
-# The module contains basic methods for checking context for compatible conditions
-import os
-
-from . import engine
-
 import bpy
 
+TEMP_DATA_NAME = "cpp_data"
 
-def check_uv_layers(ob: bpy.types.Object):
+
+def check_uv_layers(ob: bpy.types.Object) -> bool:
     """
-    Positive if there is at least one layer and TEMP_DATA_NAME layer is not active
+    Positive if there is at least one layer and TEMP_DATA_NAME layer is not active.
     """
     if ob and ob.type == 'MESH':
         uv_layers = ob.data.uv_layers
         uv_layers_count = len(uv_layers)
 
-        if engine.TEMP_DATA_NAME in uv_layers:
+        if TEMP_DATA_NAME in uv_layers:
             uv_layers_count -= 1
 
-        if uv_layers_count and uv_layers.active.name != engine.TEMP_DATA_NAME:
+        if uv_layers_count and uv_layers.active.name != TEMP_DATA_NAME:
             return True
+
     return False
 
 
-def tool_setup_poll(context: bpy.types.Context):
+def tool_setup_poll(context: bpy.types.Context) -> bool:
     """
-    The conditions under which the gizmo is available appears under the scene settings panel in the toolbar
+    The conditions under which the gizmo is available appears under the scene settings panel in the toolbar.
     """
     tool = context.workspace.tools.from_space_view3d_mode(
         context.mode, create=False)
 
     if not tool:
         return False
+
     if tool.idname != "builtin_brush.Clone":
         return False
 
@@ -43,16 +42,15 @@ def tool_setup_poll(context: bpy.types.Context):
     if not image_paint.use_clone_layer:
         return False
 
-    ob = context.image_paint_object
-    if not check_uv_layers(ob):
+    if not check_uv_layers(context.image_paint_object):
         return False
 
     return True
 
 
-def full_poll(context: bpy.types.Context):
+def full_poll(context: bpy.types.Context) -> bool:
     """
-    Conditions under which the start of the main operator
+    Conditions under which the start of the main operator.
     """
     if not tool_setup_poll(context):
         return False
@@ -60,20 +58,19 @@ def full_poll(context: bpy.types.Context):
     scene = context.scene
     image_paint = scene.tool_settings.image_paint
 
+    # Image paint canvas
     canvas = image_paint.canvas
-    if not canvas:
+    if canvas is None:
+        return False
+    elif canvas.gl_load():
         return False
 
-    if not canvas.cpp.valid:
+    # Scene
+    camera_ob = scene.camera
+    if camera_ob is None:
         return False
 
-    if not scene.camera:
-        return False
-    elif scene.camera.data.type != 'PERSP':
-        return False
     if not image_paint.detect_data():
-        return False
-    if not image_paint.clone_image:
         return False
 
     return True

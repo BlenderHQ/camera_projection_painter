@@ -1,8 +1,4 @@
-from .. import operators
-
-if "bpy" in locals():
-    import importlib
-    importlib.reload(operators)
+from typing import Iterator
 
 import bpy
 from bpy.types import PropertyGroup
@@ -22,7 +18,7 @@ class SceneProperties(PropertyGroup):
     """
 
     @property
-    def has_camera_objects(self):
+    def has_camera_objects(self) -> bool:
         """
         True if there are camera objects in the scene
         @return: bool
@@ -33,15 +29,15 @@ class SceneProperties(PropertyGroup):
         return False
 
     @property
-    def camera_objects(self):
+    def camera_objects(self) -> Iterator[bpy.types.Object]:
         """
-        Generates a generator of camera objects
+        Generator of sequence of camera objects
         @return: generator
         """
         return (ob for ob in self.id_data.objects if ob.type == 'CAMERA')
 
     @property
-    def has_initial_visible_camera_objects(self):
+    def has_initial_visible_camera_objects(self) -> bool:
         """
         True if there are initial visible camera objects in the scene
         @return: bool
@@ -51,15 +47,15 @@ class SceneProperties(PropertyGroup):
         return False
 
     @property
-    def initial_visible_camera_objects(self):
+    def initial_visible_camera_objects(self) -> Iterator[bpy.types.Object]:
         """
-        Generates a generator of initial visible camera objects
+        Generator of sequence of initial visible camera objects
         @return: generator
         """
         return (ob for ob in self.camera_objects if ob.initial_visible)
 
     @property
-    def has_camera_objects_selected(self):
+    def has_camera_objects_selected(self) -> bool:
         """
         True if there are selected cameras in the scene
         @return: bool
@@ -71,10 +67,42 @@ class SceneProperties(PropertyGroup):
     @property
     def selected_camera_objects(self):
         """
-        Generates a generator of selected camera objects
+        Generator of sequence of selected camera objects
         @return: generator
         """
         return (ob for ob in self.id_data.cpp.camera_objects if ob.select_get())
+
+    @property
+    def used_images(self):
+        """
+        Generator of sequence of images used by `initial_visible_camera_objects`
+        None values are skipped. So length may be not equal.
+        """
+        return (_.data.cpp.image for _ in self.initial_visible_camera_objects if _.data.cpp.image)
+
+    # Utility methods
+    def evaluate_initial_visible_camera_objects(self, context) -> None:
+        """
+        Set `initial_visible` attribute to True of object in
+        context.visible_objects for each object in a scene.
+        """
+        for camera_ob in self.camera_objects:
+            state = camera_ob in context.visible_objects
+            camera_ob.initial_visible = state
+
+    def update_initial_visible_cameras_sensors(self) -> None:
+        """
+        Update `sensor_fit` for each initial visible camera in the scene
+        """
+        for camera_ob in self.initial_visible_camera_objects:
+            camera = camera_ob.data
+            image = camera.cpp.image
+            if image and image.cpp.valid:
+                width, height = image.cpp.static_size
+                if width > height:
+                    camera.sensor_fit = 'VERTICAL'
+                else:
+                    camera.sensor_fit = 'HORIZONTAL'
 
     # Update methods
 
@@ -93,8 +121,8 @@ class SceneProperties(PropertyGroup):
         camera_object = self.id_data.camera
         camera_object.initial_visible = True
         image = camera_object.data.cpp.image
-        if image and image.cpp.valid:
-            self.id_data.tool_settings.image_paint.clone_image = image
+        # if image and image.cpp.valid:
+        #     self.id_data.tool_settings.image_paint.clone_image = image
         if bpy.context.mode == 'OBJECT':
             bpy.ops.object.select_all(action='DESELECT')
             camera_object.select_set(True)
@@ -114,12 +142,11 @@ class SceneProperties(PropertyGroup):
                 continue
             ob.initial_visible = value
 
-    def _calibration_source_file_update(self, context):
-        bpy.ops.cpp.import_cameras_csv()
+    active_camera_index: IntProperty(
+        name="Active Camera", get=_get_camera_index, set=_set_camera_index)
 
-    active_camera_index: IntProperty(name="Active Camera", get=_get_camera_index, set=_set_camera_index)
-
-    used_all_cameras: BoolProperty(name="Use All", get=_get_used_all_cameras, set=_set_used_all_cameras)
+    used_all_cameras: BoolProperty(
+        name="Use All", get=_get_used_all_cameras, set=_set_used_all_cameras)
 
     # Properties
     source_dir: StringProperty(
@@ -127,14 +154,6 @@ class SceneProperties(PropertyGroup):
         subtype='DIR_PATH',
         description="The path to the directory of the images used. "
                     "Used to automate image search for cameras by name"
-    )
-
-    calibration_source_file: StringProperty(
-        name="Camera Calibration File",
-        subtype='FILE_PATH',
-        description="Path to third-party application *.csv file."
-        "Used for automatic setup camera calibration parameters",
-        update=_calibration_source_file_update
     )
 
     cameras_viewport_size: FloatProperty(
@@ -222,12 +241,6 @@ class SceneProperties(PropertyGroup):
         subtype='DISTANCE',
         options={'HIDDEN'},
         description="User recommended radius projected onto the plane brush"
-    )
-
-    auto_distance_warning: BoolProperty(
-        name="Auto Safe Radius", default=False,
-        options={'HIDDEN'},
-        description="Automatically set radius considering actual performance"
     )
 
     max_loaded_images: IntProperty(

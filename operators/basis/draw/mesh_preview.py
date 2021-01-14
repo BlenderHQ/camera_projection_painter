@@ -97,13 +97,9 @@ def update_brush_texture_bindcode(self, context):
         self.brush_texture_bindcode = bindcode
 
 
-def get_object_batch(context, ob):
-    """Returns object batch from evaluated depsgraph"""
-
-    depsgraph = context.evaluated_depsgraph_get()
-
-    # Get the modified version of the mesh from the depsgraph
-    mesh = depsgraph.id_eval_get(ob).data
+def get_object_batch(context, ob_eval):
+    """Returns object batch"""
+    mesh = ob_eval.data
     mesh.calc_loop_triangles()
 
     vertices_count = len(mesh.vertices)
@@ -206,11 +202,11 @@ def draw_projection_preview(self, context):
     bgl.glBindTexture(bgl.GL_TEXTURE_2D, self.brush_texture_bindcode)
 
     # Uniforms
-    shader = engine.getCachedShader("mesh_preview")
+    shader = engine.shaders.get("mesh_preview")
     shader.bind()
 
     shader.uniform_float("model_matrix", ob.matrix_world)
-    shader.uniform_float("proj_MVP", Matrix(self.environment.projector_MVP))
+    shader.uniform_float("proj_MVP", Matrix(self.environment.projector_mvp))
 
     # Images
     shader.uniform_int("image", 0)
@@ -225,7 +221,6 @@ def draw_projection_preview(self, context):
         context, wm.cpp.mouse_pos)
     shader.uniform_int("is_active_view", is_active_view)
 
-    shader.uniform_bool("is_full_draw", (self.full_draw,))
     shader.uniform_bool("is_brush", (scene.cpp.use_projection_preview,))
     shader.uniform_bool("is_normal_highlight",
                         (scene.cpp.use_normal_highlight,))
@@ -237,8 +232,8 @@ def draw_projection_preview(self, context):
                          preferences.normal_highlight_color)
 
     # Outline and Highlight
-    outline_type = {'NO_OUTLINE': 0, 'FILL': 1,
-                    'CHECKER': 2, 'LINES': 3}[preferences.outline_type]
+    outline_type = {'OUTLINE_NONE': 0, 'OUTLINE_FILL': 1,
+                    'OUTLINE_CHECKER': 2, 'OUTLINE_LINES': 3}[preferences.outline_type]
     if outline_type:
         outline_color = preferences.outline_color
         shader.uniform_float("outline_color", outline_color)
@@ -260,7 +255,8 @@ def draw_projection_preview(self, context):
         "brush_radius", scene.tool_settings.unified_paint_settings.size)
     shader.uniform_float("brush_strength", image_paint.brush.strength)
 
-    camera.cpp.set_shader_calibration(shader)
+
+    engine.set_shader_calibration(shader, camera)
     # Draw
 
     batch.draw(shader)

@@ -54,14 +54,17 @@ def get_warning_status(context, mpos) -> bool:
     mpos = Vector(mpos)
     brush_radius = context.scene.tool_settings.unified_paint_settings.size
 
-    p0 = view3d_utils.region_2d_to_vector_3d(context.region, context.region_data, mpos)
-    p1 = view3d_utils.region_2d_to_vector_3d(context.region, context.region_data, (mpos.x + brush_radius, mpos.y))
+    p0 = view3d_utils.region_2d_to_vector_3d(
+        context.region, context.region_data, mpos)
+    p1 = view3d_utils.region_2d_to_vector_3d(
+        context.region, context.region_data, (mpos.x + brush_radius, mpos.y))
     scr_radius = (p0 - p1).length
     lens = context.space_data.lens * 0.01
 
     distances = []
     for p in CHECK_PATTERN:
-        ppos = mpos + (p * context.scene.tool_settings.unified_paint_settings.size)
+        ppos = mpos + \
+            (p * context.scene.tool_settings.unified_paint_settings.size)
         dist = ray_cast(context, ppos)
         if dist != -1:
             distances.append(dist)

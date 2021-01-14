@@ -1,9 +1,3 @@
-# <pep8 compliant>
-
-# At the moment, there is no way to fully use custom gizmo when
-# splitting a window (see link), therefore, standard
-# https://developer.blender.org/T71941
-
 from .. import poll
 from .. import __package__ as addon_pkg
 
@@ -12,6 +6,55 @@ if "bpy" in locals():
     importlib.reload(poll)
 
 import bpy
+import gpu
+import bgl
+
+
+# Coordinates.
+custom_shape_verts = (
+    (0.0, 0.0, 0.0), )
+
+
+class CPP_GT_camera_gizmo(bpy.types.Gizmo):
+    bl_idname = "CPP_GT_camera_gizmo"
+
+    __slots__ = (
+        "shape",
+        "camera_ob"
+    )
+
+    def _camera_ob_poll(self, value):
+        return (isinstance(value, bpy.types.Object) and value.type == 'CAMERA')
+
+    camera_ob: bpy.props.PointerProperty(type=bpy.types.Object)
+
+    def draw(self, context):
+        with gpu.matrix.push_pop():
+            bgl.glEnable(bgl.GL_BLEND)
+            bgl.glEnable(bgl.GL_DEPTH_TEST)
+            self.draw_custom_shape(self.shape)
+            bgl.glDisable(bgl.GL_BLEND)
+            bgl.glDisable(bgl.GL_DEPTH_TEST)
+
+    def draw_select(self, context, select_id):
+        self.draw_custom_shape(self.shape, select_id=select_id)
+
+    def setup(self):
+        if not hasattr(self, "shape"):
+            self.shape = self.new_custom_shape(
+                'POINTS', custom_shape_verts)
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        wm.cpp.current_selected_camera_ob = self.camera_ob
+        bpy.ops.wm.call_menu_pie(name="CPP_MT_camera_pie")
+        return {'RUNNING_MODAL'}
+
+    def exit(self, context, cancel):
+        pass
+
+    def modal(self, context, event, tweak):
+        return {'FINISHED'}
 
 
 class CPP_GGT_camera_gizmo_group(bpy.types.GizmoGroup):
@@ -30,15 +73,19 @@ class CPP_GGT_camera_gizmo_group(bpy.types.GizmoGroup):
         return poll.tool_setup_poll(context)
 
     def _create_gizmo(self, camera_ob):
-        """The method adds one gizmo and sets its properties"""
-        mpr = self.gizmos.new("GIZMO_GT_primitive_3d")
-        props = mpr.target_set_operator("cpp.call_pie")
-        props.camera_name = camera_ob.name
+        """Add one gizmo and sets its properties"""
+        mpr = self.gizmos.new(CPP_GT_camera_gizmo.bl_idname)
+
+        mpr.camera_ob = camera_ob
 
         mpr.matrix_basis = camera_ob.matrix_world
 
-        mpr.use_select_background = True
+        mpr.use_select_background = False
         mpr.use_event_handle_all = False
+
+        mpr.matrix_basis = camera_ob.matrix_world
+
+        mpr.use_draw_modal = True
 
         self._camera_gizmos[camera_ob] = mpr
 

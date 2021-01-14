@@ -9,6 +9,7 @@ if "bpy" in locals():
 import bpy
 
 _classes = [
+    camera.CPP_GT_camera_gizmo,
     camera.CPP_GGT_camera_gizmo_group,
     image_preview.CPP_GT_current_image_preview,
     image_preview.CPP_GGT_image_preview_gizmo_group

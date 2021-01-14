@@ -14,13 +14,16 @@ import bpy
 def add_draw_handlers(self, context):
     args = (self, context)
     callback = mesh_preview.draw_projection_preview
-    self.draw_handler = bpy.types.SpaceView3D.draw_handler_add(callback, args, 'WINDOW', 'POST_VIEW')
+    self.draw_handler = bpy.types.SpaceView3D.draw_handler_add(
+        callback, args, 'WINDOW', 'POST_VIEW')
     callback = cameras.draw_cameras
-    self.draw_handler_cameras = bpy.types.SpaceView3D.draw_handler_add(callback, args, 'WINDOW', 'POST_VIEW')
+    self.draw_handler_cameras = bpy.types.SpaceView3D.draw_handler_add(
+        callback, args, 'WINDOW', 'POST_VIEW')
 
 
 def remove_draw_handlers(self):
     if self.draw_handler:
         bpy.types.SpaceView3D.draw_handler_remove(self.draw_handler, 'WINDOW')
     if self.draw_handler_cameras:
-        bpy.types.SpaceView3D.draw_handler_remove(self.draw_handler_cameras, 'WINDOW')
+        bpy.types.SpaceView3D.draw_handler_remove(
+            self.draw_handler_cameras, 'WINDOW')
