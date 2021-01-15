@@ -1,6 +1,6 @@
-# Camera Projection Painter
-
 ![Logo](https://user-images.githubusercontent.com/16822993/88917283-2f4d8100-d270-11ea-9f2e-d546d6f3d0b0.png)
+### TODO(ivpe): current file contains todo's (search(TODO))
+# Camera Projection Painter
 
 -------------
 ## Preamble
@@ -13,6 +13,9 @@ In terms of workflow, the main feature of the add-on is that there is no need to
 ## Workfow Automation
 
  - ### Setup Context
+
+ TODO(ivpe): update current section to current implementation
+
   The operator allows you to carry out all the preparatory steps "in one click". Its description is quite extensive and will be considered for more specific situations.
   
   First of all, it is checked that there is a mesh object in the scene that can be used for drawing. The only requirements for it are that it must be visible (hidden objects will be skipped by the search), must have at least one polygon and at least one UV map. The first 2 requirements are simple, but in the case of a UV map, it makes no sense to automate its creation - it is assumed that the user is using the scene after reconstruction in photogrammetric software, which makes the absence of at least one UV map unacceptable. The object does not have to be selected - if a camera is selected or no object is selected, then the object with the largest number of polygons will be automatically selected.
@@ -24,12 +27,48 @@ In terms of workflow, the main feature of the add-on is that there is no need to
 
   The final stage is tool settings setup. The object mode will be set to "Texture Paint" mode. The tool will set to "Clone Brush". The texture mode will be set to "Single Image". If the scene does not have an active camera, will be set. The brush "Clone Image" will be set equal to the one binded to the active scene camera. The viewport display mode will be set to "Flat".
 
- - ### Bind Camera Images
- It is necessary to automate the search for the corresponding images for specific cameras.
+ - ### Name comparison algorithm
+This topic is directly related to all IO operators ("Bind Camera Images", "Import/Export Camera Data").
 
- The search is performed among image files in the selected dataset directory and also (if the appropriate option is selected) - among images already open in the blend file. The second is useful if the scene is imported immediately along with the images. For files already open in the blend file, the search is also performed by the file name in the image path. That is, the image name can "Image" and the file path contains "C:\DSC0001.jpg" - this will also be searched for.
+The main goal is to compare different item names. These can be camera object names, their data names, image data block names, image file path file names, camera / image names in camera data files of third-party software, actual file names. The current implementation is unified for all of these items. It can be tricky to understand how this works, but it's important to read it if you run into any problems. A more detailed explanation is described in the section of the respective operator.
 
-The search algorithm is quite simple - according to the name of the camera object, camera object data name and the image name and file path image file name. Comparison of names is done without file extension and case insensitivity. The search will skip items whose name contains a slash at the end - they cannot be considered as a file name (that is, the slash should not be in the names of objects, cameras and images, these situations are not supported in terms of performance). More clearly in the table:
+In short, each of these names is reduced to a single form for comparison. In any case, the comparison will take place without regard to the registry (uppercase or lowercase characters). The situation with file extensions is a little more complicated. The fact is that the names can contain periods not only before the actual file extension. Therefore, to compare names, only the file extension of the required type will be removed from the actual file name:
+
+### Supported image formats
+
+Is equal to [Blender supported image formats][1]:
+
+  - `*.bmp`
+  - `*.sgi`, `*.rgb`, `*.bw`
+  - `*.png`
+  - `*.jpg`, `*.jpeg`
+  - `*.jp2`, `*.j2c`
+  - `*.tga`
+  - `*.cin`, `*.dpx`
+  - `*.exr`
+  - `*.hdr`
+  - `*.tif`, `*.tiff`
+  - `*.psd`: (does not exist in the official documentation, but does exist)
+
+### Supported camera data IO file formats
+
+ - `*.csv`: Reality Capture "Internal/External camera parameters", "Comma-separated Name, X, Y, Z", "Comma-separated Name, X, Y, Z, Heading, Pitch, Roll", "Comma-separated Name, X, Y, Z, Omega, Phi, Kappa"
+ - `*.txt`: Metashape "Omega Phi Kappa (\*.txt)"
+ - `*.xmp` - (TODO(ivpe): explain this)
+ - `*.xml` - (TODO(ivpe): explain this)
+
+So, for example, there is an image named "DSC09941.JPG". Since we compare only lowercase, dsc09941.jpg will be used for comparison, and since ".jpg" is in the list of supported image formats, the file extension will not be used in the comparison. As a result, the name "dsc09941" will be used for comparison. It should be understood that the image file cannot have an extension, for example ".csv". In this case, the name for comparison will remain "dsc09941.csv". At the same time, if we have a camera data file "dsc09941.xmp" (not image file), then its name for comparison will be "dsc09941".
+
+As a result, we can compare the names of the camera data files with the names of the images, and with any other names.
+
+
+- ### Bind Camera Images 
+
+Since the purpose and implementation of cameras in Blender differs from photogrammetric software, it is necessary to automate the search for appropriate images for specific cameras.
+
+The search is performed among image files in the selected dataset directory as well as images already open in the \*.blend file. The second is useful if the scene is imported immediately along with images. For files already open in a \*.blend file, the search is also performed by the filename in the image path. That is, the name of the image can be "Image", and the file path contains "C:\DSC09941.jpg" - this will also be a searched.
+
+The search algorithm evaluates: the name of the camera object, the name of the data of the camera object and the image name and image file name of the file path. They are all evaluated for comparison as image names. What does it mean? It is undesirable for the names of objects and their data to contain slashes, backslashes - it is obvious that in such a situation they cannot be regarded as names of images. More detailed examples can be found in the table.
  
 | Camera name  | Image name     | Сonjunction   |
 -------------- | -------------- | ------------- |
@@ -45,26 +84,9 @@ DSC09941       | dsc09941       | Yes           |
 DSC09941.JPG   | CSF68851.JPG   | No            |
 DSC.JPG        | DSC.09941      | No            |
 DSC09941.JPG   | DSC09941.AAA   | No            |
-DSC09941.AAA/  | DSC09941.AAA/  | No            |
+C/DSC09941.AAA | DSC09941.AAA   | No            |
 
-File extensions are not considered when comparing names, but they do matter. To support names that are separated by a period, files with the following extensions are taken into account:
-
-Is equal to [Blender supported image formats][1]:
-
-  - *.bmp
-  - *.sgi, *.rgb, *.bw
-  - *.png
-  - *.jpg, *.jpeg
-  - *.jp2, *.j2c
-  - *.tga
-  - *.cin, *.dpx
-  - *.exr
-  - *.hdr
-  - *.tif, *.tiff
-
-For user convenience, there is an option "Rename" with which the name of the image, camera object and its data will be set equal to the name of the camera object without the file extension (keeping original case).
-
-Also, for convenience, there is an option "Refresh image previews" - if you select it, higher quality previews will be generated, but for large datasets this may take some time.
+Also, for convenience, there is an option "Refresh Image Previews" - if you select it, higher quality previews will be generated, but for large datasets this may take some time.
 
 -------------
 ## Preferred Workflow
@@ -72,21 +94,11 @@ Preferred workflow refers to a change in the user interface as well as automatio
 - Capturing Reality © Reality Capture ©
 - Agisoft © Metashape ©
 
-### Reality Capture
-
-#### Import Camera Data
 
 -------------
 ## Known limitations when working with the add-on
 
-Supported image file types:
-  - jpeg
-  - png
-  - targa
-  - tiff
-  - bmp
-
-Supported means that the workflow with them will be the fastest. Working with other types is also possible, however, in this case, high-resolution previews will not be generated and a large number of images must be loaded into memory to determine their size.
+ - [Blender's packed files][3]: Their use is contrary to the purpose of the add-on - it is assumed that you are using the same image dataset that was used to reconstruct the scene, without unnecessary copying of files.
 
 [Support on Patreon][2]
 
@@ -94,3 +106,4 @@ Supported means that the workflow with them will be the fastest. Working with ot
 
 [1]: https://docs.blender.org/manual/en/latest/files/media/image_formats.html#image-formats
 [2]: https://www.patreon.com/BlenderHQ
+[3]: https://docs.blender.org/manual/en/latest/files/blend/packed_data.html
