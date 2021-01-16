@@ -431,7 +431,7 @@ def draw_dev(self, context: bpy.types.Context, layout: bpy.types.UILayout) -> No
         col.operator(operator="cppdev.reload", icon='PLUGIN')
 
         col = box.column(align=False)
-        keymap.draw_kmi(context, col, "Window", operators.CPPDEV_OT_reload.bl_idname)
+        keymap.draw_kmi(context, col, "Window", "cppdev.reload")
 
         # Dev only defaults
         box = layout.box()

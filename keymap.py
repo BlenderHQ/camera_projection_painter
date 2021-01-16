@@ -34,12 +34,7 @@ ADDON_KEYMAP = {
         ),
     },
     "Window": {
-        operators.CPPDEV_OT_reload.bl_idname: (
-            (
-                {"type": "F5", "value": 'PRESS', "shift": True, "ctrl": True},
-                None
-            ),
-        ),
+
     },
 }
 
@@ -89,6 +84,15 @@ def draw_kmi(
 def register():
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
+
+    preferences = bpy.context.preferences
+    if preferences.view.show_developer_ui:
+        ADDON_KEYMAP["Window"]["cppdev.reload"] = (
+            (
+                {"type": "F5", "value": 'PRESS'},  # "shift": True, "ctrl": True},
+                None
+            ),
+        )
 
     for km_name, km_items in ADDON_KEYMAP.items():
         km = kc.keymaps.new(km_name)

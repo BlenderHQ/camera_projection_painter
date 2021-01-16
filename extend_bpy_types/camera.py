@@ -1,4 +1,5 @@
 from .. import engine
+from .. import __package__ as addon_pkg
 
 import bpy
 from bpy.types import PropertyGroup
@@ -11,7 +12,8 @@ from bpy.props import (
 
 
 class BindImageHistoryItem(PropertyGroup):
-    """ Used to store a palette of previously used images. """
+    """Used to store a palette of previously used images.
+    """
     image: PointerProperty(
         type=bpy.types.Image, name="Image",
         options={'HIDDEN'})
@@ -24,12 +26,11 @@ class BindImageHistoryItem(PropertyGroup):
 
 
 class CameraProperties(PropertyGroup, engine.lens_distortion_properties.LD_FULL_camera_properties):
+    """Serves for storing the properties associated with the data of each individual camera,
+    the main here is the image binded to the camera.
     """
-    Serves for storing the properties associated with the data of each individual camera,
-    the main here is the image binded to the camera
-    """
-
     # Update methods
+
     def _image_update(self, context):
         if self.image and self.image.cpp.valid:
             camera = self.id_data
@@ -51,6 +52,11 @@ class CameraProperties(PropertyGroup, engine.lens_distortion_properties.LD_FULL_
                 if item.image != self.image:
                     self.active_bind_index = check_index
 
+    def _image_poll(self, value):
+        if value.source == 'FILE':
+            return True
+        return False
+
     def _active_bind_index_update(self, context):
         camera = self.id_data
         bind_history = camera.cpp_bind_history
@@ -68,4 +74,5 @@ class CameraProperties(PropertyGroup, engine.lens_distortion_properties.LD_FULL_
         type=bpy.types.Image, name="Image",
         options={'HIDDEN'},
         description="An image binded to a camera for use as a Clone Image in Texture Paint mode",
-        update=_image_update)
+        update=_image_update,
+        poll=_image_poll)

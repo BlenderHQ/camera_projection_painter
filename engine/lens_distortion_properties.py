@@ -30,17 +30,18 @@ PROP_STEP = 6
 
 
 # Camera calibration properties
+
+
 class LD_CalibrationProperties:
     __slots__ = ()
 
     # --- Internal acessors ---
+
     distortion_model: EnumProperty(
         items=[
             ('NONE', "No Lens Distortion", ""),
-            #('POLYNOMIAL', "Polynomial", ""),
-            ('DIVISION', "Division", ""),
-            #('NUKE', "Nuke", ""),
-            ('BROWN', "Brown", ""),
+            ('DIVISION', "Division", "Division lens distortion model"),
+            ('BROWN', "Brown", "Brown-Conrady lens distortion model"),
         ],
         default='NONE',
         name="Distortion Model"

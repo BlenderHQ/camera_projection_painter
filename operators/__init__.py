@@ -6,7 +6,6 @@ from . import toggle_camera_usage
 from . import enable_all_cameras
 from . import io
 from . import refresh_image_preview
-from . import dev
 
 
 if "bpy" in locals():
@@ -19,7 +18,6 @@ if "bpy" in locals():
     importlib.reload(enable_all_cameras)
     importlib.reload(io)
     importlib.reload(refresh_image_preview)
-    importlib.reload(dev)
 
 import bpy
 
@@ -42,8 +40,6 @@ CPP_PT_export_camera_data_transform = io.camera_data.CPP_PT_export_camera_data_t
 
 # Previews
 CPP_OT_refresh_image_preview = refresh_image_preview.CPP_OT_refresh_image_preview
-# Dev
-CPPDEV_OT_reload = dev.CPPDEV_OT_reload
 
 _classes = [
     # Base operators
@@ -66,9 +62,6 @@ _classes = [
 
     # Previews
     CPP_OT_refresh_image_preview,
-
-    # Dev
-    CPPDEV_OT_reload,
 ]
 
 register, unregister = bpy.utils.register_classes_factory(_classes)

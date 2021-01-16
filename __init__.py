@@ -39,6 +39,7 @@ bl_info = {
     "doc_url": "https://github.com/BlenderHQ/camera_projection_painter",
 }
 
+
 if "bpy" in locals():
     unregister()
 
@@ -58,13 +59,31 @@ if "bpy" in locals():
 else:
     _module_registered = False
 
+    import bpy
+    from bpy.app.handlers import persistent
     import atexit
+
+    # Utility class to reload addon from itself
+    def _ccp_dev_reload_execute(self, context):
+        import importlib
+        addon = __import__(__package__)
+        importlib.reload(addon)
+        self.report(type={'INFO'}, message="Camera Projection Painter addon reloaded.")
+        return {'FINISHED'}
+
+    ccpdev_ot_reload = type(
+        "CCPDEV_OT_reload",
+        (bpy.types.Operator,),
+        {"bl_idname": "cppdev.reload", "bl_label": "Reload Addon",
+            "bl_description": "This operation may be unstable. Please, save your data before running.",
+            "bl_options": {'INTERNAL'},
+            "execute": _ccp_dev_reload_execute}
+    )
+
+    bpy.utils.register_class(ccpdev_ot_reload)
+
+    # Unregister generated icons at exit
     atexit.register(engine.icons.unregister_icons)
-
-
-import bpy
-from bpy.app.handlers import persistent
-
 
 sys_check.SUPPORTED_BLENDER_VERSION = bl_info["blender"]
 
