@@ -13,21 +13,106 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__all__ = (
-    "LD_CalibrationProperties",
-    "LD_PolynomialCoefficients",
-    "LD_DivisionCoefficients",
-    "LD_NukeCoefficients",
-    "LD_BrownConradyCoefficients",
-    "LD_FULL_camera_properties",
-)
-
+import bpy
 from bpy.props import FloatProperty, EnumProperty
 
+from . import _engine as engine
 
 PROP_PREC = 4
 PROP_STEP = 6
 
+IEEE_754_FLOAT_PRECISION_NUM_DIGITS = 6
+DOUBLE_AS_STRING_NUM_DIGITS = 32
+
+double_property_additional_description = "\u2022 The current value is displayed in single precision.\n" \
+    "Actual value may be different. For more information, see the documentation."
+
+
+def fff(self, context):
+    print("a")
+    return "aaa"
+
+
+def get_double_pointer_property(name: str, **kwargs):
+
+    # Set display precision to IEEE-754 standard.
+    kwargs["precision"] = IEEE_754_FLOAT_PRECISION_NUM_DIGITS
+
+    # `update` keyword argument handling.
+    # First should be called passed by `**kwargs` update function or method,
+    # than delta value will be computed.
+    kwargs_update_func = None
+    if "update" in kwargs:
+        kwargs_update_func = kwargs["update"]
+        del kwargs["update"]
+
+    def _float_value_update(self, context):
+        if kwargs_update_func is not None:
+            kwargs_update_func(self, context)
+
+        float_delta = self.float_value - self.prev_float_value
+
+        print("float delta: %.16f" % float_delta)  # !!!!!!!!!!!!!!!!!
+        engine.types.evaluate_ng_cpp_prop_as_string(self)
+        self.prev_float_value = self.float_value
+
+    # Add information about floating point precision to property description.
+    if "description" in kwargs:
+        kwargs["description"] += "\n\n" + double_property_additional_description
+    else:
+        kwargs["description"] = double_property_additional_description
+
+    #
+    def _has_double_precision_value_getter(self):
+        return bool(len(self.double_as_str))
+
+    # Create dynamic class to store property.
+    double_property_group = type(
+        "ng_prop_" + name.replace(" ", "_").lower(),
+        (
+            bpy.types.PropertyGroup,
+        ),
+        {
+            "__slots__": tuple(),
+
+            "__annotations__": {
+                "prev_float_value": bpy.props.FloatProperty(**kwargs),
+                "float_value": bpy.props.FloatProperty(
+                    name=name,
+                    update=_float_value_update,
+                    **kwargs
+                ),
+                "double_as_str": bpy.props.StringProperty(
+                    maxlen=DOUBLE_AS_STRING_NUM_DIGITS,
+                    options={'HIDDEN'},
+                )
+            },
+            "has_double_precision_value": property(
+                fget=_has_double_precision_value_getter,
+                doc=""
+            )
+        }
+    )
+
+    bpy.utils.register_class(double_property_group)
+
+    return bpy.props.PointerProperty(type=double_property_group)
+
+
+def camera_calibration_helper(has_polynomial=True, has_division=True, has_nuke=True, has_brown=True):
+
+    def wrapper(cls):
+        if not hasattr(cls, "__annotations__"):
+            setattr(cls, "__annotations__", {})
+
+        cls.__annotations__["b_k1"] = get_double_pointer_property(
+            name="K1",
+            update=fff
+        )
+
+        return cls
+
+    return wrapper
 
 # Camera calibration properties
 

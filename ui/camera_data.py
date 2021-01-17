@@ -37,6 +37,11 @@ def draw_reality_capture_distortion(layout: bpy.types.UILayout, camera: bpy.type
     layout.prop(camera.cpp, "distortion_model")
     distortion_model = camera.cpp.distortion_model
 
+    layout.prop(camera.cpp.b_k1, "prev_float_value")
+    layout.prop(camera.cpp.b_k1, "float_value")
+    layout.prop(camera.cpp.b_k1, "double_as_str")
+    print(camera.cpp.b_k1.has_double_precision_value)
+
     if distortion_model != 'NONE':
         col = layout.column(align=True)
 

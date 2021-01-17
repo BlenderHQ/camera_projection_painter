@@ -25,6 +25,7 @@ class BindImageHistoryItem(PropertyGroup):
     )
 
 
+@engine.lens_distortion_properties.camera_calibration_helper()
 class CameraProperties(PropertyGroup, engine.lens_distortion_properties.LD_FULL_camera_properties):
     """Serves for storing the properties associated with the data of each individual camera,
     the main here is the image binded to the camera.
