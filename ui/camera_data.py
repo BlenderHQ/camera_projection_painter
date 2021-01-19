@@ -26,36 +26,29 @@ def draw_reality_capture_calibration(layout: bpy.types.UILayout, camera: bpy.typ
 
     if camera.type == 'PERSP':
         col = layout.column(align=True)
-        col.prop(camera.cpp, "principal_x", text="Principal X")
-        col.prop(camera.cpp, "principal_y", text="Y")
+        camera.cpp.principal_point_x.draw(col, text="Principal X")
+        camera.cpp.principal_point_y.draw(col, text="Y")
 
-        layout.prop(camera.cpp, "skew")
-        layout.prop(camera.cpp, "pixel_aspect")
+        camera.cpp.skew.draw(layout)
+        camera.cpp.pixel_aspect_ratio.draw(layout)
 
 
 def draw_reality_capture_distortion(layout: bpy.types.UILayout, camera: bpy.types.Camera) -> None:
     layout.prop(camera.cpp, "distortion_model")
-    distortion_model = camera.cpp.distortion_model
 
-    layout.prop(camera.cpp.b_k1, "prev_float_value")
-    layout.prop(camera.cpp.b_k1, "float_value")
-    layout.prop(camera.cpp.b_k1, "double_as_str")
-    print(camera.cpp.b_k1.has_double_precision_value)
-
-    if distortion_model != 'NONE':
+    if camera.cpp.distortion_model == 'BROWN':
         col = layout.column(align=True)
+        camera.cpp.brown_k1.draw(col)
+        camera.cpp.brown_k2.draw(col)
+        camera.cpp.brown_k3.draw(col)
+        camera.cpp.brown_k4.draw(col)
+        col.separator()
+        camera.cpp.brown_p1.draw(col, text="T1")
+        camera.cpp.brown_p2.draw(col, text="T2")
 
-        if distortion_model == 'DIVISION':
-            col.prop(camera.cpp, "division_k1")
-
-        elif distortion_model == 'BROWN':
-            col.prop(camera.cpp, "brown_k1")
-            col.prop(camera.cpp, "brown_k2")
-            col.prop(camera.cpp, "brown_k3")
-            col.prop(camera.cpp, "brown_k4")
-            col.separator()
-            col.prop(camera.cpp, "brown_p1")
-            col.prop(camera.cpp, "brown_p2")
+    elif camera.cpp.distortion_model == 'DIVISION':
+        col = layout.column(align=True)
+        camera.cpp.division_k1.draw(col)
 
 
 # ------------------------ METASHAPE ------------------------ #
@@ -78,28 +71,27 @@ def draw_metashape_calibration(layout: bpy.types.UILayout, camera: bpy.types.Cam
 
     if camera.type == 'PERSP' or (camera.type == 'PANO' and camera.cpp.pano_type == 'FISHEYE'):
         col = layout.column(align=True)
-        col.prop(camera.cpp, "principal_x", text="Principal X")
-        col.prop(camera.cpp, "principal_y", text="Y")
+        camera.cpp.principal_point_x.draw(col, text="Principal X")
+        camera.cpp.principal_point_y.draw(col, text="Y")
 
-        layout.prop(camera.cpp, "skew")
-        layout.prop(camera.cpp, "affinity")
+        camera.cpp.affinity.draw(layout)
+        camera.cpp.pixel_aspect_ratio.draw(layout)
 
 
 def draw_metashape_distortion(layout: bpy.types.UILayout, camera: bpy.types.Camera) -> None:
     layout.prop(camera.cpp, "distortion_model")
-    distortion_model = camera.cpp.distortion_model
 
-    col = layout.column(align=True)
-    if distortion_model == 'BROWN':
-        col.prop(camera.cpp, "brown_k1")
-        col.prop(camera.cpp, "brown_k2")
-        col.prop(camera.cpp, "brown_k3")
-        col.prop(camera.cpp, "brown_k4")
+    if camera.cpp.distortion_model == 'BROWN':
+        col = layout.column(align=True)
+        camera.cpp.brown_k1.draw(col)
+        camera.cpp.brown_k2.draw(col)
+        camera.cpp.brown_k3.draw(col)
+        camera.cpp.brown_k4.draw(col)
         col.separator()
-        col.prop(camera.cpp, "brown_p1")
-        col.prop(camera.cpp, "brown_p2")
-        col.prop(camera.cpp, "brown_p3")
-        col.prop(camera.cpp, "brown_p4")
+        camera.cpp.brown_p1.draw(col)
+        camera.cpp.brown_p2.draw(col)
+        camera.cpp.brown_p3.draw(col)
+        camera.cpp.brown_p4.draw(col)
 
 
 # ------------------------ Panels ------------------------ #

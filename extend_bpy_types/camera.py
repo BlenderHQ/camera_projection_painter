@@ -2,7 +2,6 @@ from .. import engine
 from .. import __package__ as addon_pkg
 
 import bpy
-from bpy.types import PropertyGroup
 from bpy.props import (
     BoolProperty,
     IntProperty,
@@ -11,7 +10,7 @@ from bpy.props import (
 )
 
 
-class BindImageHistoryItem(PropertyGroup):
+class BindImageHistoryItem(bpy.types.PropertyGroup):
     """Used to store a palette of previously used images.
     """
     image: PointerProperty(
@@ -26,7 +25,7 @@ class BindImageHistoryItem(PropertyGroup):
 
 
 @engine.lens_distortion_properties.camera_calibration_helper()
-class CameraProperties(PropertyGroup, engine.lens_distortion_properties.LD_FULL_camera_properties):
+class CameraProperties(bpy.types.PropertyGroup):
     """Serves for storing the properties associated with the data of each individual camera,
     the main here is the image binded to the camera.
     """

@@ -14,6 +14,9 @@ import bpy
 FPS = 60
 IMAGES_PER_STEP = 10
 
+
+
+
 class CPP_OT_refresh_image_preview(bpy.types.Operator):
     """
     Operator for addon internal use only.
@@ -44,11 +47,17 @@ class CPP_OT_refresh_image_preview(bpy.types.Operator):
         Args:
             context (bpy.types.Context): Current context.
         """
+        progress_icons = (
+            "red_dot",
+            "green_dot",
+            "blue_dot",
+        )
+
         self.icon_id_index += 1
-        if self.icon_id_index > 2:
+        if self.icon_id_index > len(progress_icons) - 1:
             self.icon_id_index = 0
 
-        self.progress.icon_id = icons.get_icon_id(f"update_previews_{self.icon_id_index}")
+        self.progress.icon_id = icons.get_icon_id(progress_icons[self.icon_id_index])
 
     def _set_preview_size_to_preferences(self, context):
         """Set preview and icon size to preferences values.

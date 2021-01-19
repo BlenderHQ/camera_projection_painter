@@ -13,6 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+if "bpy" in locals():
+    import importlib
+
+    importlib.reload(lens_distortion_properties)
+    importlib.reload(io_properties)
+
 try:
     import bpy
 except ImportError as err:

@@ -98,7 +98,10 @@ Preferred workflow refers to a change in the user interface as well as automatio
 -------------
 ## Known limitations when working with the add-on
 
- - [Blender's packed files][3]: Their use is contrary to the purpose of the add-on - it is assumed that you are using the same image dataset that was used to reconstruct the scene, without unnecessary copying of files.
+ - ### Blender's packed files: [(Blender Wiki)][3]: Their use is contrary to the purpose of the add-on - it is assumed that you are using the same image dataset that was used to reconstruct the scene, without unnecessary copying of files.
+
+ - ### Floating point values precision [(Wikipedia)][4]: IEEE-754 standard
+
 
 [Support on Patreon][2]
 
@@ -107,3 +110,4 @@ Preferred workflow refers to a change in the user interface as well as automatio
 [1]: https://docs.blender.org/manual/en/latest/files/media/image_formats.html#image-formats
 [2]: https://www.patreon.com/BlenderHQ
 [3]: https://docs.blender.org/manual/en/latest/files/blend/packed_data.html
+[4]: https://en.wikipedia.org/wiki/IEEE_754#Basic_and_interchange_formats
