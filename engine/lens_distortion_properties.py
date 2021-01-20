@@ -14,193 +14,19 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
-from . import _engine as engine
-from ._engine import icons
-
 __all__ = (
     "camera_calibration_helper",
 )
 
+from . import _engine as engine
+
+from . import ng_prop
+
 if "bpy" in locals():
-    for _ in range(len(_registered_classes)):
-        bpy.utils.unregister_class(_registered_classes.pop())
+    import importlib
+    importlib.reload(ng_prop)
 
 import bpy
-from bpy.props import FloatProperty, EnumProperty
-
-_registered_classes = []
-
-
-def _reg(cls) -> None:
-    if cls not in _registered_classes:
-        bpy.utils.register_class(cls)
-        _registered_classes.append(cls)
-
-
-_double_property_additional_description = "\u2022 The current value is displayed in single precision.\n" \
-    "Actual value may be different.\n" \
-    "Double precision value can be showed in popup (dot right).\n" \
-    "For more information, see the documentation."
-
-
-class NG_OT_ng_prop_info(bpy.types.Operator):
-    bl_idname = "ng.prop_info"
-    bl_label = "Property Information"
-    bl_options = {'INTERNAL'}
-
-    desk: bpy.props.StringProperty()
-
-    @classmethod
-    def description(cls, _context, properties):
-        return properties.desk
-
-    def execute(self, _context):
-        return {'CANCELLED'}
-
-
-def get_double_pointer_property(name: str, **kwargs):
-    """Generate and register dynamic property type which contains float, double as string and exact double as
-    string representation of floating point value. "Exact" value means imported 16 digits value from third-party
-    software.
-
-    Registered property group contains additional API:
-        prec_icon_id (property): integer icon id to be used to show precision info in the UI.
-        draw (method): Should be used to draw property in the UI with given text.
-        draw_info (method): Should be used to draw double precision representation in the UI.
-
-    Args:
-        name (str): Regular property name.
-        **kwargs: Keyword arguments should be the same as for `bpy.props.FloatProperty`.
-    Returns:
-        bpy.props.PointerProperty: Registered property.
-    """
-    # Set display precision to IEEE-754 standard.
-    kwargs["precision"] = engine.types.FLT_DIG
-
-    # `update` keyword argument handling.
-    # First should be called passed by `**kwargs` update function or method,
-    # than delta value will be computed.
-    # `get` and `set` keyword arguments will raise an error.
-    kwargs_update_func = None
-    if "update" in kwargs:
-        kwargs_update_func = kwargs["update"]
-        del kwargs["update"]
-
-    if "set" in kwargs or "set" in kwargs:
-        engine.intern.err_log("`ng_prop_` do not support `get` and `set` arguments, use `update` instead.\n")
-        raise AttributeError()
-
-    def _float_value_update(self, context):
-        if kwargs_update_func is not None:
-            kwargs_update_func(self, context)
-        engine.types.evaluate_ng_cpp_prop_as_string(self)
-        self.prev_float_value = self.float_value
-
-    def _exact_double_value_update(self, _context):
-        self.float_value = engine.types.str_to_floating_point(self.exact_double_as_str)
-        self.double_as_str = self.exact_double_as_str
-
-    # Default value
-    kwargs_default = 0.0
-    if "default" in kwargs:
-        kwargs_default = kwargs["default"]
-
-    # Add information about floating point precision to property description.
-    if "description" in kwargs:
-        kwargs["description"] += ".\n\n" + _double_property_additional_description
-    else:
-        kwargs["description"] = _double_property_additional_description
-
-    # UI draw methods:
-    def _prec_icon_id_getter(self) -> None:
-        """
-        Precision icon id:
-            White - no exact double precision value.
-            Green - current double precision value equals to exact double precision value.
-            Yellow - current double precision value is different from exact double precision value.
-        """
-        if not self.exact_double_as_str:
-            return icons.get_icon_id("white_dot")
-        elif self.double_as_str == self.exact_double_as_str:
-            return icons.get_icon_id("green_dot")
-        else:
-            return icons.get_icon_id("yellow_dot")
-
-    def _draw_method(self, layout: bpy.types.UILayout, text="") -> None:
-        """Draw single precision value in the UI.
-
-        Args:
-            layout (bpy.types.UILayout): Current layout.
-        """
-        row = layout.row(align=True)
-        if text:
-            row.prop(self, "float_value", text=text)
-        else:
-            row.prop(self, "float_value")
-
-        dbl_text = "Missing"
-        if self.double_as_str:
-            dbl_text = self.double_as_str
-
-        exact_text = "Missing"
-        if self.exact_double_as_str:
-            exact_text = self.exact_double_as_str
-
-        props = row.operator(operator=NG_OT_ng_prop_info.bl_idname, icon_value=self.prec_icon_id, text="", emboss=False)
-        props.desk = f"\n\u2022 Double precision:                {dbl_text}\n" \
-            f"\u2022 Imported double precision: {exact_text}"
-
-    def _draw_info_method(self, layout: bpy.types.UILayout) -> None:
-        """Draw double precision value info in the UI.
-
-        Args:
-            layout (bpy.types.UILayout): Current layout.
-        """
-
-        row = layout.row(align=True)
-        row.alignment = 'RIGHT'
-        row.label(text=f"{self.double_as_str}")
-        row.label(icon_value=self.prec_icon_id)
-
-    # Create dynamic class to store property.
-    double_property_group = type(
-        "ng_prop_" + name.replace(" ", "_").lower(),
-        (
-            bpy.types.PropertyGroup,
-        ),
-        {
-            "__slots__": tuple(),
-
-            "__annotations__": {
-                "prev_float_value": bpy.props.FloatProperty(
-                    **kwargs
-                ),
-                "float_value": bpy.props.FloatProperty(
-                    name=name,
-                    update=_float_value_update,
-                    **kwargs
-                ),
-                "double_as_str": bpy.props.StringProperty(
-                    maxlen=engine.types.DBL_DIG,
-                    default=engine.types.floating_point_to_str(kwargs_default),
-                    options={'HIDDEN'},
-                ),
-                "exact_double_as_str": bpy.props.StringProperty(
-                    maxlen=engine.types.DBL_DIG,
-                    update=_exact_double_value_update,
-                    options={'HIDDEN'},
-                )
-            },
-            "prec_icon_id": property(fget=_prec_icon_id_getter),
-            "draw": _draw_method,
-            "draw_info": _draw_info_method,
-        }
-    )
-
-    _reg(double_property_group)
-
-    return bpy.props.PointerProperty(type=double_property_group)
-
 
 # Common properties for lens distortion coefficients.
 _common_coeff_kwargs = {
@@ -214,17 +40,17 @@ _common_coeff_kwargs = {
 
 # Polynomial lens distortion model coefficients
 _polynomial_coeff = {
-    "polynomial_k1": get_double_pointer_property(
+    "polynomial_k1": ng_prop.get_double_pointer_property(
         name="K1",
         description="First coefficient of Polynomial radial distortion",
         **_common_coeff_kwargs
     ),
-    "polynomial_k2": get_double_pointer_property(
+    "polynomial_k2": ng_prop.get_double_pointer_property(
         name="K2",
         description="Second coefficient of Polynomial radial distortion",
         **_common_coeff_kwargs
     ),
-    "polynomial_k3": get_double_pointer_property(
+    "polynomial_k3": ng_prop.get_double_pointer_property(
         name="K3",
         description="Third coefficient of Polynomial radial distortion",
         **_common_coeff_kwargs
@@ -233,12 +59,12 @@ _polynomial_coeff = {
 
 # Division lens distortion model coefficients
 _division_coeff = {
-    "division_k1": get_double_pointer_property(
+    "division_k1": ng_prop.get_double_pointer_property(
         name="K1",
         description="First coefficient of Division radial distortion",
         **_common_coeff_kwargs
     ),
-    "division_k2": get_double_pointer_property(
+    "division_k2": ng_prop.get_double_pointer_property(
         name="K2",
         description="Second coefficient of Division radial distortion",
         **_common_coeff_kwargs
@@ -248,12 +74,12 @@ _division_coeff = {
 
 # Nuke lens distortion model coefficients
 _nuke_coeff = {
-    "nuke_k1": get_double_pointer_property(
+    "nuke_k1": ng_prop.get_double_pointer_property(
         name="K1",
         description="First coefficient of Nuke radial distortion",
         **_common_coeff_kwargs
     ),
-    "nuke_k2": get_double_pointer_property(
+    "nuke_k2": ng_prop.get_double_pointer_property(
         name="K2",
         description="Second coefficient of Nuke radial distortion",
         **_common_coeff_kwargs
@@ -262,42 +88,42 @@ _nuke_coeff = {
 
 # Brown-Conrady lens distortion model coefficients
 _brown_coeff = {
-    "brown_k1": get_double_pointer_property(
+    "brown_k1": ng_prop.get_double_pointer_property(
         name="K1",
         description="First coefficient of Brown-Conrady radial distortion",
         **_common_coeff_kwargs
     ),
-    "brown_k2": get_double_pointer_property(
+    "brown_k2": ng_prop.get_double_pointer_property(
         name="K2",
         description="Second coefficient of Brown-Conrady radial distortion",
         **_common_coeff_kwargs
     ),
-    "brown_k3": get_double_pointer_property(
+    "brown_k3": ng_prop.get_double_pointer_property(
         name="K3",
         description="Third coefficient of Brown-Conrady radial distortion",
         **_common_coeff_kwargs
     ),
-    "brown_k4": get_double_pointer_property(
+    "brown_k4": ng_prop.get_double_pointer_property(
         name="K4",
         description="Fourth coefficient of Brown-Conrady radial distortion",
         **_common_coeff_kwargs
     ),
-    "brown_p1": get_double_pointer_property(
+    "brown_p1": ng_prop.get_double_pointer_property(
         name="P1",
         description="First coefficient of Brown-Conrady tangential distortion",
         **_common_coeff_kwargs
     ),
-    "brown_p2": get_double_pointer_property(
+    "brown_p2": ng_prop.get_double_pointer_property(
         name="P2",
         description="Second coefficient of Brown-Conrady tangential distortion",
         **_common_coeff_kwargs
     ),
-    "brown_p3": get_double_pointer_property(
+    "brown_p3": ng_prop.get_double_pointer_property(
         name="P3",
         description="Third coefficient of Brown-Conrady tangential distortion",
         **_common_coeff_kwargs
     ),
-    "brown_p4": get_double_pointer_property(
+    "brown_p4": ng_prop.get_double_pointer_property(
         name="P4",
         description="Fourth coefficient of Brown-Conrady tangential distortion",
         **_common_coeff_kwargs
@@ -492,31 +318,31 @@ _lens_distortion_prop_dict = {
     "pano_type": bpy.props.EnumProperty(
         **_pano_type_kwargs
     ),
-    "focal_length": get_double_pointer_property(
+    "focal_length": ng_prop.get_double_pointer_property(
         **_focal_length_kwargs
     ),
-    "sensor_x": get_double_pointer_property(
+    "sensor_x": ng_prop.get_double_pointer_property(
         **_sensor_x_kwargs
     ),
-    "sensor_y": get_double_pointer_property(
+    "sensor_y": ng_prop.get_double_pointer_property(
         **_sensor_y_kwargs
     ),
-    "ortho_scale": get_double_pointer_property(
+    "ortho_scale": ng_prop.get_double_pointer_property(
         **_ortho_scale_kwargs
     ),
-    "principal_point_x": get_double_pointer_property(
+    "principal_point_x": ng_prop.get_double_pointer_property(
         **_principal_point_x_kwargs
     ),
-    "principal_point_y": get_double_pointer_property(
+    "principal_point_y": ng_prop.get_double_pointer_property(
         **_principal_point_y_kwargs
     ),
-    "skew": get_double_pointer_property(
+    "skew": ng_prop.get_double_pointer_property(
         **_skew_kwargs
     ),
-    "affinity": get_double_pointer_property(
+    "affinity": ng_prop.get_double_pointer_property(
         **_affinity_kwargs
     ),
-    "pixel_aspect_ratio": get_double_pointer_property(
+    "pixel_aspect_ratio": ng_prop.get_double_pointer_property(
         **_pixel_aspect_ratio
     ),
 }
@@ -534,7 +360,6 @@ def _update_from_camera_data(self):
 def camera_calibration_helper():
     """Class decorator function. Updates class annotations by double precision values relative to camera data.
     """
-    _reg(NG_OT_ng_prop_info)
 
     def wrapper(cls):
         if not hasattr(cls, "__annotations__"):
