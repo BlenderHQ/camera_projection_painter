@@ -36,6 +36,12 @@ class SceneProperties(PropertyGroup):
         """
         return (ob for ob in self.id_data.objects if ob.type == 'CAMERA')
 
+    def update_lens_distortions_from_camera_objects(self):
+        for camera_ob in self.camera_objects:
+            camera = camera_ob.data
+
+            camera.cpp.update_from_camera_data()
+
     @property
     def has_initial_visible_camera_objects(self) -> bool:
         """
@@ -105,7 +111,6 @@ class SceneProperties(PropertyGroup):
                     camera.sensor_fit = 'HORIZONTAL'
 
     # Update methods
-
     def _get_camera_index(self):
         camob = None
         if bpy.context.mode == 'OBJECT':

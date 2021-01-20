@@ -58,9 +58,9 @@ def draw_metashape_calibration(layout: bpy.types.UILayout, camera: bpy.types.Cam
     if camera.type == 'PERSP':
         camera.cpp.focal_length.draw(layout)
         if camera.sensor_fit == 'VERTICAL':
-            layout.prop(camera, "sensor_height", text="Sensor")
+            camera.cpp.sensor_y.draw(layout)
         else:
-            layout.prop(camera, "sensor_width", text="Sensor")
+            camera.cpp.sensor_x.draw(layout)
 
     elif camera.type == 'ORTHO':
         camera.cpp.focal_length.draw(layout)

@@ -80,8 +80,7 @@ class CPP_OT_listener(bpy.types.Operator):
         wm = context.window_manager
 
         scene = context.scene
-        for camera_ob in scene.cpp.camera_objects:
-            camera_ob.data.cpp.update_from_camera_data()
+        scene.cpp.update_lens_distortions_from_camera_objects()
 
         # Stop modal execution if `CPP_OT_camera_projection_painter` invoked
         if wm.cpp.running:

@@ -382,6 +382,36 @@ _ortho_scale_kwargs = {
     "update": _ortho_scale_update,
 }
 
+
+def _sensor_x_update(self, _context):
+    self.id_data.sensor_width = self.float_value
+
+
+_sensor_x_kwargs = {
+    "name": "Sensor",
+    "default": 36.0,
+    "min": 1.0,
+    "max": 100.0,
+    "step": 2,
+    "description": "CCD sensor width",
+    "update": _sensor_x_update
+}
+
+
+def _sensor_y_update(self, _context):
+    self.id_data.sensor_height = self.float_value
+
+
+_sensor_y_kwargs = {
+    "name": "Sensor",
+    "default": 24.0,
+    "min": 1.0,
+    "max": 100.0,
+    "step": 2,
+    "description": "CCD sensor width",
+    "update": _sensor_y_update,
+}
+
 # Optical center
 _principal_point_x_kwargs = {
     "name": "Principal X",
@@ -465,6 +495,12 @@ _lens_distortion_prop_dict = {
     "focal_length": get_double_pointer_property(
         **_focal_length_kwargs
     ),
+    "sensor_x": get_double_pointer_property(
+        **_sensor_x_kwargs
+    ),
+    "sensor_y": get_double_pointer_property(
+        **_sensor_y_kwargs
+    ),
     "ortho_scale": get_double_pointer_property(
         **_ortho_scale_kwargs
     ),
@@ -491,6 +527,8 @@ def _update_from_camera_data(self):
 
     self.focal_length.float_value = camera.lens
     self.ortho_scale.float_value = camera.ortho_scale
+    self.sensor_x.float_value = camera.sensor_width
+    self.sensor_y.float_value = camera.sensor_height
 
 
 def camera_calibration_helper():
