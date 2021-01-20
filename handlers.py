@@ -45,7 +45,7 @@ def load_post_handler(scene=None):
     bpy.ops.cpp.listener('INVOKE_DEFAULT')
 
     # Set internal `engine` module variable at Blender / new file opening
-    # to enable / disable debig info in console.
+    # to enable / disable debug info in console.
     addon_preferences = bpy.context.preferences.addons[__package__].preferences
     engine.intern.set_debug_info(addon_preferences.debug_info)
 
@@ -71,14 +71,14 @@ def save_post_handler(scene=None):
             ob.hide_set(True)
 
 
-# @persistent
-# def depsgraph_update_pre_handler(scene=None):
-#     # Remove missing images from the list of the camera palette
-#     for camera_object in scene.cpp.camera_objects:
-#         camera = camera_object.data
-#         for item_index, item in enumerate(camera.cpp_bind_history):
-#             if not item.image:
-#                 camera.cpp_bind_history.remove(item_index)
+@persistent
+def depsgraph_update_pre_handler(scene=None):
+    # Remove missing images from the list of the camera palette
+    for camera_object in scene.cpp.camera_objects:
+        camera = camera_object.data
+        for item_index, item in enumerate(camera.cpp_bind_history):
+            if not item.image:
+                camera.cpp_bind_history.remove(item_index)
 
 
 _handlers = (
@@ -88,7 +88,7 @@ _handlers = (
     (bpy.app.handlers.load_post, load_post_handler),
     (bpy.app.handlers.save_pre, save_pre_handler),
     (bpy.app.handlers.save_post, save_post_handler),
-    #(bpy.app.handlers.depsgraph_update_pre, depsgraph_update_pre_handler)
+    (bpy.app.handlers.depsgraph_update_pre, depsgraph_update_pre_handler)
 )
 
 

@@ -10,7 +10,7 @@ from . import refresh_image_preview
 
 if "bpy" in locals():
     import importlib
-    # importlib.reload(basis)
+    importlib.reload(basis)
     importlib.reload(bind_history_remove)
     importlib.reload(image_paint)
     importlib.reload(set_tmp_camera_active)

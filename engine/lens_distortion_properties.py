@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import bpy
-from bpy.props import FloatProperty, EnumProperty
 
 from . import _engine as engine
 from ._engine import icons
@@ -23,9 +21,25 @@ __all__ = (
     "camera_calibration_helper",
 )
 
+if "bpy" in locals():
+    for _ in range(len(_registered_classes)):
+        bpy.utils.unregister_class(_registered_classes.pop())
+
+import bpy
+from bpy.props import FloatProperty, EnumProperty
+
+_registered_classes = []
+
+
+def _reg(cls) -> None:
+    if cls not in _registered_classes:
+        bpy.utils.register_class(cls)
+        _registered_classes.append(cls)
+
+
 _double_property_additional_description = "\u2022 The current value is displayed in single precision.\n" \
-    "Actual value may be different.\n"\
-    "Double precision value can be showed in popup (dot right).\n"\
+    "Actual value may be different.\n" \
+    "Double precision value can be showed in popup (dot right).\n" \
     "For more information, see the documentation."
 
 
@@ -66,14 +80,15 @@ def get_double_pointer_property(name: str, **kwargs):
     # `update` keyword argument handling.
     # First should be called passed by `**kwargs` update function or method,
     # than delta value will be computed.
+    # `get` and `set` keyword arguments will raise an error.
     kwargs_update_func = None
     if "update" in kwargs:
         kwargs_update_func = kwargs["update"]
         del kwargs["update"]
 
-    kwargs_default = 0.0
-    if "default" in kwargs:
-        kwargs_default = kwargs["default"]
+    if "set" in kwargs or "set" in kwargs:
+        engine.intern.err_log("`ng_prop_` do not support `get` and `set` arguments, use `update` instead.\n")
+        raise AttributeError()
 
     def _float_value_update(self, context):
         if kwargs_update_func is not None:
@@ -84,6 +99,11 @@ def get_double_pointer_property(name: str, **kwargs):
     def _exact_double_value_update(self, _context):
         self.float_value = engine.types.str_to_floating_point(self.exact_double_as_str)
         self.double_as_str = self.exact_double_as_str
+
+    # Default value
+    kwargs_default = 0.0
+    if "default" in kwargs:
+        kwargs_default = kwargs["default"]
 
     # Add information about floating point precision to property description.
     if "description" in kwargs:
@@ -127,8 +147,8 @@ def get_double_pointer_property(name: str, **kwargs):
             exact_text = self.exact_double_as_str
 
         props = row.operator(operator=NG_OT_ng_prop_info.bl_idname, icon_value=self.prec_icon_id, text="", emboss=False)
-        props.desk = f"\nDouble precision:                {dbl_text}\n" \
-            f"Imported double precision: {exact_text}"
+        props.desk = f"\n\u2022 Double precision:                {dbl_text}\n" \
+            f"\u2022 Imported double precision: {exact_text}"
 
     def _draw_info_method(self, layout: bpy.types.UILayout) -> None:
         """Draw double precision value info in the UI.
@@ -177,7 +197,7 @@ def get_double_pointer_property(name: str, **kwargs):
         }
     )
 
-    bpy.utils.register_class(double_property_group)
+    _reg(double_property_group)
 
     return bpy.props.PointerProperty(type=double_property_group)
 
@@ -186,7 +206,7 @@ def get_double_pointer_property(name: str, **kwargs):
 _common_coeff_kwargs = {
     "subtype": 'NONE',
     "precision": engine.types.FLT_DIG,
-    "step": engine.types.FLT_DIG,
+    "step": 2,
     "soft_min": -5.0,
     "soft_max": 5.0,
     "options": {'HIDDEN'},
@@ -333,12 +353,42 @@ _pano_type_kwargs = {
     "description": "Panoramic type used for projection. Lens distortions are supported only by Fisheye cameras.",
 }
 
+
+def _focal_length_update(self, _context):
+    self.id_data.lens = self.float_value
+
+
+_focal_length_kwargs = {
+    "name": "Focal Length",
+    "default": 50.0,
+    "min": 1.0,
+    "step": 2,
+    "unit": 'CAMERA',
+    "description": "Camera focal length",
+    "update": _focal_length_update,
+}
+
+
+def _ortho_scale_update(self, _context):
+    self.id_data.ortho_scale = self.float_value
+
+
+_ortho_scale_kwargs = {
+    "name": "Ortho Scale",
+    "default": 6.0,
+    "min": 0.001,
+    "step": 2,
+    "description": "Camera orthographic scale",
+    "update": _ortho_scale_update,
+}
+
 # Optical center
 _principal_point_x_kwargs = {
     "name": "Principal X",
     "default": 0.0,
     "soft_min": -1.0,
     "soft_max": 1.0,
+    "step": 2,
     "unit": 'CAMERA',
     "precision": engine.types.FLT_DIG,
     "step": engine.types.FLT_DIG,
@@ -351,6 +401,7 @@ _principal_point_y_kwargs = {
     "default": 0.0,
     "soft_min": -1.0,
     "soft_max": 1.0,
+    "step": 2,
     "unit": 'CAMERA',
     "precision": engine.types.FLT_DIG,
     "step": engine.types.FLT_DIG,
@@ -364,6 +415,7 @@ _skew_kwargs = {
     "default": 0.0,
     "soft_min": -1.0,
     "soft_max": 1.0,
+    "step": 2,
     "subtype": 'FACTOR',
     "precision": engine.types.FLT_DIG,
     "step": engine.types.FLT_DIG,
@@ -377,6 +429,7 @@ _affinity_kwargs = {
     "default": 0.0,
     "soft_min": -1.0,
     "soft_max": 1.0,
+    "step": 2,
     "subtype": 'FACTOR',
     "precision": engine.types.FLT_DIG,
     "step": engine.types.FLT_DIG,
@@ -392,6 +445,7 @@ _pixel_aspect_ratio = {
     "default": 1.0,
     "min": 0.01,
     "max": 1.99,
+    "step": 2,
     "subtype": 'FACTOR',
     "precision": engine.types.FLT_DIG,
     "step": engine.types.FLT_DIG,
@@ -402,20 +456,47 @@ _pixel_aspect_ratio = {
 
 # Camera calibration properties
 _lens_distortion_prop_dict = {
-    "distortion_model": bpy.props.EnumProperty(**_distortion_model_kwargs),
-    "pano_type": bpy.props.EnumProperty(**_pano_type_kwargs),
-    "principal_point_x": get_double_pointer_property(**_principal_point_x_kwargs),
-    "principal_point_y": get_double_pointer_property(**_principal_point_y_kwargs),
-    "skew": get_double_pointer_property(**_skew_kwargs),
-    "affinity": get_double_pointer_property(**_affinity_kwargs),
-    "pixel_aspect_ratio": get_double_pointer_property(**_pixel_aspect_ratio),
+    "distortion_model": bpy.props.EnumProperty(
+        **_distortion_model_kwargs
+    ),
+    "pano_type": bpy.props.EnumProperty(
+        **_pano_type_kwargs
+    ),
+    "focal_length": get_double_pointer_property(
+        **_focal_length_kwargs
+    ),
+    "ortho_scale": get_double_pointer_property(
+        **_ortho_scale_kwargs
+    ),
+    "principal_point_x": get_double_pointer_property(
+        **_principal_point_x_kwargs
+    ),
+    "principal_point_y": get_double_pointer_property(
+        **_principal_point_y_kwargs
+    ),
+    "skew": get_double_pointer_property(
+        **_skew_kwargs
+    ),
+    "affinity": get_double_pointer_property(
+        **_affinity_kwargs
+    ),
+    "pixel_aspect_ratio": get_double_pointer_property(
+        **_pixel_aspect_ratio
+    ),
 }
+
+
+def _update_from_camera_data(self):
+    camera = self.id_data
+
+    self.focal_length.float_value = camera.lens
+    self.ortho_scale.float_value = camera.ortho_scale
 
 
 def camera_calibration_helper():
     """Class decorator function. Updates class annotations by double precision values relative to camera data.
     """
-    bpy.utils.register_class(NG_OT_ng_prop_info)
+    _reg(NG_OT_ng_prop_info)
 
     def wrapper(cls):
         if not hasattr(cls, "__annotations__"):
@@ -423,6 +504,9 @@ def camera_calibration_helper():
 
         cls.__annotations__.update(_lens_distortion_prop_dict)
         cls.__annotations__.update(_distortion_coefficients_prop_dict)
+
+        if not hasattr(cls, "update_from_camera_data"):
+            setattr(cls, "update_from_camera_data", _update_from_camera_data)
 
         return cls
 

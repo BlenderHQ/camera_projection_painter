@@ -79,6 +79,10 @@ class CPP_OT_listener(bpy.types.Operator):
     def modal(self, context, event):
         wm = context.window_manager
 
+        scene = context.scene
+        for camera_ob in scene.cpp.camera_objects:
+            camera_ob.data.cpp.update_from_camera_data()
+
         # Stop modal execution if `CPP_OT_camera_projection_painter` invoked
         if wm.cpp.running:
             self.cancel(context)
@@ -209,7 +213,7 @@ class CPP_OT_camera_projection_painter(bpy.types.Operator):
         wm.cpp.running = False
         wm.cpp.suspended = False
 
-        #self.set_properties_defaults()
+        # self.set_properties_defaults()
 
     def modal(self, context, event):
         wm = context.window_manager

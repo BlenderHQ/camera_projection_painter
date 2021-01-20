@@ -13,13 +13,13 @@ def draw_reality_capture_calibration(layout: bpy.types.UILayout, camera: bpy.typ
     layout.prop(camera, "type")
 
     if camera.type == 'PERSP':
-        layout.prop(camera, "lens")
+        camera.cpp.focal_length.draw(layout)
 
     elif camera.type == 'ORTHO':
-        layout.prop(camera, "ortho_scale")
+        camera.cpp.ortho_scale.draw(layout)
 
     elif camera.type == 'PANO':
-        layout.prop(camera, "lens")
+        camera.cpp.focal_length.draw(layout)
 
     # Reality Capture sensor width is 36.0f as constant w.r.t 35mm camera format.
     # So here it is not displayed.
@@ -56,17 +56,17 @@ def draw_metashape_calibration(layout: bpy.types.UILayout, camera: bpy.types.Cam
     layout.prop(camera, "type")
 
     if camera.type == 'PERSP':
-        layout.prop(camera, "lens")
+        camera.cpp.focal_length.draw(layout)
         if camera.sensor_fit == 'VERTICAL':
             layout.prop(camera, "sensor_height", text="Sensor")
         else:
             layout.prop(camera, "sensor_width", text="Sensor")
 
     elif camera.type == 'ORTHO':
-        layout.prop(camera, "ortho_scale")
+        camera.cpp.focal_length.draw(layout)
 
     elif camera.type == 'PANO':
-        layout.prop(camera, "lens")
+        camera.cpp.focal_length.draw(layout)
         layout.prop(camera.cpp, "pano_type")
 
     if camera.type == 'PERSP' or (camera.type == 'PANO' and camera.cpp.pano_type == 'FISHEYE'):
