@@ -3,6 +3,7 @@ from . import scene
 from . import image
 from . import node
 from . import wm
+from . import ob
 
 from .. import engine
 
@@ -13,6 +14,7 @@ if "bpy" in locals():
     importlib.reload(image)
     importlib.reload(node)
     importlib.reload(wm)
+    importlib.reload(ob)
 
 import bpy
 from bpy.props import (
@@ -37,6 +39,7 @@ _classes = [
     camera.CameraProperties,
     scene.SceneProperties,
     image.ImageProperties,
+    ob.ObjectProperties,
 ]
 
 _cls_register, _cls_unregister = bpy.utils.register_classes_factory(_classes)
@@ -47,6 +50,7 @@ _engine_properties_items = (
     (Scene, scene.SceneProperties),
     (Image, image.ImageProperties),
     (WindowManager, wm.WindowManagerProperties),
+    (Object, ob.ObjectProperties),
 )
 
 

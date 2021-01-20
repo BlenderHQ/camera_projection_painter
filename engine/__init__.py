@@ -16,14 +16,18 @@
 if "bpy" in locals():
     import importlib
 
-    importlib.reload(lens_distortion_properties)
+    importlib.reload(ng_prop)
     importlib.reload(io_properties)
+    importlib.reload(object_transform_properties)
+    importlib.reload(lens_distortion_properties)
 
 try:
     import bpy
 except ImportError as err:
     raise ImportError("This python module should be imported only inside Blender.")
 
-from . import lens_distortion_properties
+from . import ng_prop
 from . import io_properties
+from . import lens_distortion_properties
+from . import object_transform_properties
 from ._engine import *

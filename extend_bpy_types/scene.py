@@ -38,8 +38,8 @@ class SceneProperties(PropertyGroup):
 
     def update_lens_distortions_from_camera_objects(self):
         for camera_ob in self.camera_objects:
+            camera_ob.cpp.update_transform_matrix_from_object()
             camera = camera_ob.data
-
             camera.cpp.update_from_camera_data()
 
     @property

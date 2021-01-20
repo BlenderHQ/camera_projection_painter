@@ -1,19 +1,3 @@
-# Copyright (C) 2018 Ivan Perevala (ivpe), Vlad Kuzmin (ssh4)
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-
 from . import _engine as engine
 from ._engine import icons
 
@@ -126,14 +110,14 @@ def get_double_pointer_property(name: str, **kwargs):
         else:
             return icons.get_icon_id("yellow_dot")
 
-    def _draw_method(self, layout: bpy.types.UILayout, text="") -> None:
+    def _draw_method(self, layout: bpy.types.UILayout, text=None) -> None:
         """Draw single precision value in the UI.
 
         Args:
             layout (bpy.types.UILayout): Current layout.
         """
         row = layout.row(align=True)
-        if text:
+        if text is not None:
             row.prop(self, "float_value", text=text)
         else:
             row.prop(self, "float_value")
@@ -146,6 +130,7 @@ def get_double_pointer_property(name: str, **kwargs):
         if self.exact_double_as_str:
             exact_text = self.exact_double_as_str
 
+        row.separator()
         props = row.operator(operator=NG_OT_ng_prop_info.bl_idname, icon_value=self.prec_icon_id, text="", emboss=False)
         props.desk = f"\n\u2022 Double precision:                {dbl_text}\n" \
             f"\u2022 Imported double precision: {exact_text}"
@@ -156,11 +141,7 @@ def get_double_pointer_property(name: str, **kwargs):
         Args:
             layout (bpy.types.UILayout): Current layout.
         """
-
-        row = layout.row(align=True)
-        row.alignment = 'RIGHT'
-        row.label(text=f"{self.double_as_str}")
-        row.label(icon_value=self.prec_icon_id)
+        layout.label(text=f"{self.double_as_str}", icon_value=self.prec_icon_id)
 
     # Create dynamic class to store property.
     double_property_group = type(
