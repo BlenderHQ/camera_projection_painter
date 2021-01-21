@@ -21,11 +21,10 @@ class CPP_OT_bind_camera_image(bpy.types.Operator):
     )
 
     refresh_image_previews: bpy.props.BoolProperty(
-        name="Refresh Image Preview",
+        name="Refresh Image Previews",
         default=False,
-        description="Refresh image files previews (large) and icons (small). "
-        "Previews, which are already set, will be skipped.\n\n"
-        "Warning: this operation may be slow for large datasets"
+        description="Refresh image files previews (large) and icons (small).\n"
+        "Previews, which are already set, will be skipped."
     )
 
     def draw(self, context):
