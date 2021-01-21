@@ -110,6 +110,17 @@ def get_double_pointer_property(name: str, **kwargs):
         else:
             return icons.get_icon_id("yellow_dot")
 
+    def _get_double_values_text(self):
+        dbl_text = "Missing"
+        if self.double_as_str:
+            dbl_text = self.double_as_str
+
+        exact_text = "Missing"
+        if self.exact_double_as_str:
+            exact_text = self.exact_double_as_str
+
+        return dbl_text, exact_text
+
     def _draw_method(self, layout: bpy.types.UILayout, text=None) -> None:
         """Draw single precision value in the UI.
 
@@ -122,15 +133,9 @@ def get_double_pointer_property(name: str, **kwargs):
         else:
             row.prop(self, "float_value")
 
-        dbl_text = "Missing"
-        if self.double_as_str:
-            dbl_text = self.double_as_str
-
-        exact_text = "Missing"
-        if self.exact_double_as_str:
-            exact_text = self.exact_double_as_str
-
         row.separator()
+
+        dbl_text, exact_text = _get_double_values_text(self)
         props = row.operator(operator=NG_OT_ng_prop_info.bl_idname, icon_value=self.prec_icon_id, text="", emboss=False)
         props.desk = f"\n\u2022 Double precision:                {dbl_text}\n" \
             f"\u2022 Imported double precision: {exact_text}"
@@ -141,7 +146,16 @@ def get_double_pointer_property(name: str, **kwargs):
         Args:
             layout (bpy.types.UILayout): Current layout.
         """
-        layout.label(text=f"{self.double_as_str}", icon_value=self.prec_icon_id)
+        row = layout.row(align=True)
+        row.alignment = 'LEFT'
+        dbl_text, exact_text = _get_double_values_text(self)
+        props = row.operator(
+            operator=NG_OT_ng_prop_info.bl_idname,
+            icon_value=self.prec_icon_id,
+            text=f"{dbl_text}",
+            emboss=False
+        )
+        props.desk = f"\u2022 Imported double precision: {exact_text}"
 
     # Create dynamic class to store property.
     double_property_group = type(

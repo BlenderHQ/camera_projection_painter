@@ -230,7 +230,7 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         scene = context.scene
-        return scene.cpp.has_initial_visible_camera_objects
+        return scene.cpp.has_used_camera_objects
 
     def draw(self, context):
         layout = self.layout
@@ -240,7 +240,7 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
 
         col = layout.column(align=True)
 
-        num_cameras = len(list(context.scene.cpp.initial_visible_camera_objects))
+        num_cameras = len(list(context.scene.cpp.used_camera_objects))
         ui.common.draw_wrapped_text(
             context,
             col,

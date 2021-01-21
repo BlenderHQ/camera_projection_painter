@@ -207,7 +207,7 @@ class CPP_OT_camera_projection_painter(bpy.types.Operator):
         # self.remove_uv_layer(active_ob)
 
         # for ob in context.scene.cpp.camera_objects:
-        #     ob.hide_set(not active_ob.initial_visible)
+        #     ob.hide_set(not active_ob.cpp.used)
 
         wm.cpp.running = False
         wm.cpp.suspended = False
@@ -271,7 +271,7 @@ class CPP_OT_camera_projection_painter(bpy.types.Operator):
         # # if (scene.cpp.use_projection_preview or (scene.cpp.use_warnings and scene.cpp.use_warning_action_draw)):
         #     #draw.mesh_preview.update_brush_texture_bindcode(self, context)
 
-        # scene.cpp.update_initial_visible_cameras_sensors()
+        # scene.cpp.update_used_cameras_sensors()
 
         # check_tuple = (
         #     # Base properties

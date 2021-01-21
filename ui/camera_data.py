@@ -114,11 +114,12 @@ class CPP_PT_camera_extrinsics(bpy.types.Panel):
 
         camera_ob = common.get_camera_object(context)
 
+        #layout.prop(camera_ob, "location")
+
         camera_ob.cpp.draw_location_elements(layout)
 
+        #layout.prop(camera_ob, "rotation_euler")
         camera_ob.cpp.draw_rotation_matrix(layout)
-        # layout.prop(camera_object, "location")
-        # layout.prop(camera_object, "rotation_euler")
 
 
 class CameraIntrinsicsPanelBase:

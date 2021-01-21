@@ -64,7 +64,6 @@ def register():
 
     WindowManager.cpp_progress = CollectionProperty(type=wm.ProgressPropertyItem)
     ShaderNodeTree.active_texnode_index = node.active_texnode_index
-    Object.initial_visible = BoolProperty(name="Used", default=True)
     Camera.cpp_bind_history = CollectionProperty(type=camera.BindImageHistoryItem)
 
 
@@ -79,4 +78,3 @@ def unregister():
     del Camera.cpp_bind_history
     del WindowManager.cpp_progress
     del ShaderNodeTree.active_texnode_index
-    del Object.initial_visible

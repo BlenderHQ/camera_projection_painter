@@ -58,7 +58,7 @@ def save_pre_handler(scene=None):
         wm.cpp.suspended = True
 
         for ob in bpy.context.scene.cpp.camera_objects:
-            ob.hide_set(not ob.initial_visible)
+            ob.hide_set(not ob.cpp.used)
 
 
 @persistent
@@ -74,8 +74,8 @@ def save_post_handler(scene=None):
 @persistent
 def depsgraph_update_pre_handler(scene=None):
     # Remove missing images from the list of the camera palette
-    for camera_object in scene.cpp.camera_objects:
-        camera = camera_object.data
+    for camera_ob in scene.cpp.camera_objects:
+        camera = camera_ob.data
         for item_index, item in enumerate(camera.cpp_bind_history):
             if not item.image:
                 camera.cpp_bind_history.remove(item_index)

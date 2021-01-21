@@ -21,10 +21,10 @@ class CPP_OT_enable_all_cameras(bpy.types.Operator):
 
     def execute(self, context):
         enabled_count = 0
-        for camera_object in context.scene.cpp.camera_objects:
-            if not camera_object.initial_visible:
+        for camera_ob in context.scene.cpp.camera_objects:
+            if not camera_ob.cpp.used:
                 enabled_count += 1
-            camera_object.initial_visible = True
+            camera_ob.cpp.used = True
 
         for area in context.screen.areas:
             if area.type == 'VIEW_3D':

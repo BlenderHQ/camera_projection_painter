@@ -52,7 +52,7 @@ class CPP_MT_camera_pie(bpy.types.Menu):
         pie.operator(
             operator=operators.CPP_OT_bind_camera_image.bl_idname).mode = 'GS'
 
-        if selected_camera_ob.initial_visible:
+        if selected_camera_ob.cpp.used:
             text = "Disable"
             icon = 'HIDE_ON'
         else:

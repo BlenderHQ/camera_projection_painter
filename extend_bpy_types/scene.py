@@ -43,22 +43,22 @@ class SceneProperties(PropertyGroup):
             camera.cpp.update_from_camera_data()
 
     @property
-    def has_initial_visible_camera_objects(self) -> bool:
+    def has_used_camera_objects(self) -> bool:
         """
         True if there are initial visible camera objects in the scene
         @return: bool
         """
-        for _ in self.initial_visible_camera_objects:
+        for _ in self.used_camera_objects:
             return True
         return False
 
     @property
-    def initial_visible_camera_objects(self) -> Iterator[bpy.types.Object]:
+    def used_camera_objects(self) -> Iterator[bpy.types.Object]:
         """
-        Generator of sequence of initial visible camera objects
+        Generator of sequence of camera objects marked as used
         @return: generator
         """
-        return (ob for ob in self.camera_objects if ob.initial_visible)
+        return (ob for ob in self.camera_objects if ob.cpp.used)
 
     @property
     def has_camera_objects_selected(self) -> bool:
@@ -81,26 +81,26 @@ class SceneProperties(PropertyGroup):
     @property
     def used_images(self):
         """
-        Generator of sequence of images used by `initial_visible_camera_objects`
+        Generator of sequence of images used by `used_camera_objects`
         None values are skipped. So length may be not equal.
         """
-        return (_.data.cpp.image for _ in self.initial_visible_camera_objects if _.data.cpp.image)
+        return (_.data.cpp.image for _ in self.used_camera_objects if _.data.cpp.image)
 
     # Utility methods
-    def evaluate_initial_visible_camera_objects(self, context) -> None:
+    def evaluate_used_camera_objects(self, context) -> None:
         """
-        Set `initial_visible` attribute to True of object in
+        Set `cpp.used` attribute to True of object in
         context.visible_objects for each object in a scene.
         """
         for camera_ob in self.camera_objects:
             state = camera_ob in context.visible_objects
-            camera_ob.initial_visible = state
+            camera_ob.cpp.used = state
 
-    def update_initial_visible_cameras_sensors(self) -> None:
+    def update_used_cameras_sensors(self) -> None:
         """
         Update `sensor_fit` for each initial visible camera in the scene
         """
-        for camera_ob in self.initial_visible_camera_objects:
+        for camera_ob in self.used_camera_objects:
             camera = camera_ob.data
             image = camera.cpp.image
             if image and image.cpp.valid:
@@ -123,21 +123,21 @@ class SceneProperties(PropertyGroup):
 
     def _set_camera_index(self, value):
         self.id_data.camera = self.id_data.objects[value]
-        camera_object = self.id_data.camera
-        camera_object.initial_visible = True
-        image = camera_object.data.cpp.image
+        camera_ob = self.id_data.camera
+        camera_ob.cpp.used = True
+        image = camera_ob.data.cpp.image
         # if image and image.cpp.valid:
         #     self.id_data.tool_settings.image_paint.clone_image = image
         if bpy.context.mode == 'OBJECT':
             bpy.ops.object.select_all(action='DESELECT')
-            camera_object.select_set(True)
-            bpy.context.view_layer.objects.active = camera_object
+            camera_ob.select_set(True)
+            bpy.context.view_layer.objects.active = camera_ob
 
     def _get_used_all_cameras(self):
         for ob in self.camera_objects:
             if ob == self.id_data.camera:
                 continue
-            if ob.initial_visible:
+            if ob.cpp.used:
                 return True
         return False
 
@@ -145,7 +145,7 @@ class SceneProperties(PropertyGroup):
         for ob in self.camera_objects:
             if ob == self.id_data.camera:
                 continue
-            ob.initial_visible = value
+            ob.cpp.used = value
 
     active_camera_index: IntProperty(
         name="Active Camera", get=_get_camera_index, set=_set_camera_index)

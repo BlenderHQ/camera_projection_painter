@@ -18,7 +18,7 @@ class CPP_OT_toggle_camera_usage(bpy.types.Operator):
     def description(cls, context, properties):
         wm = context.window_manager
         ob = wm.cpp.current_selected_camera_ob
-        if ob and ob.initial_visible:
+        if ob and ob.cpp.used:
             return "Disable camera"
         else:
             return "Enable camera"
@@ -27,8 +27,8 @@ class CPP_OT_toggle_camera_usage(bpy.types.Operator):
         scene = context.scene
         wm = context.window_manager
         camera_ob = wm.cpp.current_selected_camera_ob
-        camera_ob.initial_visible = not camera_ob.initial_visible
-        if (scene.camera == camera_ob) and (not camera_ob.initial_visible):
+        camera_ob.cpp.used = not camera_ob.cpp.used
+        if (scene.camera == camera_ob) and (not camera_ob.cpp.used):
             scene.camera = None
             self.report(type={'WARNING'}, message="Active camera hidden!")
 

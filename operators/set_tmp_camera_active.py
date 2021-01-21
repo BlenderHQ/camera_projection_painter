@@ -23,7 +23,7 @@ class CPP_OT_set_tmp_camera_active(bpy.types.Operator):
         camera_ob = wm.cpp.current_selected_camera_ob
         if camera_ob and camera_ob.type == 'CAMERA':
             scene.camera = camera_ob
-            scene.camera.initial_visible = True
+            scene.camera.cpp.used = True
 
             self.report(
                 type={'INFO'},

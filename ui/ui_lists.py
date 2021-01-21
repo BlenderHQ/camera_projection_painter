@@ -46,7 +46,7 @@ class DATA_UL_scene_camera_item(bpy.types.UIList):
         if self.layout_type in {'DEFAULT', 'COMPACT', 'GRID'}:
             row = layout.row(align=True)
 
-            row.prop(item, "initial_visible", text="")
+            row.prop(item.cpp, "used", text="")
             row.label(text=item.name)
 
             if flt_flag & self.IMAGE:
@@ -112,7 +112,7 @@ class DATA_UL_scene_camera_item(bpy.types.UIList):
                         if not (image and image.cpp.valid):
                             flt_flags[i] = True
                     if self.filter_used:
-                        if not ob.initial_visible:
+                        if not ob.cpp.used:
                             flt_flags[i] = True
 
         return flt_flags, flt_neworder

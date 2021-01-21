@@ -103,14 +103,14 @@ def draw_cameras(self, context):
     bgl.glEnable(bgl.GL_LINE_SMOOTH)
     bgl.glDisable(bgl.GL_MULTISAMPLE)
 
-    for camera_object in scene.cpp.initial_visible_camera_objects:
-        camera = camera_object.data
-        model_matrix = camera_object.matrix_world
+    for camera_ob in scene.cpp.used_camera_objects:
+        camera = camera_ob.data
+        model_matrix = camera_ob.matrix_world
         image = camera.cpp.image
         image_has_data = False
         line_width = preferences.camera_line_width
 
-        if camera_object == scene.camera:
+        if camera_ob == scene.camera:
             if context.region_data.view_perspective == 'CAMERA':
                 continue
             image = clone_image
@@ -174,7 +174,7 @@ def draw_cameras(self, context):
             wire_color = preferences.camera_color_loaded_data
         else:
             wire_color = preferences.camera_color
-        if camera_object == scene.camera:
+        if camera_ob == scene.camera:
             wire_color = preferences.camera_color_highlight
 
         shader_camera.uniform_float("model_matrix", model_matrix)
