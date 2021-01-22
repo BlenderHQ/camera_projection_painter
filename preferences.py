@@ -1,5 +1,6 @@
 from . import engine
 from .engine import icons
+from .engine.io_properties import camera_data_file_type_enumerator_helper
 
 from . import ui
 from . import keymap
@@ -126,6 +127,7 @@ prop_preferred_workflow_items = (
 )
 
 
+@camera_data_file_type_enumerator_helper(ui_name="IO Cameras File Type", ui_description="Default IO file type for cameras data")
 class PreferencesProperties:
     """Class contains addon preferences properties.
     """
@@ -149,10 +151,10 @@ class PreferencesProperties:
 
         # Update corresponding preferences defaults
         if self.preferred_workflow == 'REALITY_CAPTURE':
-            self.io_camera_data_as_type = 'REALITY_CAPTURE_IECP'
+            self.ng_io_prop_as_type = 'REALITY_CAPTURE_IECP'
 
         elif self.preferred_workflow == 'METASHAPE':
-            self.io_camera_data_as_type = 'METASHAPE_PIDXYZOPKR'
+            self.ng_io_prop_as_type = 'METASHAPE_PIDXYZOPKR'
 
     preferred_workflow: EnumProperty(
         items=prop_preferred_workflow_items,
@@ -213,12 +215,6 @@ class PreferencesProperties:
         "Do not affect already generated image icons."
     )
 
-    io_camera_data_as_type: EnumProperty(
-        items=engine.io_properties.file_type_items,
-        default=engine.io_properties.file_type_items[0][0],
-        name="IO Cameras File Type",
-        description="Default IO file type for cameras data"
-    )
     # \ Defaults
 
     # -------------- Viewport Inspection -------------- #
@@ -506,7 +502,7 @@ class CameraProjectionPainterPreferences(bpy.types.AddonPreferences, Preferences
                     icons.get_icon_id("defaults"), "show_defaults"):
                 col = box.column(align=False)
 
-                col.prop(self, "io_camera_data_as_type")
+                col.prop(self, "ng_io_prop_as_type")
                 col.prop(self, "new_texture_size")
 
             draw_dev(self, context, box)
