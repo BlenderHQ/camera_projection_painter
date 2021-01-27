@@ -98,9 +98,11 @@ Preferred workflow refers to a change in the user interface as well as automatio
 -------------
 ## Known limitations when working with the add-on
 
- - ### Blender's packed files: [(Blender Wiki)][3]: Their use is contrary to the purpose of the add-on - it is assumed that you are using the same image dataset that was used to reconstruct the scene, without unnecessary copying of files.
+ - #### Blender's packed files [(Blender Wiki)][3]:
+ Their use is contrary to the purpose of the add-on - it is assumed that you are using the same image dataset that was used to reconstruct the scene, without unnecessary copying of files.
 
- - ### Floating point values precision [(Wikipedia)][4]: IEEE-754 standard
+ - #### Floating point values precision [(Wikipedia)][4]:
+  TODO(ivpe): explain this.
 
 
 [Support on Patreon][2]
