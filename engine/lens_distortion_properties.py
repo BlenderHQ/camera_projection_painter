@@ -8,14 +8,13 @@ from . import ng_prop
 
 if "bpy" in locals():
     import importlib
-    #importlib.reload(ng_prop)
 
 import bpy
 
 # Common properties for lens distortion coefficients.
 _common_coeff_kwargs = {
     "subtype": 'NONE',
-    "precision": engine.types.FLT_DIG,
+    "precision": engine.intern.FLT_DIG,
     "step": 2,
     "soft_min": -5.0,
     "soft_max": 5.0,
@@ -23,96 +22,104 @@ _common_coeff_kwargs = {
 }
 
 # Polynomial lens distortion model coefficients
-_polynomial_coeff = {
-    "polynomial_k1": ng_prop.get_double_pointer_property(
-        name="K1",
-        description="First coefficient of Polynomial radial distortion",
-        **_common_coeff_kwargs
-    ),
-    "polynomial_k2": ng_prop.get_double_pointer_property(
-        name="K2",
-        description="Second coefficient of Polynomial radial distortion",
-        **_common_coeff_kwargs
-    ),
-    "polynomial_k3": ng_prop.get_double_pointer_property(
-        name="K3",
-        description="Third coefficient of Polynomial radial distortion",
-        **_common_coeff_kwargs
-    ),
-}
+_polynomial_coeff = {}
+if engine.WITH_NG_LD_POLYNOMIAL:
+    _polynomial_coeff = {
+        engine.types.ATTR_POLYNOMIAL_K1: ng_prop.get_double_pointer_property(
+            name="K1",
+            description="First coefficient of Polynomial radial distortion",
+            **_common_coeff_kwargs
+        ),
+        engine.types.ATTR_POLYNOMIAL_K2: ng_prop.get_double_pointer_property(
+            name="K2",
+            description="Second coefficient of Polynomial radial distortion",
+            **_common_coeff_kwargs
+        ),
+        engine.types.ATTR_POLYNOMIAL_K3: ng_prop.get_double_pointer_property(
+            name="K3",
+            description="Third coefficient of Polynomial radial distortion",
+            **_common_coeff_kwargs
+        ),
+    }
 
 # Division lens distortion model coefficients
-_division_coeff = {
-    "division_k1": ng_prop.get_double_pointer_property(
-        name="K1",
-        description="First coefficient of Division radial distortion",
-        **_common_coeff_kwargs
-    ),
-    "division_k2": ng_prop.get_double_pointer_property(
-        name="K2",
-        description="Second coefficient of Division radial distortion",
-        **_common_coeff_kwargs
-    ),
-}
+_division_coeff = {}
+if engine.WITH_NG_LD_DIVISION:
+    _division_coeff = {
+        engine.types.ATTR_DIVISION_K1: ng_prop.get_double_pointer_property(
+            name="K1",
+            description="First coefficient of Division radial distortion",
+            **_common_coeff_kwargs
+        ),
+        engine.types.ATTR_DIVISION_K2: ng_prop.get_double_pointer_property(
+            name="K2",
+            description="Second coefficient of Division radial distortion",
+            **_common_coeff_kwargs
+        ),
+    }
 
 
 # Nuke lens distortion model coefficients
-_nuke_coeff = {
-    "nuke_k1": ng_prop.get_double_pointer_property(
-        name="K1",
-        description="First coefficient of Nuke radial distortion",
-        **_common_coeff_kwargs
-    ),
-    "nuke_k2": ng_prop.get_double_pointer_property(
-        name="K2",
-        description="Second coefficient of Nuke radial distortion",
-        **_common_coeff_kwargs
-    ),
-}
+_nuke_coeff = {}
+if engine.WITH_NG_LD_NUKE:
+    _nuke_coeff = {
+        engine.types.ATTR_NUKE_K1: ng_prop.get_double_pointer_property(
+            name="K1",
+            description="First coefficient of Nuke radial distortion",
+            **_common_coeff_kwargs
+        ),
+        engine.types.ATTR_NUKE_K2: ng_prop.get_double_pointer_property(
+            name="K2",
+            description="Second coefficient of Nuke radial distortion",
+            **_common_coeff_kwargs
+        ),
+    }
 
 # Brown-Conrady lens distortion model coefficients
-_brown_coeff = {
-    "brown_k1": ng_prop.get_double_pointer_property(
-        name="K1",
-        description="First coefficient of Brown-Conrady radial distortion",
-        **_common_coeff_kwargs
-    ),
-    "brown_k2": ng_prop.get_double_pointer_property(
-        name="K2",
-        description="Second coefficient of Brown-Conrady radial distortion",
-        **_common_coeff_kwargs
-    ),
-    "brown_k3": ng_prop.get_double_pointer_property(
-        name="K3",
-        description="Third coefficient of Brown-Conrady radial distortion",
-        **_common_coeff_kwargs
-    ),
-    "brown_k4": ng_prop.get_double_pointer_property(
-        name="K4",
-        description="Fourth coefficient of Brown-Conrady radial distortion",
-        **_common_coeff_kwargs
-    ),
-    "brown_p1": ng_prop.get_double_pointer_property(
-        name="P1",
-        description="First coefficient of Brown-Conrady tangential distortion",
-        **_common_coeff_kwargs
-    ),
-    "brown_p2": ng_prop.get_double_pointer_property(
-        name="P2",
-        description="Second coefficient of Brown-Conrady tangential distortion",
-        **_common_coeff_kwargs
-    ),
-    "brown_p3": ng_prop.get_double_pointer_property(
-        name="P3",
-        description="Third coefficient of Brown-Conrady tangential distortion",
-        **_common_coeff_kwargs
-    ),
-    "brown_p4": ng_prop.get_double_pointer_property(
-        name="P4",
-        description="Fourth coefficient of Brown-Conrady tangential distortion",
-        **_common_coeff_kwargs
-    ),
-}
+_brown_coeff = {}
+if engine.WITH_NG_LD_BROWN:
+    _brown_coeff = {
+        engine.types.ATTR_BROWN_K1: ng_prop.get_double_pointer_property(
+            name="K1",
+            description="First coefficient of Brown-Conrady radial distortion",
+            **_common_coeff_kwargs
+        ),
+        engine.types.ATTR_BROWN_K2: ng_prop.get_double_pointer_property(
+            name="K2",
+            description="Second coefficient of Brown-Conrady radial distortion",
+            **_common_coeff_kwargs
+        ),
+        engine.types.ATTR_BROWN_K3: ng_prop.get_double_pointer_property(
+            name="K3",
+            description="Third coefficient of Brown-Conrady radial distortion",
+            **_common_coeff_kwargs
+        ),
+        engine.types.ATTR_BROWN_K4: ng_prop.get_double_pointer_property(
+            name="K4",
+            description="Fourth coefficient of Brown-Conrady radial distortion",
+            **_common_coeff_kwargs
+        ),
+        engine.types.ATTR_BROWN_P1: ng_prop.get_double_pointer_property(
+            name="P1",
+            description="First coefficient of Brown-Conrady tangential distortion",
+            **_common_coeff_kwargs
+        ),
+        engine.types.ATTR_BROWN_P2: ng_prop.get_double_pointer_property(
+            name="P2",
+            description="Second coefficient of Brown-Conrady tangential distortion",
+            **_common_coeff_kwargs
+        ),
+        engine.types.ATTR_BROWN_P3: ng_prop.get_double_pointer_property(
+            name="P3",
+            description="Third coefficient of Brown-Conrady tangential distortion",
+            **_common_coeff_kwargs
+        ),
+        engine.types.ATTR_BROWN_P4: ng_prop.get_double_pointer_property(
+            name="P4",
+            description="Fourth coefficient of Brown-Conrady tangential distortion",
+            **_common_coeff_kwargs
+        ),
+    }
 
 _distortion_coefficients_prop_dict = {}
 
@@ -230,8 +237,8 @@ _principal_point_x_kwargs = {
     "soft_max": 1.0,
     "step": 2,
     "unit": 'CAMERA',
-    "precision": engine.types.FLT_DIG,
-    "step": engine.types.FLT_DIG,
+    "precision": engine.intern.FLT_DIG,
+    "step": engine.intern.FLT_DIG,
     "options": {'HIDDEN'},
     "description": "Deviation of the camera principal point in millimeters by X axis",
 }
@@ -243,8 +250,8 @@ _principal_point_y_kwargs = {
     "soft_max": 1.0,
     "step": 2,
     "unit": 'CAMERA',
-    "precision": engine.types.FLT_DIG,
-    "step": engine.types.FLT_DIG,
+    "precision": engine.intern.FLT_DIG,
+    "step": engine.intern.FLT_DIG,
     "options": {'HIDDEN'},
     "description": "Deviation of the camera principal point in millimeters by Y axis",
 }
@@ -257,8 +264,8 @@ _skew_kwargs = {
     "soft_max": 1.0,
     "step": 2,
     "subtype": 'FACTOR',
-    "precision": engine.types.FLT_DIG,
-    "step": engine.types.FLT_DIG,
+    "precision": engine.intern.FLT_DIG,
+    "step": engine.intern.FLT_DIG,
     "options": {'HIDDEN'},
     "description": "Skew correction factor",
 }
@@ -271,8 +278,8 @@ _affinity_kwargs = {
     "soft_max": 1.0,
     "step": 2,
     "subtype": 'FACTOR',
-    "precision": engine.types.FLT_DIG,
-    "step": engine.types.FLT_DIG,
+    "precision": engine.intern.FLT_DIG,
+    "step": engine.intern.FLT_DIG,
     "options": {'HIDDEN'},
     "description": "Affinity correction factor",
 }
@@ -287,8 +294,8 @@ _pixel_aspect_ratio = {
     "max": 1.99,
     "step": 2,
     "subtype": 'FACTOR',
-    "precision": engine.types.FLT_DIG,
-    "step": engine.types.FLT_DIG,
+    "precision": engine.intern.FLT_DIG,
+    "step": engine.intern.FLT_DIG,
     "options": {'HIDDEN'},
     "description": "Camera pixel aspect ratio correction factor"
 }
@@ -296,37 +303,37 @@ _pixel_aspect_ratio = {
 
 # Camera calibration properties
 _lens_distortion_prop_dict = {
-    "distortion_model": bpy.props.EnumProperty(
+    engine.types.ATTR_DISTORTION_MODEL: bpy.props.EnumProperty(
         **_distortion_model_kwargs
     ),
-    "pano_type": bpy.props.EnumProperty(
+    engine.types.ATTR_PANO_TYPE: bpy.props.EnumProperty(
         **_pano_type_kwargs
     ),
-    "focal_length": ng_prop.get_double_pointer_property(
+    engine.types.ATTR_FOCAL_LENGTH: ng_prop.get_double_pointer_property(
         **_focal_length_kwargs
     ),
-    "sensor_x": ng_prop.get_double_pointer_property(
+    engine.types.ATTR_SENSOR_X: ng_prop.get_double_pointer_property(
         **_sensor_x_kwargs
     ),
-    "sensor_y": ng_prop.get_double_pointer_property(
+    engine.types.ATTR_SENSOR_Y: ng_prop.get_double_pointer_property(
         **_sensor_y_kwargs
     ),
-    "ortho_scale": ng_prop.get_double_pointer_property(
+    engine.types.ATTR_ORTHO_SCALE: ng_prop.get_double_pointer_property(
         **_ortho_scale_kwargs
     ),
-    "principal_point_x": ng_prop.get_double_pointer_property(
+    engine.types.ATTR_PRINCIPAL_POINT_X: ng_prop.get_double_pointer_property(
         **_principal_point_x_kwargs
     ),
-    "principal_point_y": ng_prop.get_double_pointer_property(
+    engine.types.ATTR_PRINCIPAL_POINT_Y: ng_prop.get_double_pointer_property(
         **_principal_point_y_kwargs
     ),
-    "skew": ng_prop.get_double_pointer_property(
+    engine.types.ATTR_SKEW: ng_prop.get_double_pointer_property(
         **_skew_kwargs
     ),
-    "affinity": ng_prop.get_double_pointer_property(
+    engine.types.ATTR_AFFINITY: ng_prop.get_double_pointer_property(
         **_affinity_kwargs
     ),
-    "pixel_aspect_ratio": ng_prop.get_double_pointer_property(
+    engine.types.ATTR_PIXEL_ASPECT_RATIO: ng_prop.get_double_pointer_property(
         **_pixel_aspect_ratio
     ),
 }
@@ -335,10 +342,13 @@ _lens_distortion_prop_dict = {
 def _update_from_camera_data(self):
     camera = self.id_data
 
-    self.focal_length.float_value = camera.lens
-    self.ortho_scale.float_value = camera.ortho_scale
-    self.sensor_x.float_value = camera.sensor_width
-    self.sensor_y.float_value = camera.sensor_height
+    for attr, value in (
+        (engine.types.ATTR_FOCAL_LENGTH, camera.lens),
+        (engine.types.ATTR_ORTHO_SCALE, camera.ortho_scale),
+        (engine.types.ATTR_SENSOR_X, camera.sensor_width),
+        (engine.types.ATTR_SENSOR_Y, camera.sensor_height),
+    ):
+        setattr(getattr(self, attr), engine.types.NG_PROP_ATTR_FLOAT_VALUE, value)
 
 
 def camera_calibration_helper():

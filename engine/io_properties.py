@@ -4,11 +4,11 @@ from ._engine import icons
 import bpy
 
 __all__ = (
-    "camera_data_file_type_enumerator_helper",
+    "get_ng_io_prop_as_type",
+    "get_readable_type_item_name",
 )
 
-_ng_io_prop_as_type_items = [
-]
+_ng_io_prop_as_type_items = []
 
 _csv_camera_data_file_type_items = [
     # Reality Capture:
@@ -78,39 +78,43 @@ if engine.WITH_NG_IO_XML:
     _ng_io_prop_as_type_items.extend(_xml_camera_data_file_type_items)
 
 
-def camera_data_file_type_enumerator_helper(ui_name: str, ui_description: str):
-    """Class decorator function. Updates class annotations by enum property called
-    `ng_io_prop_as_type` 
-    contains supported by engine.io module
-    camera data file types. 
-n
+def get_all_items_ext_filter_glob():
+    extlist = []
+    for item in _ng_io_prop_as_type_items:
+        ext = engine.io.get_file_extension_for_camera_data_file_type(item[0])
+        if ext not in extlist:
+            extlist.append(ext)
+
+    filter_glob = ""
+    for i, ext in enumerate(extlist):
+        filter_glob += f"*{ext}"
+        if i < len(extlist) - 1:
+            filter_glob += ";"
+    return filter_glob
+
+
+def get_readable_type_item_name(file_type: engine.io.CameraDataFileType) -> tuple:
+    """Returns readable item name and icon id.
+
     Args:
-        ui_name (str): Name to be used in user interface.
-        ui_description (str): Description to be used in user interface.
+        file_type (engine.io.CameraDataFileType): File type.
+
+    Returns:
+        tuple: Descriptive name and icon id.
     """
-    def wrapper(cls):
-        if not hasattr(cls, "__annotations__"):
-            setattr(cls, "__annotations__", {})
+    for item in _ng_io_prop_as_type_items:
+        if int(file_type) == item[4]:
+            return item[1], item[3]
 
-        def _ng_io_prop_as_type_get(self):
-            return 1
+    return "", 0
 
-        def _ng_io_prop_as_type_set(self, value):
-            print(value)
 
-        cls.__annotations__.update(
-            {
-                "ng_io_prop_as_type": bpy.props.EnumProperty(
-                    items=_ng_io_prop_as_type_items,
-                    default=1,
-                    name=ui_name,
-                    description=ui_description,
-                    get=_ng_io_prop_as_type_get,
-                    set=_ng_io_prop_as_type_set,
-                )
-            }
-        )
-
-        return cls
-
-    return wrapper
+def get_ng_io_prop_as_type(ui_name: str, ui_description: str):
+    return bpy.props.EnumProperty(
+        # Items can be sorted w.r.t third-party software:
+        # items=reversed(sorted(_ng_io_prop_as_type_items, key=lambda item: item[3])),
+        items=_ng_io_prop_as_type_items,
+        default=1,  # 'UNKNOWN' item skipped.
+        name=ui_name,
+        description=ui_description,
+    )

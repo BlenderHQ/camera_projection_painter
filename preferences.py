@@ -1,6 +1,5 @@
 from . import engine
 from .engine import icons
-from .engine.io_properties import camera_data_file_type_enumerator_helper
 
 from . import ui
 from . import keymap
@@ -127,7 +126,6 @@ prop_preferred_workflow_items = (
 )
 
 
-@camera_data_file_type_enumerator_helper(ui_name="IO Cameras File Type", ui_description="Default IO file type for cameras data")
 class PreferencesProperties:
     """Class contains addon preferences properties.
     """
@@ -179,6 +177,11 @@ class PreferencesProperties:
     # \ UI Tags
 
     # Defaults /
+    ng_io_prop_as_type: engine.io_properties.get_ng_io_prop_as_type(
+        ui_name="IO Cameras File Type",
+        ui_description="Default IO file type for cameras data"
+    )
+
     new_texture_size: IntVectorProperty(
         name="New Texture Size",
         size=2,

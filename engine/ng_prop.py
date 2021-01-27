@@ -41,7 +41,7 @@ class NG_OT_ng_prop_info(bpy.types.Operator):
         return {'CANCELLED'}
 
 
-def get_double_pointer_property(name: str, **kwargs):
+def get_double_pointer_property(name: str, indices=(-1, -1), **kwargs):
     """Generate and register dynamic property type which contains float, double as string and exact double as
     string representation of floating point value. "Exact" value means imported 16 digits value from third-party
     software.
@@ -53,13 +53,14 @@ def get_double_pointer_property(name: str, **kwargs):
 
     Args:
         name (str): Regular property name.
+        indices (tuple): Optional indices [i, j] for matrix element values.
         **kwargs: Keyword arguments should be the same as for `bpy.props.FloatProperty`.
     Returns:
         bpy.props.PointerProperty: Registered property.
     """
 
     # Set display precision to IEEE-754 standard.
-    kwargs["precision"] = engine.types.FLT_DIG
+    kwargs["precision"] = engine.intern.FLT_DIG
 
     # `update` keyword argument handling.
     # First should be called passed by `**kwargs` update function or method,
@@ -77,12 +78,27 @@ def get_double_pointer_property(name: str, **kwargs):
     def _float_value_update(self, context):
         if kwargs_update_func is not None:
             kwargs_update_func(self, context)
-        engine.types.evaluate_ng_cpp_prop_as_string(self)
-        self.prev_float_value = self.float_value
+        engine.types.ng_prop_float_value_update(self)
 
     def _exact_double_value_update(self, _context):
-        self.float_value = engine.types.str_to_floating_point(self.exact_double_as_str)
-        self.double_as_str = self.exact_double_as_str
+        setattr(
+            self,
+            engine.types.NG_PROP_ATTR_FLOAT_VALUE,
+            engine.intern.str_to_floating_point(
+                getattr(
+                    self,
+                    engine.types.NG_PROP_ATTR_EXACT_DOUBLE_AS_STR
+                )
+            )
+        )
+        setattr(
+            self,
+            engine.types.NG_PROP_ATTR_DOUBLE_AS_STR,
+            getattr(
+                self,
+                engine.types.NG_PROP_ATTR_EXACT_DOUBLE_AS_STR
+            )
+        )
 
     # Default value
     kwargs_default = 0.0
@@ -103,21 +119,25 @@ def get_double_pointer_property(name: str, **kwargs):
             Green - current double precision value equals to exact double precision value.
             Yellow - current double precision value is different from exact double precision value.
         """
-        if not self.exact_double_as_str:
+        double_as_str = getattr(self, engine.types.NG_PROP_ATTR_DOUBLE_AS_STR)
+        exact_double_as_str = getattr(self, engine.types.NG_PROP_ATTR_EXACT_DOUBLE_AS_STR)
+        if not exact_double_as_str:
             return icons.get_icon_id("white_dot")
-        elif self.double_as_str == self.exact_double_as_str:
+        elif double_as_str == exact_double_as_str:
             return icons.get_icon_id("green_dot")
         else:
             return icons.get_icon_id("yellow_dot")
 
     def _get_double_values_text(self):
         dbl_text = "Missing"
-        if self.double_as_str:
-            dbl_text = self.double_as_str
+        double_as_str = getattr(self, engine.types.NG_PROP_ATTR_DOUBLE_AS_STR)
+        if double_as_str:
+            dbl_text = double_as_str
 
         exact_text = "Missing"
-        if self.exact_double_as_str:
-            exact_text = self.exact_double_as_str
+        exact_double_as_str = getattr(self, engine.types.NG_PROP_ATTR_EXACT_DOUBLE_AS_STR)
+        if exact_double_as_str:
+            exact_text = exact_double_as_str
 
         return dbl_text, exact_text
 
@@ -129,9 +149,9 @@ def get_double_pointer_property(name: str, **kwargs):
         """
         row = layout.row(align=True)
         if text is not None:
-            row.prop(self, "float_value", text=text)
+            row.prop(self, engine.types.NG_PROP_ATTR_FLOAT_VALUE, text=text)
         else:
-            row.prop(self, "float_value")
+            row.prop(self, engine.types.NG_PROP_ATTR_FLOAT_VALUE)
 
         row.separator()
 
@@ -157,6 +177,34 @@ def get_double_pointer_property(name: str, **kwargs):
         )
         props.desk = f"\u2022 Imported double precision: {exact_text}"
 
+    annotations_dict = {
+        engine.types.NG_PROP_ATTR_PREV_FLOAT_VALUE: bpy.props.FloatProperty(
+            **kwargs
+        ),
+        engine.types.NG_PROP_ATTR_FLOAT_VALUE: bpy.props.FloatProperty(
+            name=name,
+            update=_float_value_update,
+            **kwargs
+        ),
+        engine.types.NG_PROP_ATTR_DOUBLE_AS_STR: bpy.props.StringProperty(
+            maxlen=engine.intern.DBL_DIG * 2,
+            default=engine.intern.floating_point_to_str(kwargs_default),
+            options={'HIDDEN'},
+        ),
+        engine.types.NG_PROP_ATTR_EXACT_DOUBLE_AS_STR: bpy.props.StringProperty(
+            maxlen=engine.intern.DBL_DIG * 2,
+            update=_exact_double_value_update,
+            options={'HIDDEN'},
+        ),
+    }
+
+    if (indices[0] != -1 and indices[1] != -1):
+        annotations_dict["indices"] = bpy.props.IntVectorProperty(
+            default=indices,
+            size=2,
+            options={'HIDDEN', 'SKIP_SAVE'}
+        )
+
     # Create dynamic class to store property.
     double_property_group = type(
         "ng_prop_" + name.replace(" ", "_").lower(),
@@ -165,27 +213,7 @@ def get_double_pointer_property(name: str, **kwargs):
         ),
         {
             "__slots__": tuple(),
-
-            "__annotations__": {
-                "prev_float_value": bpy.props.FloatProperty(
-                    **kwargs
-                ),
-                "float_value": bpy.props.FloatProperty(
-                    name=name,
-                    update=_float_value_update,
-                    **kwargs
-                ),
-                "double_as_str": bpy.props.StringProperty(
-                    maxlen=engine.types.DBL_DIG,
-                    default=engine.types.floating_point_to_str(kwargs_default),
-                    options={'HIDDEN'},
-                ),
-                "exact_double_as_str": bpy.props.StringProperty(
-                    maxlen=engine.types.DBL_DIG,
-                    update=_exact_double_value_update,
-                    options={'HIDDEN'},
-                )
-            },
+            "__annotations__": annotations_dict,
             "prec_icon_id": property(fget=_prec_icon_id_getter),
             "draw": _draw_method,
             "draw_info": _draw_info_method,

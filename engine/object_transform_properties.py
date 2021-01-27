@@ -12,21 +12,32 @@ if "bpy" in locals():
 import bpy
 
 _element_kwargs = {
-    "precision": engine.types.FLT_DIG,
-    "step": engine.types.FLT_DIG,
+    "precision": engine.intern.FLT_DIG,
+    "step": engine.intern.FLT_DIG,
 }
 
 _object_transform_matrix_prop_dict = {}
 
 
 def _get_elem_name_by_indices(i: int, j: int):
-    return f"r_{i}{j}"
+    return f"{engine.types.ATTR_TRANSFORM_MATRIX_PREFIX}{i}{j}"
+
+
+def _elem_update(self, _context):
+    self.id_data.matrix_world[self.indices[0]][self.indices[1]] = getattr(
+        self,
+        engine.types.NG_PROP_ATTR_FLOAT_VALUE
+    )
 
 
 for i in range(4):
     for j in range(4):
         name = _get_elem_name_by_indices(i, j)
-        _object_transform_matrix_prop_dict[name] = ng_prop.get_double_pointer_property(name=name)
+        _object_transform_matrix_prop_dict[name] = ng_prop.get_double_pointer_property(
+            name=name,
+            indices=(i, j),
+            update=_elem_update
+        )
 
 
 def _update_transform_matrix_from_object(self):
@@ -35,7 +46,7 @@ def _update_transform_matrix_from_object(self):
         for j in range(4):
             name = _get_elem_name_by_indices(i, j)
             elem = getattr(self, name)
-            setattr(elem, "float_value", ob.matrix_world[i][j])
+            setattr(elem, engine.types.NG_PROP_ATTR_FLOAT_VALUE, ob.matrix_world[i][j])
 
 
 def _draw_rotation_matrix(self, layout: bpy.types.UILayout) -> None:

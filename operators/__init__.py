@@ -33,10 +33,10 @@ CPP_OT_enable_all_cameras = enable_all_cameras.CPP_OT_enable_all_cameras
 # IO
 CPP_OT_bind_camera_image = io.bind_camera_image.CPP_OT_bind_camera_image
 CPP_OT_setup_context = io.setup_context.CPP_OT_setup_context
-CPP_OT_import_camera_data = io.camera_data.CPP_OT_import_camera_data
 
+CPP_OT_import_camera_data = io.camera_data.CPP_OT_import_camera_data
 CPP_OT_export_camera_data = io.camera_data.CPP_OT_export_camera_data
-CPP_PT_export_camera_data_transform = io.camera_data.CPP_PT_export_camera_data_transform
+CPP_PT_io_camera_data_transform = io.camera_data.CPP_PT_io_camera_data_transform
 
 # Previews
 CPP_OT_refresh_image_preview = refresh_image_preview.CPP_OT_refresh_image_preview
@@ -48,17 +48,17 @@ _classes = [
 
     # Misc
     CPP_OT_image_paint,
-    CPP_OT_bind_camera_image,
     CPP_OT_set_tmp_camera_active,
     CPP_OT_bind_history_remove,
     CPP_OT_toggle_camera_usage,
     CPP_OT_enable_all_cameras,
 
     # IO
+    CPP_OT_bind_camera_image,
     CPP_OT_setup_context,
     CPP_OT_import_camera_data,
     CPP_OT_export_camera_data,
-    CPP_PT_export_camera_data_transform,
+    CPP_PT_io_camera_data_transform,
 
     # Previews
     CPP_OT_refresh_image_preview,
