@@ -79,8 +79,8 @@ class CPP_OT_listener(bpy.types.Operator):
     def modal(self, context, event):
         wm = context.window_manager
 
-        scene = context.scene
-        scene.cpp.update_lens_distortions_from_camera_objects()
+        if wm.cpp.suspended:
+            return {'PASS_THROUGH'}
 
         # Stop modal execution if `CPP_OT_camera_projection_painter` invoked
         if wm.cpp.running:

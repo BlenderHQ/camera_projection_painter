@@ -50,8 +50,15 @@ class CPP_OT_import_camera_data(bpy.types.Operator):
     )
 
     def invoke(self, context, event):
-        context.window_manager.fileselect_add(self)
+        wm = context.window_manager
+        wm.cpp.suspended = True
+
+        wm.fileselect_add(self)
         return {'RUNNING_MODAL'}
+
+    def cancel(self, context):
+        wm = context.window_manager
+        wm.cpp.suspended = True
 
     def check(self, _context):
         change_axis = bpy_extras.io_utils.axis_conversion_ensure(
@@ -60,6 +67,10 @@ class CPP_OT_import_camera_data(bpy.types.Operator):
             "axis_up",
         )
         return change_axis
+
+    @property
+    def files_word(self):
+        return "file" if len(self.files) == 1 else "files"
 
     def draw(self, context):
         layout = self.layout
@@ -77,14 +88,12 @@ class CPP_OT_import_camera_data(bpy.types.Operator):
         if len(self.files):
             import_type = engine.io.recognize_files(self.directory, [_.name for _ in self.files])
 
-            file_word = "file" if len(self.files) == 1 else "files"
-
             if import_type == engine.io.CameraDataFileType.UNKNOWN:
-                info_text = f"Unable to recognize {file_word} as camera data."
+                info_text = f"Unable to recognize {self.files_word} as camera data."
                 info_icon_id = icons.get_icon_id("warning")
             else:
-                info_text = f"Selected {file_word} recognized as type:"
-                info_icon_id = icons.get_icon_id("info")
+                info_text = f"Selected {self.files_word} recognized as type:"
+                info_icon_id = icons.get_icon_id("import")
         else:
             info_text = "Please, select one or more camera data files of the same type."
             info_icon_id = icons.get_icon_id("info")
@@ -96,16 +105,12 @@ class CPP_OT_import_camera_data(bpy.types.Operator):
             ui.common.draw_wrapped_text(context, col, text=f"\"{readable_name}\"", icon_id=soft_icon_id)
 
     def execute(self, context):
-        # import_type = engine.io.recognize_files(self.directory, [_.name for _ in self.files])
-        # file_word = "file" if len(self.files) == 1 else "files"
-        # if import_type == engine.io.CameraDataFileType.UNKNOWN:
-        #     self.report(type={'WARNING'}, message=f"Failed to import unknown {file_word}")
-        #     return {'CANCELLED'}
-
         num_succeeded = engine.io.import_camera_data(self.directory, [_.name for _ in self.files])
-
-        self.report(type={'INFO'}, message=f"Imported {num_succeeded} files")
-
+        if num_succeeded:
+            self.report(type={'INFO'}, message=f"Imported {num_succeeded} {self.files_word}")
+        else:
+            self.report(type={'WARNING'}, message=f"Unable to import {self.files_word}")
+        self.cancel(context)
         return {'FINISHED'}
 
 
@@ -116,6 +121,13 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     __slots__ = ()
+
+    filename: StringProperty(
+        name="File Name",
+        description="Output filename",
+        maxlen=1024,
+        subtype='FILE_NAME'
+    )
 
     filepath: StringProperty(
         name="File Path",
@@ -132,9 +144,14 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
     )
 
     filter_glob: StringProperty(
-        default="",
+        default=engine.io_properties.get_all_items_ext_filter_glob(),
         options={'HIDDEN'},
         maxlen=255
+    )
+
+    files: CollectionProperty(
+        type=bpy.types.OperatorFileListElement,
+        options={'HIDDEN', 'SKIP_SAVE'},
     )
 
     check_existing: BoolProperty(
@@ -186,16 +203,16 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
     def invoke(self, context, event):
         addon_preferences = context.preferences.addons[addon_pkg].preferences
 
-        # self.ng_io_prop_as_type = addon_preferences.ng_io_prop_as_type
+        self.ng_io_prop_as_type = addon_preferences.ng_io_prop_as_type
 
-        # if not self.filepath:
-        #     blend_filepath = context.blend_data.filepath
-        #     if not blend_filepath:
-        #         blend_filepath = "untitled"
-        #     else:
-        #         blend_filepath = os.path.splitext(blend_filepath)[0]
+        if not self.filepath:
+            blend_filepath = context.blend_data.filepath
+            if not blend_filepath:
+                blend_filepath = "untitled"
+            else:
+                blend_filepath = os.path.splitext(blend_filepath)[0]
 
-        #     self.filepath = blend_filepath + self.filename_ext
+            self.filepath = blend_filepath + self.filename_ext
 
         wm = context.window_manager
         wm.fileselect_add(self)
@@ -204,21 +221,22 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
     def check(self, context):
         change_ext = False
 
-        # check_extension = self.filename_ext
+        filepath = self.filepath
 
-        # if check_extension is not None:
-        #     filepath = self.filepath
-        #     if os.path.basename(filepath):
-        #         filepath = bpy.path.ensure_ext(
-        #             os.path.splitext(filepath)[0],
-        #             self.filename_ext
-        #             if check_extension
-        #             else "",
-        #         )
+        export_type = engine.io.recognize_files(self.directory, [_.name for _ in self.files])
 
-        #         if filepath != self.filepath:
-        #             self.filepath = filepath
-        #             change_ext = True
+        if (export_type != engine.io.CameraDataFileType.UNKNOWN):
+            self.ng_io_prop_as_type = str(export_type).split('.')[1]
+
+        if os.path.basename(filepath):
+            filepath = bpy.path.ensure_ext(
+                os.path.splitext(filepath)[0],
+                self.filename_ext,
+            )
+
+            if filepath != self.filepath:
+                self.filepath = filepath
+                change_ext = True
 
         return change_ext
 
@@ -226,6 +244,14 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
         print(self.filepath)
         print(self.directory)
         print(self.ng_io_prop_as_type)
+
+        num_succeeded = engine.io.export_camera_data(
+            self.ng_io_prop_as_type,
+            self.directory,
+            self.filename,
+            list(context.scene.cpp.used_camera_objects)
+        )
+
         return {'FINISHED'}
 
 
