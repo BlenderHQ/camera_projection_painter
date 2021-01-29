@@ -41,7 +41,7 @@ class NG_OT_ng_prop_info(bpy.types.Operator):
         return {'CANCELLED'}
 
 
-def get_double_pointer_property(name: str, indices=(-1, -1), **kwargs):
+def get_double_pointer_property(name: str, index=-1, indices=(-1, -1), **kwargs):
     """Generate and register dynamic property type which contains float, double as string and exact double as
     string representation of floating point value. "Exact" value means imported 16 digits value from third-party
     software.
@@ -53,6 +53,7 @@ def get_double_pointer_property(name: str, indices=(-1, -1), **kwargs):
 
     Args:
         name (str): Regular property name.
+        index (int): Optional index [i] for vector element values.
         indices (tuple): Optional indices [i, j] for matrix element values.
         **kwargs: Keyword arguments should be the same as for `bpy.props.FloatProperty`.
     Returns:
@@ -198,11 +199,19 @@ def get_double_pointer_property(name: str, indices=(-1, -1), **kwargs):
         ),
     }
 
-    if (indices[0] != -1 and indices[1] != -1):
+    if indices[0] != -1 and indices[1] != -1:
+        if index != -1:
+            raise AttributeError("Only one of optional arguments is possible")
+
         annotations_dict["indices"] = bpy.props.IntVectorProperty(
             default=indices,
             size=2,
-            options={'HIDDEN', 'SKIP_SAVE'}
+            options={'HIDDEN', 'SKIP_SAVE'},
+        )
+    elif index != -1:
+        annotations_dict["index"] = bpy.props.IntProperty(
+            default=index,
+            options={'HIDDEN', 'SKIP_SAVE'},
         )
 
     # Create dynamic class to store property.
