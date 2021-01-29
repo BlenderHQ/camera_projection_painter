@@ -43,18 +43,15 @@ def _rotation_matrix_elem_update(self, _context):
 
 
 for i in range(3):
-    name = _get_location_vector_elem_name_by_index(i)
-    _object_location_vector_prop_dict[name] = ng_prop.get_double_pointer_property(
-        name=name,
+    _object_location_vector_prop_dict[_get_location_vector_elem_name_by_index(i)] = ng_prop.get_double_pointer_property(
         index=i,
         update=_location_vector_elem_update,
         options={'HIDDEN'}
     )
 
     for j in range(3):
-        name = _get_rotation_matrix_elem_name_by_indices(i, j)
-        _object_rotation_matrix_prop_dict[name] = ng_prop.get_double_pointer_property(
-            name=name,
+        _object_rotation_matrix_prop_dict[
+            _get_rotation_matrix_elem_name_by_indices(i, j)] = ng_prop.get_double_pointer_property(
             indices=(i, j),
             update=_rotation_matrix_elem_update,
             options={'HIDDEN'}
