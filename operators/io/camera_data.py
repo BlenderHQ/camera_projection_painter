@@ -11,7 +11,12 @@ if "bpy" in locals():
 
 import bpy
 import bpy_extras
-from bpy.props import BoolProperty, FloatProperty, StringProperty, EnumProperty, CollectionProperty
+from bpy.props import (
+    BoolProperty,
+    FloatProperty,
+    StringProperty,
+    CollectionProperty
+)
 
 import os
 
@@ -20,6 +25,7 @@ import os
 class CPP_OT_import_camera_data(bpy.types.Operator):
     bl_idname = "cpp.import_camera_data"
     bl_label = "Import Camera Data"
+    bl_description = "Import camera data from third-party software"
     bl_options = {'REGISTER', 'UNDO'}
 
     __slots__ = ()
@@ -118,6 +124,7 @@ class CPP_OT_import_camera_data(bpy.types.Operator):
 class CPP_OT_export_camera_data(bpy.types.Operator):
     bl_idname = "cpp.export_camera_data"
     bl_label = "Export Camera Data"
+    bl_description = "Export used cameras data"
     bl_options = {'REGISTER', 'UNDO'}
 
     __slots__ = ()
@@ -126,21 +133,24 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
         name="File Name",
         description="Output filename",
         maxlen=1024,
-        subtype='FILE_NAME'
+        subtype='FILE_NAME',
+        options={'HIDDEN'}
     )
 
     filepath: StringProperty(
         name="File Path",
         description="Output filepath",
         maxlen=1024,
-        subtype='FILE_PATH'
+        subtype='FILE_PATH',
+        options={'HIDDEN'}
     )
 
     directory: StringProperty(
         name="Directory",
         description="Output directory",
         maxlen=1024,
-        subtype='DIR_PATH'
+        subtype='DIR_PATH',
+        options={'HIDDEN'}
     )
 
     filter_glob: StringProperty(
@@ -166,11 +176,19 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
         ui_description="Export type for third - party software"
     )
 
+    open_dir_at_succeeded: BoolProperty(
+        name="Open Directory",
+        default=False,
+        description="Open output directory after export camera data",
+        options={'HIDDEN'}
+    )
+
     scene_scale: FloatProperty(
         name="Scene Scale",
         default=1.0,
         min=0.01,
-        max=10000
+        max=10000.0,
+        options={'HIDDEN'}
     )
 
     @classmethod
@@ -185,7 +203,6 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
         layout.use_property_decorate = False
 
         col = layout.column(align=True)
-
         num_cameras = len(list(context.scene.cpp.used_camera_objects))
         ui.common.draw_wrapped_text(
             context,
@@ -194,17 +211,24 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
             icon_id=icons.get_icon_id("export")
         )
 
-        col.prop(self, "ng_io_prop_as_type", text="")
+        layout.prop(self, "ng_io_prop_as_type", text="")
+
+        layout.prop(self, "open_dir_at_succeeded")
 
     @property
-    def filename_ext(self):
+    def filename_ext(self) -> str:
         return engine.io.get_file_extension_for_camera_data_file_type(self.ng_io_prop_as_type)
 
-    def invoke(self, context, event):
-        addon_preferences = context.preferences.addons[addon_pkg].preferences
+    @property
+    def files_word(self) -> str:
+        return "file" if len(self.files) == 1 else "files"
 
+    def invoke(self, context, _event):
+        # Set export file type option to preferences defaults
+        addon_preferences = context.preferences.addons[addon_pkg].preferences
         self.ng_io_prop_as_type = addon_preferences.ng_io_prop_as_type
 
+        # Create default filepath
         if not self.filepath:
             blend_filepath = context.blend_data.filepath
             if not blend_filepath:
@@ -218,16 +242,19 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
         wm.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
-    def check(self, context):
+    def check(self, _context):
         change_ext = False
+        change_export_type = False
 
-        filepath = self.filepath
-
+        # Automatically recognize existing file type for overwrite
         export_type = engine.io.recognize_files(self.directory, [_.name for _ in self.files])
 
-        if (export_type != engine.io.CameraDataFileType.UNKNOWN):
+        if export_type != engine.io.CameraDataFileType.UNKNOWN:
             self.ng_io_prop_as_type = str(export_type).split('.')[1]
+            change_export_type = True
 
+        # Change file extension with respect to camera data file type
+        filepath = self.filepath
         if os.path.basename(filepath):
             filepath = bpy.path.ensure_ext(
                 os.path.splitext(filepath)[0],
@@ -238,13 +265,9 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
                 self.filepath = filepath
                 change_ext = True
 
-        return change_ext
+        return change_ext or change_export_type
 
     def execute(self, context):
-        print(self.filepath)
-        print(self.directory)
-        print(self.ng_io_prop_as_type)
-
         num_succeeded = engine.io.export_camera_data(
             self.ng_io_prop_as_type,
             self.directory,
@@ -252,7 +275,13 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
             list(context.scene.cpp.used_camera_objects)
         )
 
-        return {'FINISHED'}
+        if num_succeeded:
+            self.report(type={'INFO'}, message=f"Exported {num_succeeded} camera data {self.files_word}")
+            if self.open_dir_at_succeeded:
+                bpy.ops.wm.path_open('EXEC_DEFAULT', filepath=self.directory)
+            return {'FINISHED'}
+        else:
+            self.report(type={'WARNING'}, message=f"Unable to export camera data {self.files_word}")
 
 
 class CPP_PT_io_camera_data_transform(bpy.types.Panel):

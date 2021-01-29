@@ -112,8 +112,8 @@ def get_readable_type_item_name(file_type: engine.io.CameraDataFileType) -> tupl
 def get_ng_io_prop_as_type(ui_name: str, ui_description: str):
     return bpy.props.EnumProperty(
         # Items can be sorted w.r.t third-party software:
-        # items=reversed(sorted(_ng_io_prop_as_type_items, key=lambda item: item[3])),
-        items=_ng_io_prop_as_type_items,
+        items=reversed(sorted(_ng_io_prop_as_type_items, key=lambda item: item[3])),
+        # items=_ng_io_prop_as_type_items,
         default=1,  # 'UNKNOWN' item skipped.
         name=ui_name,
         description=ui_description,
