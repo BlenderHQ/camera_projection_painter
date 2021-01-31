@@ -41,9 +41,6 @@ class NG_OT_ng_prop_info(bpy.types.Operator):
         return {'CANCELLED'}
 
 
-PROPERTY_GROUP_CACHE = {}
-
-
 def get_double_pointer_property(name="", index=-1, indices=(-1, -1), **kwargs):
     """Generate and register dynamic property type which contains float, double as string and exact double as
     string representation of floating point value. "Exact" value means imported 16 digits value from third-party
@@ -62,10 +59,6 @@ def get_double_pointer_property(name="", index=-1, indices=(-1, -1), **kwargs):
     Returns:
         bpy.props.PointerProperty: Registered property.
     """
-
-    if name in PROPERTY_GROUP_CACHE:
-        return bpy.props.PointerProperty(type=PROPERTY_GROUP_CACHE[name])
-
     # Set display precision to IEEE-754 standard.
     kwargs["precision"] = engine.intern.FLT_DIG
 
@@ -209,6 +202,8 @@ def get_double_pointer_property(name="", index=-1, indices=(-1, -1), **kwargs):
         if index != -1:
             raise AttributeError("Only one of optional arguments is possible")
 
+            print(indices)
+
         annotations_dict["indices"] = bpy.props.IntVectorProperty(
             default=indices,
             size=2,
@@ -238,5 +233,4 @@ def get_double_pointer_property(name="", index=-1, indices=(-1, -1), **kwargs):
     _reg(double_property_group)
     _reg(NG_OT_ng_prop_info)
 
-    PROPERTY_GROUP_CACHE[name] = double_property_group
     return bpy.props.PointerProperty(type=double_property_group)

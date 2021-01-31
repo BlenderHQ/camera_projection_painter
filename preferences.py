@@ -177,9 +177,11 @@ class PreferencesProperties:
     # \ UI Tags
 
     # Defaults /
-    ng_io_prop_as_type: engine.io_properties.get_ng_io_prop_as_type(
-        ui_name="IO Cameras File Type",
-        ui_description="Default IO file type for cameras data"
+    ng_io_prop_as_type: EnumProperty(
+        name="IO Cameras File Type",
+        description="Default IO file type for cameras data files",
+        items=engine.io_properties.ng_io_prop_as_type_items,
+        default=1
     )
 
     new_texture_size: IntVectorProperty(

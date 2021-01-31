@@ -15,6 +15,7 @@ from bpy.props import (
     BoolProperty,
     FloatProperty,
     StringProperty,
+    EnumProperty,
     CollectionProperty
 )
 
@@ -26,7 +27,7 @@ class CPP_OT_import_camera_data(bpy.types.Operator):
     bl_idname = "cpp.import_camera_data"
     bl_label = "Import Camera Data"
     bl_description = "Import camera data from third-party software"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'UNDO', 'PRESET'}
 
     __slots__ = ()
 
@@ -111,7 +112,11 @@ class CPP_OT_import_camera_data(bpy.types.Operator):
             ui.common.draw_wrapped_text(context, col, text=f"\"{readable_name}\"", icon_id=soft_icon_id)
 
     def execute(self, context):
-        num_succeeded = engine.io.import_camera_data(self.directory, [_.name for _ in self.files])
+        num_succeeded = engine.io.import_camera_data(
+            self.directory,
+            [_.name for _ in self.files],
+            self.scene_scale
+        )
         if num_succeeded:
             self.report(type={'INFO'}, message=f"Imported {num_succeeded} {self.files_word}")
         else:
@@ -125,7 +130,7 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
     bl_idname = "cpp.export_camera_data"
     bl_label = "Export Camera Data"
     bl_description = "Export used cameras data"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'PRESET'}
 
     __slots__ = ()
 
@@ -171,24 +176,24 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
         options={'HIDDEN'}
     )
 
-    ng_io_prop_as_type: engine.io_properties.get_ng_io_prop_as_type(
-        ui_name="Export as",
-        ui_description="Export type for third - party software"
+    ng_io_prop_as_type: EnumProperty(
+        name="Export as",
+        description="Export type for third - party software",
+        items=engine.io_properties.ng_io_prop_as_type_items,
+        default=1
     )
 
     open_dir_at_succeeded: BoolProperty(
         name="Open Directory",
-        default=False,
-        description="Open output directory after export camera data",
-        options={'HIDDEN'}
+        default=True,
+        description="Open output directory after export camera data"
     )
 
     scene_scale: FloatProperty(
         name="Scene Scale",
         default=1.0,
         min=0.01,
-        max=10000.0,
-        options={'HIDDEN'}
+        max=10000.0
     )
 
     @classmethod
@@ -272,7 +277,8 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
             self.ng_io_prop_as_type,
             self.directory,
             self.filename,
-            list(context.scene.cpp.used_camera_objects)
+            list(context.scene.cpp.used_camera_objects),
+            self.scene_scale
         )
 
         if num_succeeded:
