@@ -180,7 +180,7 @@ class PreferencesProperties:
     ng_io_prop_as_type: EnumProperty(
         name="IO Cameras File Type",
         description="Default IO file type for cameras data files",
-        items=engine.io_properties.ng_io_prop_as_type_items,
+        items=engine.camera_data_io_properties.ng_io_prop_as_type_items,
         default=1
     )
 

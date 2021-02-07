@@ -35,6 +35,9 @@ def draw_reality_capture_calibration(layout: bpy.types.UILayout, camera: bpy.typ
 
 def draw_reality_capture_distortion(layout: bpy.types.UILayout, camera: bpy.types.Camera) -> None:
     layout.prop(camera.cpp, "distortion_model")
+    layout.prop(camera.cpp, "rc_distortion_model")
+
+    #print((camera.cpp.k1))
 
     if camera.cpp.distortion_model == 'BROWN':
         col = layout.column(align=True)

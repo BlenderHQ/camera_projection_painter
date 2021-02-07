@@ -16,18 +16,32 @@
 if "bpy" in locals():
     import importlib
 
+    # Set debug info printing to true in case of package reloading
+    intern.set_debug_info(True)
+
     importlib.reload(ng_prop)
-    importlib.reload(io_properties)
-    importlib.reload(object_transform_properties)
-    importlib.reload(lens_distortion_properties)
+
+    if WITH_NG_IO:
+        importlib.reload(camera_data_io_properties)
+
+    if WITH_NG_LD_ANY:
+        importlib.reload(camera_data_extrinsics_properties)
+
+    importlib.reload(camera_data_intrinsics_properties)
 
 try:
     import bpy
 except ImportError as err:
-    raise ImportError("This python module should be imported only inside Blender.")
+    raise ImportError("This module should be imported only from inside Blender.")
+
+from ._engine import *
 
 from . import ng_prop
-from . import io_properties
-from . import lens_distortion_properties
-from . import object_transform_properties
-from ._engine import *
+
+if WITH_NG_IO:
+    from . import camera_data_io_properties
+
+if WITH_NG_LD_ANY:
+    from . import camera_data_intrinsics_properties
+
+from . import camera_data_extrinsics_properties

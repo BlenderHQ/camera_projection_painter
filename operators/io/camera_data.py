@@ -39,7 +39,7 @@ class CPP_OT_import_camera_data(bpy.types.Operator):
     )
 
     filter_glob: StringProperty(
-        default=engine.io_properties.get_all_items_ext_filter_glob(),
+        default=engine.camera_data_io_properties.get_all_items_ext_filter_glob(),
         options={'HIDDEN'},
         maxlen=255
     )
@@ -108,7 +108,7 @@ class CPP_OT_import_camera_data(bpy.types.Operator):
         ui.common.draw_wrapped_text(context, col, text=info_text, icon_id=info_icon_id)
 
         if import_type != engine.io.CameraDataFileType.UNKNOWN:
-            readable_name, soft_icon_id = engine.io_properties.get_readable_type_item_name(import_type)
+            readable_name, soft_icon_id = engine.camera_data_io_properties.get_readable_type_item_name(import_type)
             ui.common.draw_wrapped_text(context, col, text=f"\"{readable_name}\"", icon_id=soft_icon_id)
 
     def execute(self, context):
@@ -159,7 +159,7 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
     )
 
     filter_glob: StringProperty(
-        default=engine.io_properties.get_all_items_ext_filter_glob(),
+        default=engine.camera_data_io_properties.get_all_items_ext_filter_glob(),
         options={'HIDDEN'},
         maxlen=255
     )
@@ -179,7 +179,7 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
     ng_io_prop_as_type: EnumProperty(
         name="Export as",
         description="Export type for third - party software",
-        items=engine.io_properties.ng_io_prop_as_type_items,
+        items=engine.camera_data_io_properties.ng_io_prop_as_type_items,
         default=1
     )
 

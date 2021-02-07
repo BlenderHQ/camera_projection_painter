@@ -24,7 +24,7 @@ class BindImageHistoryItem(bpy.types.PropertyGroup):
     )
 
 
-@engine.lens_distortion_properties.camera_calibration_helper()
+@engine.camera_data_intrinsics_properties.camera_calibration_helper()
 class CameraProperties(bpy.types.PropertyGroup):
     """Serves for storing the properties associated with the data of each individual camera,
     the main here is the image binded to the camera.
