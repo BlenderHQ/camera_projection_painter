@@ -1,5 +1,6 @@
 from . import common
 from .. import __package__ as addon_pkg
+from .. import engine
 
 if "bpy" in locals():
     import importlib
@@ -10,51 +11,68 @@ import bpy
 
 # ------------------------ REALITY_CAPTURE ------------------------ #
 def draw_reality_capture_calibration(layout: bpy.types.UILayout, camera: bpy.types.Camera) -> None:
+    camera_cpp = getattr(camera, engine.MODULE_ATTR)
+
+    layout.prop(camera_cpp, engine.types.ATTR_RC_POSE_PRIOR)
+    layout.prop(camera_cpp, engine.types.ATTR_RC_CALIBRATION_PRIOR)
+    layout.prop(camera_cpp, engine.types.ATTR_RC_COORDINATES)
+    layout.prop(camera_cpp, engine.types.ATTR_RC_CALIBRATION_GROUP)
+    layout.prop(camera_cpp, engine.types.ATTR_RC_DISTORTION_GROUP)
+    layout.prop(camera_cpp, engine.types.ATTR_RC_IN_TEXTURING)
+    layout.prop(camera_cpp, engine.types.ATTR_RC_IN_MESHING)
+
     layout.prop(camera, "type")
 
     if camera.type == 'PERSP':
-        camera.cpp.focal_length.draw(layout)
+        getattr(camera_cpp, engine.types.ATTR_FOCAL_LENGTH).draw(layout)
 
     elif camera.type == 'ORTHO':
-        camera.cpp.ortho_scale.draw(layout)
+        getattr(camera_cpp, engine.types.ATTR_ORTHO_SCALE).draw(layout)
 
     elif camera.type == 'PANO':
-        camera.cpp.focal_length.draw(layout)
+        getattr(camera_cpp, engine.types.ATTR_FOCAL_LENGTH).draw(layout)
 
     # Reality Capture sensor width is 36.0f as constant w.r.t 35mm camera format.
     # So here it is not displayed.
 
     if camera.type == 'PERSP':
         col = layout.column(align=True)
-        camera.cpp.principal_point_x.draw(col, text="Principal X")
-        camera.cpp.principal_point_y.draw(col, text="Y")
+        getattr(camera_cpp, engine.types.ATTR_PRINCIPAL_POINT_X).draw(col, text="Principal X")
+        getattr(camera_cpp, engine.types.ATTR_PRINCIPAL_POINT_Y).draw(col, text="Y")
 
-        camera.cpp.skew.draw(layout)
-        camera.cpp.pixel_aspect_ratio.draw(layout)
+        getattr(camera_cpp, engine.types.ATTR_SKEW).draw(layout)
+        getattr(camera_cpp, engine.types.ATTR_PIXEL_ASPECT_RATIO).draw(layout)
 
 
 def draw_reality_capture_distortion(layout: bpy.types.UILayout, camera: bpy.types.Camera) -> None:
-    layout.prop(camera.cpp, "distortion_model")
-    layout.prop(camera.cpp, "rc_distortion_model")
+    camera_cpp = getattr(camera, engine.MODULE_ATTR)
 
-    #print((camera.cpp.k1))
+    layout.prop(camera_cpp, engine.types.ATTR_RC_DISTORTION_MODEL)
 
-    if camera.cpp.distortion_model == 'BROWN':
-        col = layout.column(align=True)
-        camera.cpp.brown_k1.draw(col)
-        camera.cpp.brown_k2.draw(col)
-        camera.cpp.brown_k3.draw(col)
-        camera.cpp.brown_k4.draw(col)
-        col.separator()
-        camera.cpp.brown_p1.draw(col, text="T1")
-        camera.cpp.brown_p2.draw(col, text="T2")
+    rc_dm = engine.types.RC_DistortionModel(getattr(camera_cpp, engine.types.ATTR_RC_DISTORTION_MODEL))
 
-    elif camera.cpp.distortion_model == 'DIVISION':
-        col = layout.column(align=True)
-        camera.cpp.division_k1.draw(col)
+    col = layout.column(align=True)
+
+    if rc_dm == engine.types.RC_DistortionModel.division:
+        getattr(camera_cpp, engine.types.ATTR_DIVISION_K1).draw(col)
+
+    else:
+        getattr(camera_cpp, engine.types.ATTR_BROWN_K1).draw(col)
+        getattr(camera_cpp, engine.types.ATTR_BROWN_K2).draw(col)
+        getattr(camera_cpp, engine.types.ATTR_BROWN_K3).draw(col)
+
+        if rc_dm in (engine.types.RC_DistortionModel.brown4, engine.types.RC_DistortionModel.brown4t2):
+            getattr(camera_cpp, engine.types.ATTR_BROWN_K4).draw(col)
+
+        if rc_dm in (engine.types.RC_DistortionModel.brown3t2, engine.types.RC_DistortionModel.brown4t2):
+            col.separator()
+
+            getattr(camera_cpp, engine.types.ATTR_BROWN_P1).draw(col, text="T1")
+            getattr(camera_cpp, engine.types.ATTR_BROWN_P2).draw(col, text="T2")
+
+        # ------------------------ METASHAPE ------------------------ #
 
 
-# ------------------------ METASHAPE ------------------------ #
 def draw_metashape_calibration(layout: bpy.types.UILayout, camera: bpy.types.Camera) -> None:
     layout.prop(camera, "type")
 

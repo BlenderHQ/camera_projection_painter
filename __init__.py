@@ -119,7 +119,11 @@ def load_post_register(dummy=None):
 
 def register():
     preferences.register()
-    if sys_check.check_sys_platform() and sys_check.check_blender_version():
+    if (
+        sys_check.check_sys_platform()
+        and sys_check.check_blender_version()
+        and sys_check.check_module_configuration()
+    ):
         bpy.app.handlers.load_post.append(load_post_register)
 
 

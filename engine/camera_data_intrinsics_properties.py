@@ -1,19 +1,22 @@
+from . import _engine as engine
+
 __all__ = (
     "camera_calibration_helper",
 )
 
-from . import _engine as engine
-
-from . import ng_prop
-
-if "bpy" in locals():
-    import importlib
-
-import bpy
-
-_camera_data_intrinsics = {}
-
 if engine.WITH_NG_LD_ANY:
+
+    from . import ng_prop
+
+    if "bpy" in locals():
+        import importlib
+
+        importlib.reload(ng_prop)
+
+    import bpy
+
+    _camera_data_intrinsics = {}
+
     _polynomial_coeff = {}
     _division_coeff = {}
     _nuke_coeff = {}
@@ -149,7 +152,7 @@ if engine.WITH_NG_LD_ANY:
     )
 
     _ms_distortion_model_items.append(
-        (str(engine.types.MS_DistortionModel.NONE), "No lens distortion", "No lens distortion")
+        (str(engine.types.MS_DistortionModel.NONE), "No Lens Distortion", "No lens distortion")
     )
 
     # Extend lens distortion coefficient dictionaries with correspondence to build options:
@@ -292,14 +295,16 @@ if engine.WITH_NG_LD_ANY:
     # Lens distortion model enumerators:
 
     def _eval_dm(self, required_enum_item: engine.types.DistortionModel) -> None:
-        if engine.types.DistortionModel(getattr(self, engine.types.ATTR_DISTORTION_MODEL)) != required_enum_item:
+        if ((not self.suspend_dm_eval) and (engine.types.DistortionModel(
+                getattr(self, engine.types.ATTR_DISTORTION_MODEL)) != required_enum_item)):
+
             setattr(self, engine.types.ATTR_DISTORTION_MODEL, str(required_enum_item))
 
     def _eval_rc_dm(self, required_enum_item: engine.types.RC_DistortionModel, use_corrective_brown_dm: bool) -> None:
-        rc_dm = engine.types.RC_DistortionModel(getattr(self, engine.types.ATTR_REALITY_CAPTURE_DISTORTION_MODEL))
+        rc_dm = engine.types.RC_DistortionModel(getattr(self, engine.types.ATTR_RC_DISTORTION_MODEL))
 
         if rc_dm != required_enum_item:
-            if use_corrective_brown_dm and rc_dm in (
+            if use_corrective_brown_dm and required_enum_item in (
                 engine.types.RC_DistortionModel.brown3,
                 engine.types.RC_DistortionModel.brown4,
                 engine.types.RC_DistortionModel.brown3t2,
@@ -307,25 +312,26 @@ if engine.WITH_NG_LD_ANY:
             ):
                 required_enum_item = engine.types.RC_DistortionModel.brown3
 
-                def _is_non_zero_coeff(attr_name: str) -> bool:
+                def _is_brown_coeff_non_zero(attr_name: str) -> bool:
                     return (getattr(getattr(self, attr_name), engine.types.NG_PROP_ATTR_FLOAT_VALUE) != 0.0)
 
-                if _is_non_zero_coeff(engine.types.ATTR_BROWN_K4):
+                if _is_brown_coeff_non_zero(engine.types.ATTR_BROWN_K4):
                     required_enum_item = engine.types.RC_DistortionModel.brown4
 
-                if _is_non_zero_coeff(engine.types.ATTR_BROWN_P1) or _is_non_zero_coeff(engine.types.ATTR_BROWN_P2):
+                if (_is_brown_coeff_non_zero(engine.types.ATTR_BROWN_P1)
+                        or _is_brown_coeff_non_zero(engine.types.ATTR_BROWN_P2)):
                     if required_enum_item == engine.types.RC_DistortionModel.brown4:
                         required_enum_item = engine.types.RC_DistortionModel.brown4t2
                     else:
                         required_enum_item = engine.types.RC_DistortionModel.brown3t2
-                
-            setattr(self, engine.types.ATTR_REALITY_CAPTURE_DISTORTION_MODEL, str(required_enum_item))
+
+            setattr(self, engine.types.ATTR_RC_DISTORTION_MODEL, str(required_enum_item))
 
     def _eval_ms_dm(self, required_enum_item: engine.types.MS_DistortionModel) -> None:
-        ms_dm = engine.types.MS_DistortionModel(getattr(self, engine.types.ATTR_METASHAPE_DISTORTION_MODEL))
+        ms_dm = engine.types.MS_DistortionModel(getattr(self, engine.types.ATTR_MS_DISTORTION_MODEL))
 
         if ms_dm != required_enum_item:
-            setattr(self, engine.types.ATTR_METASHAPE_DISTORTION_MODEL, str(required_enum_item))
+            setattr(self, engine.types.ATTR_MS_DISTORTION_MODEL, str(required_enum_item))
 
     _distortion_model_kwargs = {
         "items": _internal_distortion_model_items,
@@ -335,24 +341,36 @@ if engine.WITH_NG_LD_ANY:
     }
 
     def _rc_distortion_model_update(self, _context):
-        rc_dm = engine.types.RC_DistortionModel(getattr(self, engine.types.ATTR_REALITY_CAPTURE_DISTORTION_MODEL))
+        if not self.suspend_dm_eval:
+            rc_dm = engine.types.RC_DistortionModel(getattr(self, engine.types.ATTR_RC_DISTORTION_MODEL))
 
-        if rc_dm == engine.types.RC_DistortionModel.perspective:
-            _eval_ms_dm(self, engine.types.MS_DistortionModel.NONE)
-            _eval_dm(self, engine.types.DistortionModel.NONE)
+            if rc_dm == engine.types.RC_DistortionModel.perspective:
+                _eval_dm(self, engine.types.DistortionModel.NONE)
+                self.suspend_dm_eval = True
 
-        elif rc_dm == engine.types.RC_DistortionModel.division:
-            _eval_ms_dm(self, engine.types.MS_DistortionModel.NONE)
-            _eval_dm(self, engine.types.DistortionModel.DIVISION)
+                # NOTE: Here should be other third-party software evaluations.
+                _eval_ms_dm(self, engine.types.MS_DistortionModel.NONE)
 
-        elif rc_dm in (
-            engine.types.RC_DistortionModel.brown3,
-            engine.types.RC_DistortionModel.brown4,
-            engine.types.RC_DistortionModel.brown3t2,
-            engine.types.RC_DistortionModel.brown4t2
-        ):
-            _eval_ms_dm(self, engine.types.MS_DistortionModel.BROWN)
-            _eval_dm(self, engine.types.DistortionModel.BROWN)
+            elif rc_dm == engine.types.RC_DistortionModel.division:
+                _eval_dm(self, engine.types.DistortionModel.DIVISION)
+                self.suspend_dm_eval = True
+
+                # NOTE: Here should be other third-party software evaluations.
+                _eval_ms_dm(self, engine.types.MS_DistortionModel.NONE)
+
+            elif rc_dm in (
+                engine.types.RC_DistortionModel.brown3,
+                engine.types.RC_DistortionModel.brown4,
+                engine.types.RC_DistortionModel.brown3t2,
+                engine.types.RC_DistortionModel.brown4t2
+            ):
+                _eval_dm(self, engine.types.DistortionModel.BROWN)
+                self.suspend_dm_eval = True
+
+                # NOTE: Here should be other third-party software evaluations.
+                _eval_ms_dm(self, engine.types.MS_DistortionModel.BROWN)
+
+            self.suspend_dm_eval = False
 
     _rc_distortion_model_kwargs = {
         "items": _rc_distortion_model_items,
@@ -363,15 +381,24 @@ if engine.WITH_NG_LD_ANY:
     }
 
     def _ms_distortion_model_update(self, _context):
-        dm = engine.types.MS_DistortionModel(getattr(self, engine.types.ATTR_METASHAPE_DISTORTION_MODEL))
+        if not self.suspend_dm_eval:
+            ms_dm = engine.types.MS_DistortionModel(getattr(self, engine.types.ATTR_MS_DISTORTION_MODEL))
 
-        if dm == engine.types.MS_DistortionModel.NONE:
-            _eval_rc_dm(self, engine.types.RC_DistortionModel.perspective, use_corrective_brown_dm=False)
-            _eval_dm(self, engine.types.DistortionModel.NONE)
+            if ms_dm == engine.types.MS_DistortionModel.NONE:
+                _eval_dm(self, engine.types.DistortionModel.NONE)
+                self.suspend_dm_eval = True
 
-        elif dm == engine.types.MS_DistortionModel.BROWN:
-            _eval_rc_dm(self, engine.types.RC_DistortionModel.brown3, use_corrective_brown_dm=True)
-            _eval_dm(self, engine.types.DistortionModel.BROWN)
+                # NOTE: Here should be other third-party software evaluations.
+                _eval_rc_dm(self, engine.types.RC_DistortionModel.perspective, use_corrective_brown_dm=False)
+
+            elif ms_dm == engine.types.MS_DistortionModel.BROWN:
+                _eval_dm(self, engine.types.DistortionModel.BROWN)
+                self.suspend_dm_eval = True
+
+                # NOTE: Here should be other third-party software evaluations.
+                _eval_rc_dm(self, engine.types.RC_DistortionModel.brown3, use_corrective_brown_dm=True)
+
+            self.suspend_dm_eval = False
 
     _ms_distortion_model_kwargs = {
         "items": _ms_distortion_model_items,
@@ -380,6 +407,72 @@ if engine.WITH_NG_LD_ANY:
         "description": "Lens distortion model to be used",
         "update": _ms_distortion_model_update,
     }
+
+    # Add third-party software specific properties
+    _camera_data_intrinsics.update(
+        {
+            # Reality Capture:
+
+            engine.types.ATTR_RC_POSE_PRIOR: bpy.props.EnumProperty(
+                items=[
+                    (str(engine.types.RC_Camera_PosePrior.initial), "Initial", ""),
+                    (str(engine.types.RC_Camera_PosePrior.exact), "Exact", ""),
+                    (str(engine.types.RC_Camera_PosePrior.locked), "Locked", ""),
+                ],
+                default=str(engine.types.RC_Camera_PosePrior(0)),
+                name="Pose Prior",
+                description="",
+            ),
+
+            engine.types.ATTR_RC_CALIBRATION_PRIOR: bpy.props.EnumProperty(
+                items=[
+                    (str(engine.types.RC_Camera_CalibrationPrior.initial), "Initial", ""),
+                    (str(engine.types.RC_Camera_CalibrationPrior.exact), "Exact", ""),
+                ],
+                default=str(engine.types.RC_Camera_CalibrationPrior(0)),
+                name="Calibration Prior",
+                description="",
+            ),
+
+            engine.types.ATTR_RC_COORDINATES: bpy.props.EnumProperty(
+                items=[
+                    (str(engine.types.RC_Camera_Coordinates.absolute), "Absolute", ""),
+                    (str(engine.types.RC_Camera_Coordinates.relative), "Relative", ""),
+                ],
+                default=str(engine.types.RC_Camera_Coordinates(0)),
+                name="Coordinates",
+                description="",
+            ),
+
+            engine.types.ATTR_RC_CALIBRATION_GROUP: bpy.props.IntProperty(
+                name="Calibration Group",
+                default=-1,
+                min=-1,
+                description="",
+            ),
+
+            engine.types.ATTR_RC_DISTORTION_GROUP: bpy.props.IntProperty(
+                name="Distortion Group",
+                default=-1,
+                min=-1,
+                description="",
+            ),
+
+            engine.types.ATTR_RC_IN_TEXTURING: bpy.props.BoolProperty(
+                name="In Texturing",
+                default=True,
+                description="",
+            ),
+
+            engine.types.ATTR_RC_IN_MESHING: bpy.props.BoolProperty(
+                name="In Meshing",
+                default=True,
+                description="",
+            ),
+
+
+        }
+    )
 
     # Panoramic camera type
     _pano_type_kwargs = {
@@ -515,6 +608,8 @@ if engine.WITH_NG_LD_ANY:
         "description": "Camera pixel aspect ratio correction factor"
     }
 
+    ATTR_SUSPEND_DM_EVAL = "suspend_dm_eval"
+
     # Camera calibration properties
     _camera_data_intrinsics.update(
         {
@@ -523,14 +618,17 @@ if engine.WITH_NG_LD_ANY:
                 **_distortion_model_kwargs
             ),
             # Lens distortion model enum property (Reality Capture)
-            engine.types.ATTR_REALITY_CAPTURE_DISTORTION_MODEL: bpy.props.EnumProperty(
+            engine.types.ATTR_RC_DISTORTION_MODEL: bpy.props.EnumProperty(
                 **_rc_distortion_model_kwargs
             ),
 
             # Lens distortion model enum property (Metashape)
-            engine.types.ATTR_METASHAPE_DISTORTION_MODEL: bpy.props.EnumProperty(
+            engine.types.ATTR_MS_DISTORTION_MODEL: bpy.props.EnumProperty(
                 **_ms_distortion_model_kwargs
             ),
+
+            # Utility property to allow conversion between different software distortion model enumerators
+            ATTR_SUSPEND_DM_EVAL: bpy.props.BoolProperty(options={'HIDDEN', 'SKIP_SAVE'}),
 
             # Panoramic type
             engine.types.ATTR_PANO_TYPE: bpy.props.EnumProperty(
@@ -567,21 +665,23 @@ if engine.WITH_NG_LD_ANY:
         }
     )
 
+    def _update_from_camera_data(self):
+        camera = self.id_data
 
-def _update_from_camera_data(self):
-    camera = self.id_data
-
-    for attr, value in (
-        (engine.types.ATTR_FOCAL_LENGTH, camera.lens),
-        (engine.types.ATTR_ORTHO_SCALE, camera.ortho_scale),
-        (engine.types.ATTR_SENSOR_X, camera.sensor_width),
-        (engine.types.ATTR_SENSOR_Y, camera.sensor_height),
-    ):
-        setattr(getattr(self, attr), engine.types.NG_PROP_ATTR_FLOAT_VALUE, value)
+        for attr, value in (
+            (engine.types.ATTR_FOCAL_LENGTH, camera.lens),
+            (engine.types.ATTR_ORTHO_SCALE, camera.ortho_scale),
+            (engine.types.ATTR_SENSOR_X, camera.sensor_width),
+            (engine.types.ATTR_SENSOR_Y, camera.sensor_height),
+        ):
+            setattr(getattr(self, attr), engine.types.NG_PROP_ATTR_FLOAT_VALUE, value)
 
 
 def camera_calibration_helper():
-    """Class decorator function. Updates class annotations by double precision values relative to camera data.
+    """
+    Class decorator function.
+    Updates class annotations by double precision floating point and enumeration properties relative to camera
+    intrinsics.
     """
     if not engine.WITH_NG_LD_ANY:
         raise AssertionError(

@@ -1,4 +1,4 @@
-from typing import Iterator
+from .. import engine
 
 import bpy
 from bpy.types import PropertyGroup
@@ -10,6 +10,8 @@ from bpy.props import (
     StringProperty,
     PointerProperty
 )
+
+from typing import Iterator
 
 
 class SceneProperties(PropertyGroup):
@@ -36,13 +38,6 @@ class SceneProperties(PropertyGroup):
         """
         return (ob for ob in self.id_data.objects if ob.type == 'CAMERA')
 
-    def update_lens_distortions_from_camera_objects(self):
-        for camera_ob in self.camera_objects:
-            camera_ob.cpp.update_location_vector_from_object()
-            camera_ob.cpp.update_rotation_matrix_from_object()
-            camera = camera_ob.data
-            camera.cpp.update_from_camera_data()
-
     @property
     def has_used_camera_objects(self) -> bool:
         """
@@ -60,6 +55,35 @@ class SceneProperties(PropertyGroup):
         @return: generator
         """
         return (ob for ob in self.camera_objects if ob.cpp.used)
+
+    @property
+    def io_valid_objects(self) -> Iterator[bpy.types.Object]:
+        """Generator of sequence of camera objects marked as used which has binded images and binded image name
+        is correspondent to camera name.
+
+        Returns:
+            generator: Generator of camera object sequence.
+
+        Yields:
+            Iterator[bpy.types.Object]: Camera objects.
+        """
+        return (ob for ob in self.used_camera_objects if engine.io.is_camera_binded_image_name_match(ob))
+
+    @property
+    def has_io_valid_objects(self) -> bool:
+        """Positive if scene has camera objects marked as used which has binded images and binded image name
+        is correspondent to camera name.
+
+        Returns:
+            bool: Positive mean that required camera objects exists.
+        """
+        for _ in self.io_valid_objects:
+            return True
+        return False
+
+    def update_ng_prop_for_io_valid_objects(self):
+        for ob in (self.io_valid_objects):
+            ob.cpp.update_ng_prop()
 
     @property
     def has_camera_objects_selected(self) -> bool:
@@ -96,20 +120,6 @@ class SceneProperties(PropertyGroup):
         for camera_ob in self.camera_objects:
             state = camera_ob in context.visible_objects
             camera_ob.cpp.used = state
-
-    def update_used_cameras_sensors(self) -> None:
-        """
-        Update `sensor_fit` for each initial visible camera in the scene
-        """
-        for camera_ob in self.used_camera_objects:
-            camera = camera_ob.data
-            image = camera.cpp.image
-            if image and image.cpp.valid:
-                width, height = image.cpp.static_size
-                if width > height:
-                    camera.sensor_fit = 'VERTICAL'
-                else:
-                    camera.sensor_fit = 'HORIZONTAL'
 
     # Update methods
     def _get_camera_index(self):

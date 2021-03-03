@@ -21,6 +21,8 @@ from bpy.props import (
 
 import os
 
+BINDED_IMAGE_FILENAME_TEXT = "[Binded Image File Name]"
+
 
 @bpy_extras.io_utils.orientation_helper(axis_forward='-Z', axis_up='Y')
 class CPP_OT_import_camera_data(bpy.types.Operator):
@@ -112,17 +114,19 @@ class CPP_OT_import_camera_data(bpy.types.Operator):
             ui.common.draw_wrapped_text(context, col, text=f"\"{readable_name}\"", icon_id=soft_icon_id)
 
     def execute(self, context):
-        num_succeeded = engine.io.import_camera_data(
-            self.directory,
-            [_.name for _ in self.files],
-            self.scene_scale
-        )
+        file_names = [_.name for _ in self.files]
+
+        data_type = engine.io.recognize_files(self.directory, file_names)
+        num_succeeded = engine.io.import_camera_data(data_type, self.directory, file_names)
+
         if num_succeeded:
             self.report(type={'INFO'}, message=f"Imported {num_succeeded} {self.files_word}")
+            self.cancel(context)
+            return {'FINISHED'}
         else:
             self.report(type={'WARNING'}, message=f"Unable to import {self.files_word}")
-        self.cancel(context)
-        return {'FINISHED'}
+            self.cancel(context)
+            return {'CANCELLED'}
 
 
 @bpy_extras.io_utils.orientation_helper(axis_forward='-Z', axis_up='Y')
@@ -198,8 +202,7 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        scene = context.scene
-        return scene.cpp.has_used_camera_objects
+        return context.scene.cpp.has_io_valid_objects
 
     def draw(self, context):
         layout = self.layout
@@ -208,11 +211,16 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
         layout.use_property_decorate = False
 
         col = layout.column(align=True)
-        num_cameras = len(list(context.scene.cpp.used_camera_objects))
+        num_cameras = len(list(context.scene.cpp.io_valid_objects))
+
+        cameras_word = "camera"
+        if num_cameras > 1:
+            cameras_word = "cameras"
+
         ui.common.draw_wrapped_text(
             context,
             col,
-            f"Export {num_cameras} cameras as type:",
+            f"Export {num_cameras} {cameras_word} data as type:",
             icon_id=icons.get_icon_id("export")
         )
 
@@ -223,10 +231,6 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
     @property
     def filename_ext(self) -> str:
         return engine.io.get_file_extension_for_camera_data_file_type(self.ng_io_prop_as_type)
-
-    @property
-    def files_word(self) -> str:
-        return "file" if len(self.files) == 1 else "files"
 
     def invoke(self, context, _event):
         # Set export file type option to preferences defaults
@@ -248,46 +252,79 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
     def check(self, _context):
-        change_ext = False
+        change_filepath = False
         change_export_type = False
 
         # Automatically recognize existing file type for overwrite
-        export_type = engine.io.recognize_files(self.directory, [_.name for _ in self.files])
+        data_type = engine.io.CameraDataFileType(self.ng_io_prop_as_type)
 
-        if export_type != engine.io.CameraDataFileType.UNKNOWN:
-            self.ng_io_prop_as_type = str(export_type).split('.')[1]
-            change_export_type = True
+        if (os.path.exists(self.filepath)):
+            data_type = engine.io.recognize_files(self.directory, [_.name for _ in self.files])
 
-        # Change file extension with respect to camera data file type
-        filepath = self.filepath
-        if os.path.basename(filepath):
-            filepath = bpy.path.ensure_ext(
-                os.path.splitext(filepath)[0],
-                self.filename_ext,
-            )
+        if data_type != engine.io.CameraDataFileType.UNKNOWN:
+            str_data_type = str(data_type)
+
+            if self.ng_io_prop_as_type != str_data_type:
+                self.ng_io_prop_as_type = str(data_type)
+                change_export_type = True
+
+        dirname = os.path.dirname(self.filepath)
+        basename = os.path.basename(self.filepath)
+
+        if basename:
+            name_noext = os.path.splitext(basename)[0]
+
+            # Modify filename with respect to camrea data file type
+            if data_type in (
+                    engine.io.CameraDataFileType.RC_IECP,
+                    engine.io.CameraDataFileType.RC_NXYZ,
+                    engine.io.CameraDataFileType.RC_NXYZHPR,
+                    engine.io.CameraDataFileType.RC_NXYZOPK,
+            ):
+                name_noext = name_noext.replace(' ', '_')
+
+            elif data_type in (
+                engine.io.CameraDataFileType.RC_METADATA_XMP,
+            ):
+                name_noext = BINDED_IMAGE_FILENAME_TEXT
+
+            # Change file extension with respect to camera data file type
+            filepath = bpy.path.ensure_ext(os.path.join(dirname, name_noext), self.filename_ext,)
 
             if filepath != self.filepath:
                 self.filepath = filepath
-                change_ext = True
+                change_filepath = True
 
-        return change_ext or change_export_type
+        return change_filepath or change_export_type
 
     def execute(self, context):
-        num_succeeded = engine.io.export_camera_data(
-            self.ng_io_prop_as_type,
-            self.directory,
-            self.filename,
-            list(context.scene.cpp.used_camera_objects),
-            self.scene_scale
-        )
+        scene = context.scene
+        camera_ob_arr = list(scene.cpp.io_valid_objects)
+
+        # Update all io-valid camera objects data `ng_prop` properties
+        scene.cpp.update_ng_prop_for_io_valid_objects()
+
+        num_succeeded = 0
+
+        if camera_ob_arr:
+            num_succeeded = engine.io.export_camera_data(self.ng_io_prop_as_type, self.filepath, camera_ob_arr)
+        else:
+            self.report(type={'WARNING'}, message="Used camera objects with binded images matched by name is missing")
+            return {'CANCELLED'}
+
+        files_word = "file"
+        if (num_succeeded > 1):
+            files_word = "files"
 
         if num_succeeded:
-            self.report(type={'INFO'}, message=f"Exported {num_succeeded} camera data {self.files_word}")
+            self.report(type={'INFO'}, message=f"Exported {num_succeeded} camera data {files_word}")
             if self.open_dir_at_succeeded:
                 bpy.ops.wm.path_open('EXEC_DEFAULT', filepath=self.directory)
             return {'FINISHED'}
+
         else:
-            self.report(type={'WARNING'}, message=f"Unable to export camera data {self.files_word}")
+            self.report(type={'WARNING'}, message=f"Unable to export camera data {files_word}")
+            return {'CANCELLED'}
 
 
 class CPP_PT_io_camera_data_transform(bpy.types.Panel):

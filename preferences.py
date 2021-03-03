@@ -149,18 +149,18 @@ class PreferencesProperties:
 
         # Update corresponding preferences defaults
         if self.preferred_workflow == 'REALITY_CAPTURE':
-            self.ng_io_prop_as_type = 'REALITY_CAPTURE_IECP'
+            self.ng_io_prop_as_type = 'RC_IECP'
 
         elif self.preferred_workflow == 'METASHAPE':
-            self.ng_io_prop_as_type = 'METASHAPE_PIDXYZOPKR'
+            self.ng_io_prop_as_type = 'MS_PIDXYZOPKR'
 
     preferred_workflow: EnumProperty(
         items=prop_preferred_workflow_items,
         default='REALITY_CAPTURE',
         name="Preferred Software Workflow",
         description="Use specific algorithms for import camera "
-                    "calibration and lens distortion parameters."
-                    " \"Setup Context\" operator will try to simplify *.fbx "
+                    "calibration and lens distortion parameters. "
+                    "\"Setup Context\" operator will try to simplify *.fbx "
                     "import stage",
         update=preferred_workflow_update
     )

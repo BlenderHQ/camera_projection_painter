@@ -79,6 +79,11 @@ class CPP_OT_listener(bpy.types.Operator):
     def modal(self, context, event):
         wm = context.window_manager
 
+        # Update possibly visible in the UI camera objects data `ng_prop` properties
+        for ob in (context.scene.camera, context.active_object):
+            if isinstance(ob, bpy.types.Object):
+                ob.cpp.update_ng_prop()
+
         if wm.cpp.suspended:
             return {'PASS_THROUGH'}
 

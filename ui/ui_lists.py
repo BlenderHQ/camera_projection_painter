@@ -1,6 +1,6 @@
-import math
-
 from ..engine import icons
+from .. import engine
+
 from .. import operators
 
 if "bpy" in locals():
@@ -11,30 +11,45 @@ if "bpy" in locals():
 import bpy
 from mathutils import Vector
 
+import math
+
 
 class DATA_UL_scene_camera_item(bpy.types.UIList):
-    IMAGE = 1 << 0
-    NONE_IMAGE = 1 << 1
-    INVALID_IMAGE = 1 << 2
+    IMAGE_NAME_MATCH = 1 << 0
+    IMAGE_NAME_DIFF = 1 << 1
+    NONE_IMAGE = 1 << 2
+    INVALID_IMAGE = 1 << 3
 
     order: bpy.props.EnumProperty(
         items=[
-            ('ALPHA', "", "Cameras in alphabetical order", 'SORTALPHA', 0),
-            ('RADIAL', "", "Cameras ordered by world direction in XY plane",
-             'ORIENTATION_VIEW', 1)
+            (
+                'ALPHA',
+                "",
+                "Cameras in alphabetical order",
+                icons.get_icon_id("alphabetical_order"),
+                0
+            ),
+            (
+                'RADIAL',
+                "",
+                "Cameras ordered by world direction in XY plane",
+                icons.get_icon_id("radial_order"),
+                1
+            )
         ],
         name="Filter Order",
         default='RADIAL'
     )
 
     filter_available: bpy.props.BoolProperty(
-        name="Only Available",
+        name="Filter Available",
         default=False,
-        description="Show only cameras with binded valid images"
+        description="Show only cameras with binded valid images matched by "
+                    "name with camera. They are available for export"
     )
 
     filter_used: bpy.props.BoolProperty(
-        name="Only Used",
+        name="Filter Used",
         default=True,
         description="Show only used cameras"
     )
@@ -49,10 +64,7 @@ class DATA_UL_scene_camera_item(bpy.types.UIList):
             row.prop(item.cpp, "used", text="")
             row.label(text=item.name)
 
-            if flt_flag & self.IMAGE:
-                row.label(text=image.name, icon_value=image.preview.icon_id)
-
-            elif flt_flag & self.NONE_IMAGE:
+            if flt_flag & self.NONE_IMAGE:
                 row.label(text="No Image", icon_value=icons.get_icon_id("info"))
 
             elif flt_flag & self.INVALID_IMAGE:
@@ -60,6 +72,14 @@ class DATA_UL_scene_camera_item(bpy.types.UIList):
                     text=image.name,
                     icon_value=icons.get_icon_id("broken_image")
                 )
+
+            else:
+                row.label(text=image.name, icon_value=image.preview.icon_id)
+
+                if flt_flag & self.IMAGE_NAME_MATCH:
+                    row.label(text="", icon_value=icons.get_icon_id("green_dot"))
+                elif flt_flag & self.IMAGE_NAME_DIFF:
+                    row.label(text="", icon_value=icons.get_icon_id("yellow_dot"))
 
         # elif self.layout_type in {'GRID'}:
             # TODO: https://developer.blender.org/T75784
@@ -71,15 +91,18 @@ class DATA_UL_scene_camera_item(bpy.types.UIList):
             if ob.type == 'CAMERA':
                 image = ob.data.cpp.image
                 if image is None:
-                    return self.bitflag_filter_item + self.NONE_IMAGE
+                    return self.bitflag_filter_item | self.NONE_IMAGE
                 elif not image.cpp.valid:
-                    return self.bitflag_filter_item + self.INVALID_IMAGE
+                    return self.bitflag_filter_item | self.INVALID_IMAGE
                 else:
-                    return self.bitflag_filter_item + self.IMAGE
+                    if engine.io.is_camera_binded_image_name_match(ob):
+                        return self.bitflag_filter_item | self.IMAGE_NAME_MATCH
+                    else:
+                        return self.bitflag_filter_item | self.IMAGE_NAME_DIFF
+
             return self.bitflag_filter_item
 
-        flt_flags = [_get_bitflag(ob) if (
-            ob.type == 'CAMERA') else True for ob in objects]
+        flt_flags = [_get_bitflag(ob) if (ob.type == 'CAMERA') else True for ob in objects]
         flt_neworder = list(range(len(objects)))
 
         helper_funcs = bpy.types.UI_UL_list
@@ -91,8 +114,7 @@ class DATA_UL_scene_camera_item(bpy.types.UIList):
                 x, y = -Vector([mat[0][2], mat[1][2]]).normalized()
                 camera_angles[ob] = math.atan2(x, y)
 
-            cameras_radial = [i[0] for i in sorted(
-                camera_angles.items(), key=lambda item: item[1], reverse=False)]
+            cameras_radial = [i[0] for i in sorted(camera_angles.items(), key=lambda item: item[1], reverse=False)]
             for i, ob in enumerate(objects):
                 if ob.type == 'CAMERA':
                     flt_flags[i] &= _get_bitflag(ob)
@@ -109,7 +131,7 @@ class DATA_UL_scene_camera_item(bpy.types.UIList):
                 if ob.type == 'CAMERA':
                     if self.filter_available:
                         image = ob.data.cpp.image
-                        if not (image and image.cpp.valid):
+                        if (not (image and image.cpp.valid)) or (not engine.io.is_camera_binded_image_name_match(ob)):
                             flt_flags[i] = True
                     if self.filter_used:
                         if not ob.cpp.used:
@@ -119,9 +141,12 @@ class DATA_UL_scene_camera_item(bpy.types.UIList):
 
     def draw_filter(self, context, layout):
         col = layout.column(align=True)
+        col.use_property_split = True
+
         col.prop(self, "filter_available")
         col.prop(self, "filter_used")
-        row = col.row(align=True)
+
+        row = layout.row(align=True)
         row.prop(self, "filter_name", text="")
         row.prop(self, "order", expand=True, emboss=True)
 
@@ -140,7 +165,6 @@ class DATA_UL_bind_history_item(bpy.types.UIList):
             row.prop(image, "name", text="", emboss=False)
         else:
             row.label(icon="ERROR")
-
 
         row.emboss = 'NONE'
         row.operator(

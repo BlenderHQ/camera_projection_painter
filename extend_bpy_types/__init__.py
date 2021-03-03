@@ -57,10 +57,9 @@ _engine_properties_items = (
 def register():
     _cls_register()
 
-    module_attr_name = engine.module_attr_name()
     for cls, pointer_type in _engine_properties_items:
-        if not hasattr(cls, module_attr_name):
-            setattr(cls, module_attr_name, PointerProperty(type=pointer_type))
+        if not hasattr(cls, engine.MODULE_ATTR):
+            setattr(cls, engine.MODULE_ATTR, PointerProperty(type=pointer_type))
 
     WindowManager.cpp_progress = CollectionProperty(type=wm.ProgressPropertyItem)
     ShaderNodeTree.active_texnode_index = node.active_texnode_index
@@ -70,10 +69,9 @@ def register():
 def unregister():
     _cls_unregister()
 
-    module_attr_name = engine.module_attr_name()
     for cls, _ in _engine_properties_items:
-        if hasattr(cls, module_attr_name):
-            delattr(cls, module_attr_name)
+        if hasattr(cls, engine.MODULE_ATTR):
+            delattr(cls, engine.MODULE_ATTR)
 
     del Camera.cpp_bind_history
     del WindowManager.cpp_progress

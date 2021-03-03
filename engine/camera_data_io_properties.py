@@ -13,61 +13,61 @@ _ng_io_prop_as_type_items = []
 _csv_camera_data_file_type_items = [
     # Reality Capture:
     (
-        'REALITY_CAPTURE_IECP',
+        'RC_IECP',
         "Internal/External camera parameters",
         "",
         icons.get_icon_id("reality_capture"),
-        int(engine.io.CameraDataFileType.REALITY_CAPTURE_IECP)
+        int(engine.io.CameraDataFileType.RC_IECP)
     ),
     (
-        'REALITY_CAPTURE_NXYZ',
+        'RC_NXYZ',
         "Comma-separated Name, X, Y, Z",
         "",
         icons.get_icon_id("reality_capture"),
-        int(engine.io.CameraDataFileType.REALITY_CAPTURE_NXYZ)
+        int(engine.io.CameraDataFileType.RC_NXYZ)
     ),
     (
-        'REALITY_CAPTURE_NXYZHPR',
+        'RC_NXYZHPR',
         "Comma-separated Name, X, Y, Z, Heading, Pitch, Roll",
         "",
         icons.get_icon_id("reality_capture"),
-        int(engine.io.CameraDataFileType.REALITY_CAPTURE_NXYZHPR)
+        int(engine.io.CameraDataFileType.RC_NXYZHPR)
     ),
     (
-        'REALITY_CAPTURE_NXYZOPK',
+        'RC_NXYZOPK',
         "Comma-separated Name, X, Y, Z, Omega, Phi, Kappa",
         "",
         icons.get_icon_id("reality_capture"),
-        int(engine.io.CameraDataFileType.REALITY_CAPTURE_NXYZOPK)
+        int(engine.io.CameraDataFileType.RC_NXYZOPK)
     ),
 
     # Metashape:
     (
-        'METASHAPE_PIDXYZOPKR',
+        'MS_PIDXYZOPKR',
         "Omega Phi Kappa",
         "",
         icons.get_icon_id("metashape"),
-        int(engine.io.CameraDataFileType.METASHAPE_PIDXYZOPKR)
+        int(engine.io.CameraDataFileType.MS_PIDXYZOPKR)
     ),
 ]
 
 _xml_camera_data_file_type_items = [
     # Reality Capture:
     (
-        'REALITY_CAPTURE_METADATA_XMP',
+        'RC_METADATA_XMP',
         "Metadata (XMP)",
         "",
         icons.get_icon_id("reality_capture"),
-        int(engine.io.CameraDataFileType.REALITY_CAPTURE_METADATA_XMP)
+        int(engine.io.CameraDataFileType.RC_METADATA_XMP)
     ),
 
     # Metashape:
     (
-        'METASHAPE_AGISOFT_XML',
+        'MS_AGISOFT_XML',
         "Agisoft XML",
         "",
         icons.get_icon_id("metashape"),
-        int(engine.io.CameraDataFileType.METASHAPE_AGISOFT_XML)
+        int(engine.io.CameraDataFileType.MS_AGISOFT_XML)
     ),
 ]
 

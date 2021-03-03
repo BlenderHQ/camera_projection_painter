@@ -1,4 +1,5 @@
 from .engine import icons
+from . import engine
 
 import bpy
 import sys
@@ -38,6 +39,29 @@ def check_sys_platform() -> bool:
     return sys.platform in SUPPORTED_PLATFORMS
 
 
+def check_module_configuration() -> bool:
+    """Check C++ module attribute names.
+
+    Returns:
+        bool: True if engine.MODULE_ATTR is 'cpp' and has all required build flags.
+    """
+    return (
+        engine.MODULE_ATTR == "cpp"
+
+        and engine.WITH_NG_LD_DIVISION
+        and engine.WITH_NG_LD_BROWN
+
+        and engine.WITH_NG_IO
+        and engine.WITH_NG_IO_BIND_IMAGES
+        and engine.WITH_NG_IO_CSV
+        and engine.WITH_NG_IO_XML
+
+        and engine.WITH_NG_IMAGES
+        and engine.WITH_NG_SHADERS
+        and engine.WITH_NG_ICONS
+    )
+
+
 def draw_check_supported(layout: bpy.types.UILayout) -> bool:
     """Draw information about system platform and Blender version.
 
@@ -47,14 +71,15 @@ def draw_check_supported(layout: bpy.types.UILayout) -> bool:
     Returns:
         bool: True if all checked sucessfull.
     """
-    res = True
+    result = True
     if not check_blender_version():
         sbver = SUPPORTED_BLENDER_VERSION
         sbver_str = f"{sbver[0]}.{sbver[1]}.{sbver[2]}"
         layout.label(
             text=f"Minimum required Blender version is {sbver_str}",
             icon_value=icons.get_icon_id("unsupported_bv"))
-        res = False
+
+        result = False
 
     if not check_sys_platform():
         sp = readable_platforms[sys.platform]
@@ -75,5 +100,12 @@ def draw_check_supported(layout: bpy.types.UILayout) -> bool:
             icon_value=icons.get_icon_id("unsupported_os")
         )
 
-        res = False
-    return res
+        result = False
+
+    if not check_module_configuration():
+        layout.label(
+            text="Internal error: C++ module compiled with wrong flags.",
+            icon=icons.get_icon_id("warning")
+        )
+
+    return result
