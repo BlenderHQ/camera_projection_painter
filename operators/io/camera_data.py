@@ -11,20 +11,14 @@ if "bpy" in locals():
 
 import bpy
 import bpy_extras
-from bpy.props import (
-    BoolProperty,
-    FloatProperty,
-    StringProperty,
-    EnumProperty,
-    CollectionProperty
-)
+import mathutils
 
 import os
 
 BINDED_IMAGE_FILENAME_TEXT = "[Binded Image File Name]"
 
 
-@bpy_extras.io_utils.orientation_helper(axis_forward='-Z', axis_up='Y')
+@bpy_extras.io_utils.orientation_helper(axis_forward='Y', axis_up='Z')
 class CPP_OT_import_camera_data(bpy.types.Operator):
     bl_idname = "cpp.import_camera_data"
     bl_label = "Import Camera Data"
@@ -33,25 +27,25 @@ class CPP_OT_import_camera_data(bpy.types.Operator):
 
     __slots__ = ()
 
-    directory: StringProperty(
+    directory: bpy.props.StringProperty(
         name="Directory",
         description="Input directory",
         maxlen=1024,
         subtype='DIR_PATH'
     )
 
-    filter_glob: StringProperty(
+    filter_glob: bpy.props.StringProperty(
         default=engine.camera_data_io_properties.get_all_items_ext_filter_glob(),
         options={'HIDDEN'},
         maxlen=255
     )
 
-    files: CollectionProperty(
+    files: bpy.props.CollectionProperty(
         type=bpy.types.OperatorFileListElement,
         options={'HIDDEN', 'SKIP_SAVE'},
     )
 
-    scene_scale: FloatProperty(
+    scene_scale: bpy.props.FloatProperty(
         name="Scene Scale",
         default=1.0,
         min=0.01,
@@ -129,7 +123,7 @@ class CPP_OT_import_camera_data(bpy.types.Operator):
             return {'CANCELLED'}
 
 
-@bpy_extras.io_utils.orientation_helper(axis_forward='-Z', axis_up='Y')
+@bpy_extras.io_utils.orientation_helper(axis_forward='Y', axis_up='Z')
 class CPP_OT_export_camera_data(bpy.types.Operator):
     bl_idname = "cpp.export_camera_data"
     bl_label = "Export Camera Data"
@@ -138,7 +132,7 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
 
     __slots__ = ()
 
-    filename: StringProperty(
+    filename: bpy.props.StringProperty(
         name="File Name",
         description="Output filename",
         maxlen=1024,
@@ -146,7 +140,7 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
         options={'HIDDEN'}
     )
 
-    filepath: StringProperty(
+    filepath: bpy.props.StringProperty(
         name="File Path",
         description="Output filepath",
         maxlen=1024,
@@ -154,7 +148,7 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
         options={'HIDDEN'}
     )
 
-    directory: StringProperty(
+    directory: bpy.props.StringProperty(
         name="Directory",
         description="Output directory",
         maxlen=1024,
@@ -162,38 +156,38 @@ class CPP_OT_export_camera_data(bpy.types.Operator):
         options={'HIDDEN'}
     )
 
-    filter_glob: StringProperty(
+    filter_glob: bpy.props.StringProperty(
         default=engine.camera_data_io_properties.get_all_items_ext_filter_glob(),
-        options={'HIDDEN'},
-        maxlen=255
+        maxlen=255,
+        options={'HIDDEN'}
     )
 
-    files: CollectionProperty(
+    files: bpy.props.CollectionProperty(
         type=bpy.types.OperatorFileListElement,
         options={'HIDDEN', 'SKIP_SAVE'},
     )
 
-    check_existing: BoolProperty(
+    check_existing: bpy.props.BoolProperty(
         name="Check Existing",
         description="Check and warn on overwriting existing files",
         default=True,
         options={'HIDDEN'}
     )
 
-    ng_io_prop_as_type: EnumProperty(
+    ng_io_prop_as_type: bpy.props.EnumProperty(
         name="Export as",
         description="Export type for third - party software",
         items=engine.camera_data_io_properties.ng_io_prop_as_type_items,
         default=1
     )
 
-    open_dir_at_succeeded: BoolProperty(
+    open_dir_at_succeeded: bpy.props.BoolProperty(
         name="Open Directory",
         default=True,
         description="Open output directory after export camera data"
     )
 
-    scene_scale: FloatProperty(
+    scene_scale: bpy.props.FloatProperty(
         name="Scene Scale",
         default=1.0,
         min=0.01,
