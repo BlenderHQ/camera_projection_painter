@@ -1,0 +1,4 @@
+const int CAMERA_WIRES_FLAG_ACTIVE = (1 << 0);
+const int CAMERA_WIRES_FLAG_HOVER = (1 << 1);
+const int CAMERA_WIRES_FLAG_PORTRAIT = (1 << 2);
+const int CAMERA_WIRES_FLAG_LANDSCAPE = (1 << 3);
