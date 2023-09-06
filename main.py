@@ -449,10 +449,13 @@ class GPUDrawCameras(CameraPainterMain):
 				if image_index!=-1:text_x+=prv_dimensions.x+border_px
 				text_y=box_upper-line_height;cls.tt_info_text_pos=Vector((text_x,text_y))
 				if not cls.tooltip_ubo:cls.tooltip_ubo=bhqglsl.ubo.UBO(ubo_type=shaders.TooltipParams)
-				params=cls.tooltip_ubo.data;params.transform=box_x,box_y,box_sx,box_sy;params.color=wcol.inner[:];params.outline_color=*wcol.outline,_E;params.show_shaded=wcol.show_shaded;params.shade_top_bottom=wcol.shadetop/255.,wcol.shadedown/255.;params.outline_thickness=cls.LINE_THICKNESS_PX;params.roundness=wcol.roundness;cls.tooltip_ubo.update()
+				params=cls.tooltip_ubo.data
+				if len(wcol.outline)==3:color_wcol_outline=*wcol.outline,_E
+				elif len(wcol.outline)==4:color_wcol_outline=wcol.outline[:]
+				params.transform=box_x,box_y,box_sx,box_sy;params.color=wcol.inner[:];params.outline_color=color_wcol_outline;params.show_shaded=wcol.show_shaded;params.shade_top_bottom=wcol.shadetop/255.,wcol.shadedown/255.;params.outline_thickness=cls.LINE_THICKNESS_PX;params.roundness=wcol.roundness;cls.tooltip_ubo.update()
 				if image_index!=-1:
 					if not cls.prv_ubo:cls.prv_ubo=bhqglsl.ubo.UBO(ubo_type=shaders.PreviewParams)
-					params=cls.prv_ubo.data;params.transform=prv_x,prv_y,prv_dimensions.x,prv_dimensions.y;params.tile_index=image_index;params.aspect=image_props.aspect_ratio[:];params.outline_color=*wcol.outline,_E;params.outline_thickness=cls.LINE_THICKNESS_PX;params.roundness=wcol.roundness;cls.prv_ubo.update()
+					params=cls.prv_ubo.data;params.transform=prv_x,prv_y,prv_dimensions.x,prv_dimensions.y;params.tile_index=image_index;params.aspect=image_props.aspect_ratio[:];params.outline_color=color_wcol_outline;params.outline_thickness=cls.LINE_THICKNESS_PX;params.roundness=wcol.roundness;cls.prv_ubo.update()
 			cls.need_update_camera_info=_B
 	@classmethod
 	def cb_SpaceView3D_POST_PIXEL(cls):
