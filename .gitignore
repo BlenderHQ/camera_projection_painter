@@ -1,6 +1,6 @@
 !.gitkeep
 
-
+logs/
 
 __pycache__/
 *.pyc

@@ -115,7 +115,7 @@ class CheckPoint(CameraPainterMain):
 		highlight_orientation:bool=_B;highlight_border:bool=_B;highlight_border_type:int=constants.BorderType.FILL;highlight_border_color0:Vector=Vector((_C,_C,_C,_C));highlight_border_color1:Vector=Vector((_C,_C,_C,_C))
 		class image_paint:brush_size:float=_C
 	@classmethod
-	def restore(cls,_context:Context)->bool:cls.images=tuple();cls.prev_camera_has_changes=_B;cls.camera=_A;cls.cam=_A;cls.image=_A;cls.width=_C;cls.height=_C;cls.lens=_C;cls.sensor_fit='AUTO';cls.sensor=_C;cls.clip_start=_C;cls.clip_end=_C;cls.principal_x=_C;cls.principal_y=_C;cls.skew=_C;cls.aspect=_C;cls.distortion_model='';cls.k1=_C;cls.k2=_C;cls.k3=_C;cls.k4=_C;cls.p1=_C;cls.p2=_C;cls.object_matrix_world.identity();cls.camera_matrix_world.identity();cls.object_arr_has_changes=_B;cls.image_arr_has_changes=_B;cls.select_id=constants.CAMERA.SELECT.OFFSET;cls.pref.view.use_mesh_preview=_B;cls.pref.view.ui_line_width='';cls.pref.dithering_mix_factor=_C;cls.pref.cameras_transparency=_C;cls.pref.refine_previews='';cls.scene_props.highlight_orientation=_B;cls.scene_props.highlight_border=_B;cls.scene_props.highlight_border_type=constants.BorderType.FILL;cls.scene_props.highlight_border_color0=Color((_C,_C,_C));cls.scene_props.highlight_border_color1=Color((_C,_C,_C));cls.scene_props.image_paint.brush_size=_C;return _D
+	def restore(cls,_context:Context)->bool:cls.objects=tuple();cls.images=tuple();cls.prev_camera_has_changes=_B;cls.camera=_A;cls.cam=_A;cls.image=_A;cls.width=_C;cls.height=_C;cls.lens=_C;cls.sensor_fit='AUTO';cls.sensor=_C;cls.clip_start=_C;cls.clip_end=_C;cls.principal_x=_C;cls.principal_y=_C;cls.skew=_C;cls.aspect=_C;cls.distortion_model='';cls.k1=_C;cls.k2=_C;cls.k3=_C;cls.k4=_C;cls.p1=_C;cls.p2=_C;cls.object_matrix_world.identity();cls.camera_matrix_world.identity();cls.object_arr_has_changes=_B;cls.image_arr_has_changes=_B;cls.select_id=constants.CAMERA.SELECT.OFFSET;cls.pref.view.use_mesh_preview=_B;cls.pref.view.ui_line_width='';cls.pref.dithering_mix_factor=_C;cls.pref.refine_previews='';cls.pref.cameras_transparency=_C;cls.scene_props.highlight_orientation=_B;cls.scene_props.highlight_border=_B;cls.scene_props.highlight_border_type=constants.BorderType.FILL;cls.scene_props.highlight_border_color0=Color((_C,_C,_C));cls.scene_props.highlight_border_color1=Color((_C,_C,_C));cls.scene_props.image_paint.brush_size=_C;return _D
 class Workflow(CameraPainterMain):
 	__slots__=()
 	@classmethod
@@ -279,13 +279,13 @@ class EventMouse(CameraPainterMain):
 		if cls.region:return cls.position-Vector((cls.region.x,cls.region.y))
 		return cls.position
 class GPUDrawCameras(CameraPainterMain):
-	shaders:dict[str,GPUShader]=dict();batch_wires_data:_A|np.ndarray=_A;batch_wires:_A|GPUBatch=_A;select_framework:_A|bhqab.utils_gpu.FrameBufferFramework=_A;select_id:int=constants.CAMERA.SELECT.OFFSET;tt_info:str='';tt_info_text_pos:_A|Vector=_A;need_update_camera_info:bool=_B;prv_pixels:_A|np.ndarray=_A;prv_atlas_offscreen:_A|GPUOffScreen=_A;prv_image_indices:_A|np.ndarray=_A;prv_image_indices_texture:_A|GPUTexture=_A;prv_images:list[Image]=list();prv_i:int=0;prv_process_queue:list[Object]=list();prv_render_queue:list[Object]=list();prv_rendered:_A|Object=_A;LINE_THICKNESS_PX:float=_E;tooltip_ubo:_A|bhqglsl.ubo.UBO[shaders.TooltipParams]=_A;prv_ubo:_A|bhqglsl.ubo.UBO[shaders.PreviewParams]=_A;dithering_ubo:_A|bhqglsl.ubo.UBO[shaders.DitheringParams]=_A;common_ubo:_A|bhqglsl.ubo.UBO[shaders.CameraCommonParams]=_A
+	batch_wires_data:_A|np.ndarray=_A;batch_wires:_A|GPUBatch=_A;select_framework:_A|bhqab.utils_gpu.FrameBufferFramework=_A;select_id:int=constants.CAMERA.SELECT.OFFSET;tt_info:str='';tt_info_text_pos:_A|Vector=_A;need_update_camera_info:bool=_B;prv_pixels:_A|np.ndarray=_A;prv_atlas_offscreen:_A|GPUOffScreen=_A;prv_image_indices:_A|np.ndarray=_A;prv_image_indices_texture:_A|GPUTexture=_A;prv_images:list[Image]=list();prv_i:int=0;prv_process_queue:list[Object]=list();prv_render_queue:list[Object]=list();prv_rendered:_A|Object=_A;LINE_THICKNESS_PX:float=_E;tooltip_ubo:_A|bhqglsl.ubo.UBO[shaders.TooltipParams]=_A;prv_ubo:_A|bhqglsl.ubo.UBO[shaders.PreviewParams]=_A;dithering_ubo:_A|bhqglsl.ubo.UBO[shaders.DitheringParams]=_A;common_ubo:_A|bhqglsl.ubo.UBO[shaders.CameraCommonParams]=_A
 	@classmethod
 	def initialize(cls,context:Context)->bool:cls.modal_update_ubo_data(context);return cls.generate_batches(context,force=_D)and cls.update_select_framework(context)
 	@classmethod
-	def restore(cls,_context:Context)->bool:cls.batch_wires_data=_A;cls.batch_wires=_A;cls.preview_atlases_refine_framework=_A;cls.select_framework=_A;cls.select_id=constants.CAMERA.SELECT.OFFSET;cls.need_update_camera_info=_B;cls.tt_info=_A;cls.tt_info_text_pos=_A;cls.clear_preview_data();cls.tooltip_ubo=_A;cls.prv_ubo=_A;cls.dithering_ubo=_A;cls.common_ubo=_A;return _D
+	def restore(cls,_context:Context)->bool:cls.batch_wires_data=_A;cls.batch_wires=_A;cls.select_framework=_A;cls.select_id=constants.CAMERA.SELECT.OFFSET;cls.tt_info='';cls.tt_info_text_pos=_A;cls.need_update_camera_info=_B;cls.clear_preview_data();cls.tooltip_ubo=_A;cls.prv_ubo=_A;cls.dithering_ubo=_A;cls.common_ubo=_A;return _D
 	@classmethod
-	def clear_preview_data(cls):bhqab.utils_ui.progress.complete(identifier='prv');cls.prv_atlas_offscreen=_A;cls.prv_pixels=_A;cls.prv_images.clear();cls.prv_process_queue.clear();cls.prv_render_queue.clear();cls.prv_rendered=_A;cls.prv_image_indices_texture=_A;cls.prv_image_indices=_A;cls.prv_i=0
+	def clear_preview_data(cls):bhqab.utils_ui.progress.complete(identifier='prv');cls.prv_pixels=_A;cls.prv_atlas_offscreen=_A;cls.prv_image_indices=_A;cls.prv_image_indices_texture=_A;cls.prv_images.clear();cls.prv_i=0;cls.prv_process_queue.clear();cls.prv_render_queue.clear();cls.prv_rendered=_A
 	@classmethod
 	def handlers_SpaceView3D(cls)->set[object]:return{SpaceView3D.draw_handler_add(cls.cb_SpaceView3D_POST_PIXEL,tuple(),_F,'POST_PIXEL'),SpaceView3D.draw_handler_add(cls.cb_SpaceView3D_Selection,tuple(),_F,'PRE_VIEW')}
 	@staticmethod
@@ -619,7 +619,7 @@ class GPUDraw(CameraPainterMain):
 	@classmethod
 	def initialize(cls,context:Context)->bool:return cls.invoke_add_handlers()
 	@classmethod
-	def restore(cls,_context:Context)->bool:cls.remove_handlers();cls._image_texture=_A;cls.intrinsics_ubo=_A;return _D
+	def restore(cls,_context:Context)->bool:cls.remove_handlers();cls._image_texture_source=_A;cls._image_texture=_A;cls.intrinsics_ubo=_A;return _D
 	@classmethod
 	def handlers_SpaceView3D(cls)->set[object]:return{SpaceView3D.draw_handler_add(cls.cb_SpaceView3D_POST_VIEW,tuple(),_F,'POST_VIEW')}
 	@classmethod
@@ -662,7 +662,7 @@ def main(context:Context,event:Event):
 	if CheckPoint.pref.view.use_mesh_preview!=addon_pref.use_mesh_preview:
 		if addon_pref.use_mesh_preview:
 			cam:Camera=Workflow.cam
-			if cam:cam_props:CameraProps=cam.cpp;cam_props.update_tool_settings(context)
+			if cam:cam_props:CameraProps=cam.cpp;cam_props.update_sensor_fit_from_image();cam_props.update_render_settings(context);cam_props.update_tool_settings(context)
 		CheckPoint.pref.view.use_mesh_preview=addon_pref.use_mesh_preview
 	changed_camera=_B;changed_camera_params=_B;changed_cam=_B;changed_cam_props=_B;changed_image=_B;changed_image_props=_B
 	if CheckPoint.camera!=Workflow.camera:changed_camera=_D
@@ -722,7 +722,7 @@ class CPP_OT_main(Operator):
 				qualname=item.__qualname__;dt1=time.time();log.debug(_i.format(qualname=qualname));ret=getattr(item,'restore',_A)
 				if not ret(context):log.warning('{qualname} not done, queue not restored'.format(qualname=qualname));return _B
 				log.debug(_j.format(qualname=qualname,elapsed=time.time()-dt1))
-			cls.initialized=_B;log.debug(_k.format(elapsed=time.time()-dt0)).pop_indent()
+			cls.initialized=_B;log.pop_indent().debug(_k.format(elapsed=time.time()-dt0)).pop_indent()
 		return _D
 	def cancel(self,context:Context):
 		cls=self.__class__;WindowInstances.cancel_operator_instance(context,operator=self)
