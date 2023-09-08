@@ -43,7 +43,7 @@ class ImageProps(PropertyGroup):
 				fp=bpy.path.abspath(image.filepath)
 				if fp:
 					inp=oiio.ImageInput.open(fp)
-					if not inp:log.error(oiio.geterror());inp.close()
+					if not inp:log.error(oiio.geterror())
 					else:spec=inp.spec();self.static_size=spec.width,spec.height;inp.close();return
 		if not(force or self.valid):
 			self.static_size=image.size

@@ -573,7 +573,7 @@ class GPUDrawMesh(CameraPainterMain):
 	@classmethod
 	def cb_SpaceView3D_POST_VIEW(cls):
 		context=bpy.context
-		if not(cls.draw_framework and cls.batch_tris and GPUDraw.image_texture):return
+		if not(cls.draw_framework and cls.batch_tris):return
 		if context.region!=EventMouse.region:return
 		fb_framework=cls.draw_framework.get(index=0)
 		if not fb_framework:return
@@ -581,7 +581,8 @@ class GPUDrawMesh(CameraPainterMain):
 		if not fb:return
 		original_depth_texture=bhqab.utils_gpu.get_depth_map(depth_format=_M);viewport_metrics=bhqab.utils_gpu.get_viewport_metrics();ob=Workflow.object;camera=Workflow.camera
 		if not(ob and camera):return
-		mouse_pos=EventMouse.position_region(context);shader=shaders.get('mesh_project');shader.uniform_sampler('u_DepthTexture',original_depth_texture);shader.uniform_sampler(_b,GPUDraw.image_texture)
+		mouse_pos=EventMouse.position_region(context);shader=shaders.get('mesh_project');shader.uniform_sampler('u_DepthTexture',original_depth_texture)
+		if GPUDraw.image_texture:shader.uniform_sampler(_b,GPUDraw.image_texture)
 		if cls.brush_curve_texture:shader.uniform_sampler('u_BrushMask',cls.brush_curve_texture)
 		shader.uniform_sampler('u_UVProjectTexture',cls.uv_project_offscreen.texture_color);shader.uniform_float('u_BrushPos',mouse_pos);shader.uniform_float(_O,viewport_metrics);shader.uniform_block(_R,GPUDraw.intrinsics_ubo.ubo);shader.uniform_block(_h,cls.uv_project_ubo.ubo);shader.uniform_block('u_MeshProjectParams',cls.mesh_project_ubo.ubo)
 		with fb.bind():
@@ -643,7 +644,7 @@ class GPUDraw(CameraPainterMain):
 			if Workflow.image:
 				image_props:ImageProps=Workflow.image.cpp
 				if image_props.valid:cls._image_texture=gpu.texture.from_image(Workflow.image)
-			else:cls._image_texture=_A;cls._image_texture=_A
+			else:cls._image_texture=_A
 		return cls._image_texture
 	@classmethod
 	def update_intrinsics_ubo(cls):
