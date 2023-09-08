@@ -3,8 +3,8 @@ _I='FINISHED'
 _H='CPP_OT_import_scene'
 _G='EXEC_DEFAULT'
 _F='CANCELLED'
-_E='obj'
-_D='dae'
+_E='dae'
+_D='obj'
 _C='fbx'
 _B=True
 _A=False
@@ -24,14 +24,14 @@ __all__=_H,
 def check_additional_builtin_io_addons()->set:
 	ret=set()
 	if addon_utils.check('io_scene_fbx')[1]:ret.add(_C)
-	if addon_utils.check('io_scene_obj')[1]:ret.add('ob')
-	if bpy.app.build_options.collada:ret.add(_D)
+	if addon_utils.check('io_scene_obj')[1]:ret.add(_D)
+	if bpy.app.build_options.collada:ret.add(_E)
 	return ret
 def get_prop_file_format_items(_self=None,_context=None):
 	ret=[];additional_io_addons_set=check_additional_builtin_io_addons()
 	if _C in additional_io_addons_set:ret.append((_C,'Autodesk (*.fbx)',''))
-	if _E in additional_io_addons_set:ret.append((_E,'Wavefront (*.obj)',''))
-	if _D in additional_io_addons_set:ret.append((_D,'Collada (*.dae)',''))
+	if _D in additional_io_addons_set:ret.append((_D,'Wavefront (*.obj)',''))
+	if _E in additional_io_addons_set:ret.append((_E,'Collada (*.dae)',''))
 	return ret
 def _get_file_fmt_enum_item_name_from_fp(fp:str)->str:
 	if fp:
@@ -43,10 +43,10 @@ def _ot_result_to_bool(result:set)->bool:
 	if result=={_I}:return _B
 	elif result=={_F}:return _A
 	else:raise AssertionError('Operator should be executed default, not running modal.')
-def _cb_REALITY_CAPTURE_FBX(context:Context,abs_fp:str)->bool:ret=bpy.ops.import_scene.fbx(_G,filepath=abs_fp,use_manual_orientation=_A,global_scale=1.,bake_space_transform=_A,use_custom_normals=_B,use_image_search=_B,use_alpha_decals=_A,use_anim=_B,anim_offset=1.,use_subsurf=_A,use_custom_props=_B,use_custom_props_enum_as_string=_B,ignore_leaf_bones=_A,force_connect_children=_A,automatic_bone_orientation=_A,primary_bone_axis='Y',secondary_bone_axis='X',use_prepost_rot=_B,axis_forward='-Z',axis_up='Y');return _ot_result_to_bool(ret)
-def _cb_REALITY_CAPTURE_OBJ(context:Context,abs_fp:str)->bool:ret=bpy.ops.import_scene.obj(_G,filepath=abs_fp,filter_glob='*.obj;*.mtl',use_edges=_B,use_smooth_groups=_B,use_split_objects=_B,use_split_groups=_A,use_groups_as_vgroups=_A,use_image_search=_B,split_mode='ON',global_clamp_size=.0,axis_forward='-Z',axis_up='Y');return _ot_result_to_bool(ret)
+def _cb_REALITY_CAPTURE_FBX(context:Context,abs_fp:str)->bool:ret=bpy.ops.import_scene.fbx(_G,filepath=abs_fp,use_manual_orientation=_A,global_scale=1.,bake_space_transform=_A,use_custom_normals=_B,use_image_search=_A,use_alpha_decals=_A,use_anim=_B,anim_offset=1.,use_subsurf=_A,use_custom_props=_B,use_custom_props_enum_as_string=_B,ignore_leaf_bones=_A,force_connect_children=_A,automatic_bone_orientation=_A,primary_bone_axis='Y',secondary_bone_axis='X',use_prepost_rot=_B,axis_forward='-Z',axis_up='Y');return _ot_result_to_bool(ret)
+def _cb_REALITY_CAPTURE_OBJ(context:Context,abs_fp:str)->bool:ret=bpy.ops.import_scene.obj(_G,filepath=abs_fp,filter_glob='*.obj;*.mtl',use_edges=_B,use_smooth_groups=_B,use_split_objects=_B,use_split_groups=_A,use_groups_as_vgroups=_A,use_image_search=_A,split_mode='ON',global_clamp_size=.0,axis_forward='-Z',axis_up='Y');return _ot_result_to_bool(ret)
 def _cb_REALITY_CAPTURE_DAE(context:Context,abs_fp:str)->bool:ret=bpy.ops.wm.collada_import(_G,filepath=abs_fp,import_units=_A,fix_orientation=_A,find_chains=_A,auto_connect=_A,min_chain_length=0,keep_bind_info=_A);return _ot_result_to_bool(ret)
-_CALLBACKS={'REALITY_CAPTURE':{_C:_cb_REALITY_CAPTURE_FBX,_E:_cb_REALITY_CAPTURE_OBJ,_D:_cb_REALITY_CAPTURE_DAE}}
+_CALLBACKS={'REALITY_CAPTURE':{_C:_cb_REALITY_CAPTURE_FBX,_D:_cb_REALITY_CAPTURE_OBJ,_E:_cb_REALITY_CAPTURE_DAE}}
 def _apply_udim_materials_fix(context:Context,*,objects:set[Object]):
 	for ob in objects:
 		if main.Workflow.object_poll(ob):
