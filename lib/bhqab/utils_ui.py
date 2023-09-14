@@ -144,7 +144,7 @@ def safe_register(cls):
 	try:bpy.utils.unregister_class(cls)
 	except RuntimeError:pass
 	bpy.utils.register_class(cls)
-def _intern_update_post_restart_blender(module_name:str):import subprocess;startupinfo=subprocess.STARTUPINFO();startupinfo.dwFlags=subprocess.DETACHED_PROCESS;subprocess.Popen([bpy.app.binary_path,'-con','--python-expr',f"import bpy; bpy.ops.wm.recover_last_session(); bpy.ops.preferences.addon_enable('EXEC_DEFAULT', module={module_name}); bpy.ops.preferences.addon_show('EXEC_DEFAULT', module={module_name})"],startupinfo=startupinfo);bpy.ops.wm.quit_blender()
+def _intern_update_post_restart_blender(module_name:str):import subprocess;startupinfo=subprocess.STARTUPINFO();startupinfo.dwFlags=subprocess.DETACHED_PROCESS;subprocess.Popen([bpy.app.binary_path,'-con','--python-expr','import bpy; bpy.ops.wm.recover_last_session(); '],startupinfo=startupinfo);bpy.ops.wm.quit_blender()
 UPDATE_PROPS_ATTR_NAME='update_props'
 class PreferencesUpdateProperties(PropertyGroup):
 	auto_check:BoolProperty(default=_A,options={_D,_J},translation_context=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT,name='Check for Updates',description='Automatically check for updates when you open Blender');auth_token:StringProperty(maxlen=256,subtype='PASSWORD',options={_D},translation_context=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT,name='Authorization Token',description='Authorization token to increase the limit of responses during development');has_updates:BoolProperty(options={_D});url:StringProperty(options={_D},maxlen=256)
@@ -235,26 +235,21 @@ class BHQAB_OT_install_addon_update(Operator):
 	@staticmethod
 	def switch_to_manual_installation():doc_url=PreferencesUpdateProperties._addon_module.bl_info[_H];bpy.ops.wm.url_open(_I,url=doc_url)
 	def execute(self,context:Context):
-		A='WARNING';msgctxt=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT;doc_url=PreferencesUpdateProperties._addon_module.bl_info[_H];module_name=PreferencesUpdateProperties._addon_module_name;clean_module_name=PreferencesUpdateProperties._addon_clean_module_name;updater.setup_logger(module_name=module_name);log=logging.getLogger(module_name);module_directory=os.path.dirname(PreferencesUpdateProperties._addon_module.__file__);root_directory=os.path.dirname(module_directory);cache_directory=PreferencesUpdateProperties._addon_update_cache_directory;cache=updater.UpdateCache.get(directory=cache_directory);local_filename=cache.retrieved_filepath;data_root_dirname=updater.get_single_zipfile_root_directory(module_name=module_name,local_filename=local_filename)
+		A='WARNING';msgctxt=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT;doc_url=PreferencesUpdateProperties._addon_module.bl_info[_H];module_name=PreferencesUpdateProperties._addon_module_name;clean_module_name=PreferencesUpdateProperties._addon_clean_module_name;updater.setup_logger(module_name=module_name);log=logging.getLogger(module_name);module_directory=os.path.dirname(PreferencesUpdateProperties._addon_module.__file__);root_directory=os.path.dirname(module_directory);cache_directory=PreferencesUpdateProperties._addon_update_cache_directory;cache=updater.UpdateCache.get(directory=cache_directory);local_filename=cache.retrieved_filepath;data_root_dirname=updater.get_zipfile_base_dir(module_name=module_name,local_filename=local_filename)
 		if data_root_dirname is _B:self.report('Downloaded file can not be used for installation');return{_E}
 		backup_directory=os.path.join(cache_directory,'backup');result=updater.create_directory(module_name=module_name,directory=backup_directory,ensure_empty=_A)
 		if not result:self.report(type={A},message='Failed to create backup directory');return{_E}
 		result=updater.copy_directory(module_name=module_name,src=module_directory,dst=backup_directory)
 		if not result:self.report(type={A},message='Failed to make backup');return{_E}
-		self.report(type={'INFO'},message='Installing update');addon_utils.disable(module_name,default_set=_A);result=updater.remove_directory(module_name=module_name,directory=module_directory)
+		self.report(type={'INFO'},message='Installing update');addon_utils.disable(module_name,default_set=_C);result=updater.remove_directory(module_name=module_name,directory=module_directory)
 		if not result:addon_utils.enable(module_name,persistent=_A);self.report(type={A},message='Unable to remove local installation files, please, check directory permissions');return{_E}
 		def _intern_critical():print('\n\nA critical error occurred while installing "{module_name:s}" the update, unable to restore the installation from backup. Use the link {doc_url:s} to visit the repository and download the latest update. If you do not have access to the Internet, "{backup_directory:s}" contains a backup files\n\n'.format(module_name=module_name,doc_url=doc_url,backup_directory=backup_directory));bpy.ops.wm.url_open(_I,url=doc_url);bpy.ops.wm.path_open(_I,filepath=backup_directory);return{_E}
 		def _intern_restore_backup():
 			result=updater.copy_directory(module_name=module_name,src=backup_directory,dst=module_directory)
 			if result:addon_utils.enable(module_name,persistent=_A);self.report(type={A},message='Update failed, installation restored from backup. Please install the update manually');return{_E}
 			else:return _intern_critical()
-		result=updater.extract_archive_data(module_name=module_name,local_filename=local_filename,dst=root_directory)
+		result=updater.extract_archive_data(module_name=module_name,local_filename=local_filename,dst=module_directory)
 		if not result:return _intern_restore_backup()
-		extracted_directory=os.path.join(root_directory,data_root_dirname);result=updater.rename_directory(module_name=module_name,directory=extracted_directory,new_name=clean_module_name)
-		if not result:
-			result=updater.remove_directory(module_name=module_name,directory=extracted_directory)
-			if result:return _intern_restore_backup()
-			else:return _intern_critical()
 		log.info(f'Removing backup files from "{backup_directory}"');result=updater.remove_directory(module_name=module_name,directory=backup_directory)
 		if result:log.info('Backup files removed')
 		else:log.warning('Unable to remove backup files')

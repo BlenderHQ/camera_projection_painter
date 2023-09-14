@@ -3,7 +3,7 @@ _D='Unable to read zip file data'
 _C=True
 _B=None
 _A=False
-import os,sys,re,shutil,logging,json
+import os,sys,re,shutil,tempfile,logging,json
 from datetime import datetime
 from types import FunctionType
 __all__='BHQAB_PREFERENCES_UPDATES_MSGCTXT','EN_US_CODE','LANG_CODES','UpdateCache','eval_int_version','check_for_updates'
@@ -47,13 +47,13 @@ def _cb_get_release_data(*,release_url:str,headers:dict):
 	with urllib.request.urlopen(req,timeout=2.)as response:byte_data=response.read();rate_limit=int(response.headers.get('X-RateLimit-Limit',0));remaining=int(response.headers.get('X-RateLimit-Remaining',0));reset_at=int(response.headers.get('X-RateLimit-Reset',0));return byte_data,rate_limit,remaining,reset_at
 def _cb_get_release_archive(*,filename:str,tag_zipball_url:str):import urllib.request;local_filename,_headers=urllib.request.urlretrieve(url=tag_zipball_url,filename=filename);return local_filename
 def check_for_updates(*,module_name:str,cache_filepath:str,release_url:str,int_version:int,auth_token:str=''):
-	A='tag_name';setup_logger(module_name=module_name);log=logging.getLogger(module_name);cache=UpdateCache.get(directory=cache_filepath);headers=dict()
+	B='zip';A='tag_name';setup_logger(module_name=module_name);log=logging.getLogger(module_name);cache=UpdateCache.get(directory=cache_filepath);headers=dict()
 	if auth_token:headers['Authorization']=f"Bearer {auth_token}"
 	release_data=_safe_make_cb_request(module_name=module_name,callback=_cb_get_release_data,release_url=release_url,headers=headers)
 	if release_data is _B:log.warning('Unable to check for updates');return
 	byte_data,rate_limit,remaining,reset_at=release_data;cache.rate_limit=rate_limit;cache.remaining=remaining;cache.reset_at=reset_at;cache.checked_at=int(datetime.timestamp(datetime.now()));data:dict=json.loads(byte_data,strict=_A);tag_name=data.get(A,_B)
 	if tag_name is not _B:
-		try:version=eval_int_version(ver=tuple(int(_)for _ in tag_name[1:].split('_')))
+		try:version=int(tag_name[1:])
 		except ValueError:log.warning(f"Unable to convert tag to integer version")
 		else:cache.has_updates=version>int_version
 	tag=data.get(A,_B)
@@ -76,13 +76,16 @@ def check_for_updates(*,module_name:str,cache_filepath:str,release_url:str,int_v
 	if zipball_url is not _B:cache.tag_zipball_url=zipball_url
 	result=cache.write(module_name=module_name)
 	if cache.has_updates and result:
-		do_update_cache=_A;update_filename=cache.retrieved_filepath
-		if not(update_filename and os.path.isfile(update_filename)):update_filename=os.path.join(cache_filepath,f"{cache.tag_tag}.zip");cache.retrieved_filepath=update_filename;do_update_cache=_C
-		if os.path.isfile(update_filename):log.info('Update files already downloaded')
+		do_update_cache=_A;update_filepath=cache.retrieved_filepath
+		if update_filepath and os.path.isfile(update_filepath):log.info('Update files already downloaded')
 		else:
-			log.info('Downloading update files');release_data=_safe_make_cb_request(module_name=module_name,callback=_cb_get_release_archive,filename=update_filename,tag_zipball_url=cache.tag_zipball_url)
-			if release_data is _B:log.warning('Unable to download update files')
-			else:cache.retrieved_filepath=update_filename;do_update_cache=_C;log.info('Update files downloaded')
+			log.info('Downloading update files')
+			with tempfile.TemporaryDirectory()as tmp_dir:
+				tmp_filepath=os.path.join(tmp_dir,'update.zip');release_data=_safe_make_cb_request(module_name=module_name,callback=_cb_get_release_archive,filename=tmp_filepath,tag_zipball_url=cache.tag_zipball_url)
+				if release_data is _B:log.warning('Unable to download update files')
+				else:
+					base_dir=get_zipfile_base_dir(module_name=module_name,local_filename=tmp_filepath)
+					if base_dir:shutil.unpack_archive(tmp_filepath,tmp_dir,format=B);os.unlink(tmp_filepath);update_filepath=shutil.make_archive(base_name=os.path.join(cache_filepath,f"{module_name}_{cache.tag_tag}"),format=B,root_dir=os.path.join(tmp_dir,base_dir));cache.retrieved_filepath=update_filepath;do_update_cache=_C;log.info('Update files downloaded')
 		if do_update_cache:
 			result=cache.write(module_name=module_name)
 			if not result:log.warning('Unable to update information about downloaded files')
@@ -105,18 +108,25 @@ def create_directory(*,module_name:str,directory:str,ensure_empty:bool=_A)->bool
 		if not result:log.warning(f'Unable to remove existing data to create empty directory at "{directory}"');return _A
 	try:os.mkdir(directory)
 	except FileNotFoundError:log.error('Parent path does not exist, creating');return create_directory(module_name=module_name,directory=os.path.dirname(directory),ensure_empty=_A)
+	except FileExistsError:log.warning(f'Path "{directory}" already exists');return _A
 	if ensure_empty:log.info(f'Created empty directory at "{directory}"')
 	else:log.info(f'Created directory at "{directory}"')
 	return _C
 def remove_directory(*,module_name:str,directory:str)->bool:
-	log=logging.getLogger(module_name);log.info(f'Removing directory "{directory}"')
-	try:shutil.rmtree(directory)
-	except shutil.Error as err:log.warning(f"Failed to remove existing directory: {err}");return _A
-	except OSError as err:log.warning(f"Failed to remove existing directory, OS error: {err}");return _A
+	log=logging.getLogger(module_name);log.info(f'Removing directory "{directory}"');is_safe_to_remove=_C
+	for item in os.listdir(directory):
+		if item in{'.git'}:is_safe_to_remove=_A;continue
+		filepath=os.path.join(directory,item)
+		try:
+			if os.path.isfile(filepath)or os.path.islink(filepath):os.unlink(filepath)
+			elif os.path.isdir(filepath):shutil.rmtree(filepath)
+		except shutil.Error as err:log.warning(f"Failed to remove existing directory: {err}");return _A
+		except OSError as err:log.warning(f"Failed to remove existing directory, OS error: {err}");return _A
+	if is_safe_to_remove:shutil.rmtree(directory)
 	log.info(f'Removed directory "{directory}"');return _C
 def copy_directory(*,module_name:str,src:str,dst:str)->bool:
 	log=logging.getLogger(module_name);log.info(f'Copying directory \n"{src}" \nto \n"{dst}"')
-	try:shutil.copytree(src=src,dst=dst,dirs_exist_ok=_C,ignore=shutil.ignore_patterns('*.pyc','__pycache__'))
+	try:shutil.copytree(src=src,dst=dst,dirs_exist_ok=_C,ignore=shutil.ignore_patterns('*.pyc','__pycache__','.git'))
 	except shutil.Error as err:log.warning(f"Unable to copy directory: {err}");return _A
 	log.info(f"Directory copied");return _C
 def rename_directory(*,module_name:str,directory:str,new_name:str)->bool:
@@ -139,7 +149,7 @@ def _safe_make_cb_request(*,module_name:str,callback:FunctionType,**kwargs)->_B|
 		return
 	except URLError:log.warning('Failed to reach the server');return
 	else:return ret
-def get_single_zipfile_root_directory(*,module_name:str,local_filename:str)->_B|str:
+def get_zipfile_base_dir(*,module_name:str,local_filename:str)->_B|str:
 	import zipfile;log=logging.getLogger(module_name);log.info(f'Getting single root directory name from local zip file: "{local_filename}"');count=0;root_dirname=_B
 	try:
 		with zipfile.ZipFile(local_filename,'r')as zip_ref:
@@ -152,10 +162,7 @@ def get_single_zipfile_root_directory(*,module_name:str,local_filename:str)->_B|
 	else:log.warning('Archive has more than one directory in root. Looks like its not an addon')
 def extract_archive_data(*,module_name:str,local_filename:str,dst:str)->bool:
 	import zipfile;log=logging.getLogger(module_name)
-	try:
-		with zipfile.ZipFile(local_filename,'r')as zip_ref:
-			try:zip_ref.extractall(dst,members=zip_ref.namelist())
-			except ValueError:log.error('For some reason zip file is closed, extracting failed');return _A
+	try:shutil.unpack_archive(local_filename,dst)
 	except PermissionError:log.warning('Unable to write extracted archive data, please, check your write permissions');return _A
 	except zipfile.BadZipFile:log.warning(_D);return _A
 	return _C

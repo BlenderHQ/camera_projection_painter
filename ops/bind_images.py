@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:from..props import Image;from..props.camera import CameraProps;from..props.scene import SceneProps
 __all__=_C,
 class CPP_OT_bind_images(common.IOUnifiedName_Params,metaclass=common.SetupContextOperator):
-	bl_idname='cpp.bind_images';bl_label='Bind Images';bl_options={'REGISTER','UNDO'};bl_translation_context=_C;use_existing_caches:BoolProperty(default=_A,options={_B,_D});directory:StringProperty(subtype='DIR_PATH',maxlen=1024,options={_B},translation_context='CPP_IO',name='Directory');mode:EnumProperty(items=(('ACTIVE','Active',''),('ALL','All','')),options={_B,_D})
+	bl_idname='cpp.bind_images';bl_description='';bl_label='Bind Images';bl_options={'REGISTER','UNDO'};bl_translation_context=_C;use_existing_caches:BoolProperty(default=_A,options={_B,_D});directory:StringProperty(subtype='DIR_PATH',maxlen=1024,options={_B},translation_context='CPP_IO',name='Directory');mode:EnumProperty(items=(('ACTIVE','Active',''),('ALL','All','')),options={_B,_D})
 	@classmethod
 	def description(cls,context:Context,properties:CPP_OT_bind_images)->str:
 		msgctxt=cls.__qualname__

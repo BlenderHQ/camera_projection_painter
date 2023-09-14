@@ -1,4 +1,5 @@
 from __future__ import annotations
+_J='HIDDEN'
 _I='FINISHED'
 _H='CPP_OT_import_scene'
 _G='EXEC_DEFAULT'
@@ -67,7 +68,7 @@ class CPP_OT_import_scene(common.IOFileBase_Params,metaclass=common.SetupContext
 		ret=''
 		for(enum_str,_enum_name,_enum_desc)in get_prop_file_format_items():ret+=f"*.{enum_str};"
 		return ret
-	filter_glob:StringProperty(get=_get_file_fmt_filter_glob);is_filepath_recognized:BoolProperty();file_format:EnumProperty(items=get_prop_file_format_items,name='Type',description='File type to be imported');view_all:BoolProperty()
+	filter_glob:StringProperty(get=_get_file_fmt_filter_glob,options={_J});is_filepath_recognized:BoolProperty(options={_J});file_format:EnumProperty(items=get_prop_file_format_items,name='Type',description='File type to be imported')
 	def draw(self:Operator,context:Context):
 		layout=self.layout;layout.use_property_split=_B;addon_pref=get_addon_pref(context);layout.prop(addon_pref,'preferred_software_workflow')
 		if self.is_filepath_recognized:text='Selected file recognized as\n'+layout.enum_item_name(self,'file_format',self.file_format)
@@ -83,7 +84,5 @@ class CPP_OT_import_scene(common.IOFileBase_Params,metaclass=common.SetupContext
 		if self.is_filepath_recognized is _A:reports.report_and_log(self,level=logging.WARNING,message='Unable to import file with unknown file extension',msgctxt=msgctxt);return{_F}
 		addon_pref=get_addon_pref(context);wm=context.window_manager;wm_props:WMProps=wm.cpp;initial_objects=set(context.scene.objects);result=_CALLBACKS[addon_pref.preferred_software_workflow][self.file_format](context,self.filepath);imported_objects=set(context.scene.objects)-initial_objects
 		if wm_props.apply_udim_materials_fix:_apply_udim_materials_fix(context,objects=imported_objects)
-		if result is _B:
-			if self.view_all and context.region and context.region.type=='VIEW_3D':bpy.ops.view3d.view_all('INVOKE_DEFAULT')
-			reports.report_and_log(self,level=logging.INFO,message='Imported "{filepath}"',msgctxt=msgctxt,filepath=os.path.basename(self.filepath));return{_I}
+		if result is _B:reports.report_and_log(self,level=logging.INFO,message='Imported "{filepath}"',msgctxt=msgctxt,filepath=os.path.basename(self.filepath));return{_I}
 		else:reports.report_and_log(self,level=logging.WARNING,message='Import Failed "{filepath}"',msgctxt=msgctxt,filepath=self.filepath);return{_F}
