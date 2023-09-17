@@ -83,8 +83,9 @@ class RC_MetadataXMP_ExportOptions(common.IOOptionsBase):
 		super().__init__(**kwargs);self.use_calibration_groups=kwargs['rc_metadata_xmp_use_calibration_groups'];self.use_include_editor_options=kwargs['rc_metadata_xmp_include_editor_options'];self.overwrite_flags=0
 		for item in kwargs['rc_metadata_xmp_overwrite_flags']:self.overwrite_flags|=RC_METADATA_XMP_Overwrite[item]
 		self.overwrite_export_mode=RC_METADATA_XMP_ExportMode[kwargs['rc_metadata_xmp_export_mode']];self.overwrite_calibration_group=kwargs['rc_metadata_xmp_calibration_group'];self.overwrite_distortion_group=kwargs['rc_metadata_xmp_distortion_group'];self.overwrite_in_texturing=kwargs['rc_metadata_xmp_in_texturing'];self.overwrite_in_meshing=kwargs['rc_metadata_xmp_in_meshing']
+_EXPORT_MODE_ENUMS={RC_METADATA_XMP_ExportMode.DO_NOT_EXPORT:dict(),RC_METADATA_XMP_ExportMode.DRAFT:{pose_prior_name:RC_METADATA_XMP_PosePrior.initial.name,coordinates_name:RC_METADATA_XMP_Coordinates.absolute.name,calibration_prior_name:RC_METADATA_XMP_CalibrationPrior.initial.name},RC_METADATA_XMP_ExportMode.EXACT:{pose_prior_name:RC_METADATA_XMP_PosePrior.exact.name,coordinates_name:RC_METADATA_XMP_Coordinates.relative.name,calibration_prior_name:RC_METADATA_XMP_CalibrationPrior.exact.name},RC_METADATA_XMP_ExportMode.LOCKED:{pose_prior_name:RC_METADATA_XMP_PosePrior.locked.name,coordinates_name:RC_METADATA_XMP_Coordinates.absolute.name,calibration_prior_name:RC_METADATA_XMP_CalibrationPrior.exact.name}}
 class RC_METADATA_XMP(common.IOFileHandler):
-	io_format=common.IOFormat.RC_METADATA_XMP;extension='.xmp';size_max=1500;export_options=RC_MetadataXMP_ExportOptions
+	io_format=common.IOFormat.RC_METADATA_XMP;extension='.xmp';size_max=2000;export_options=RC_MetadataXMP_ExportOptions
 	@classmethod
 	def check(cls,*,file:TextIOWrapper)->bool:
 		handler=XMP_HandlerCheck();reader=xml.sax.make_parser();reader.setContentHandler(handler)
@@ -131,15 +132,9 @@ class RC_METADATA_XMP(common.IOFileHandler):
 		return 1
 	@classmethod
 	def write(cls,*,directory:str,filename:str,options:RC_MetadataXMP_ExportOptions)->int:
-		A='0.0';num_files=0;root=et.Element(root_name,{xmlnsx_name:NAMESPACE_X});rdf=et.SubElement(root,rdf_name,{xmlnsrdf_name:NAMESPACE_RDF});desc=et.SubElement(rdf,rdf_desc_name,{xmlnsxcr_name:NAMESPACE_XCR,version_name:'3'});tree=et.ElementTree(root);et.indent(tree,space=_D*2,level=0)
-		def _set_enums_for_mode(export_mode:RC_METADATA_XMP_ExportMode):
-			match export_mode:
-				case RC_METADATA_XMP_ExportMode.DRAFT:desc.attrib[pose_prior_name]=RC_METADATA_XMP_PosePrior.initial.name;desc.attrib[coordinates_name]=RC_METADATA_XMP_Coordinates.absolute.name;desc.attrib[calibration_prior_name]=RC_METADATA_XMP_CalibrationPrior.initial.name
-				case RC_METADATA_XMP_ExportMode.EXACT:desc.attrib[pose_prior_name]=RC_METADATA_XMP_PosePrior.exact.name;desc.attrib[coordinates_name]=RC_METADATA_XMP_Coordinates.relative.name;desc.attrib[calibration_prior_name]=RC_METADATA_XMP_CalibrationPrior.exact.name
-				case RC_METADATA_XMP_ExportMode.LOCKED:desc.attrib[pose_prior_name]=RC_METADATA_XMP_PosePrior.locked.name;desc.attrib[coordinates_name]=RC_METADATA_XMP_Coordinates.absolute.name;desc.attrib[calibration_prior_name]=RC_METADATA_XMP_CalibrationPrior.exact.name
-		do_export_mode=_B;do_data=_B
+		A='0.0';num_files=0;root=et.Element(root_name,{xmlnsx_name:NAMESPACE_X});rdf=et.SubElement(root,rdf_name,{xmlnsrdf_name:NAMESPACE_RDF});desc=et.SubElement(rdf,rdf_desc_name,{xmlnsxcr_name:NAMESPACE_XCR,version_name:'3'});tree=et.ElementTree(root);do_export_mode=_B;do_data=_B
 		if options.overwrite_flags&RC_METADATA_XMP_Overwrite.rc_metadata_xmp_export_mode:
-			export_mode=options.overwrite_export_mode;_set_enums_for_mode(export_mode);do_export_mode=_A
+			export_mode=options.overwrite_export_mode;desc.attrib.update(_EXPORT_MODE_ENUMS[export_mode]);do_export_mode=_A
 			if export_mode==RC_METADATA_XMP_ExportMode.DO_NOT_EXPORT:do_data=_A
 		if do_data:position=et.SubElement(desc,position_name);rotation=et.SubElement(desc,rotation_name);distortion_coeff=et.SubElement(desc,distortion_coeff_name)
 		do_calibration_group=options.use_calibration_groups
@@ -153,21 +148,23 @@ class RC_METADATA_XMP(common.IOFileHandler):
 		for(name,camera)in common.IOProcessor.cached_export_items:
 			fp=os.path.join(directory,os.path.splitext(name)[0]+cls.extension);camera_props:ObjectProps=camera.cpp;cam_props:CameraProps=camera.data.cpp;rc_xmp_props:RC_MetadataXMP_Props=cam_props.rc_metadata_xmp_props
 			if do_export_mode:
-				export_mode=RC_METADATA_XMP_ExportMode[rc_xmp_props.rc_metadata_xmp_export_mode];_set_enums_for_mode(export_mode)
-				if do_data and export_mode!=RC_METADATA_XMP_ExportMode.DO_NOT_EXPORT:
-					xyalt:RC_XYAltProps=camera_props.rc_xyalt;rot:RC_MetadataXMP_RotationComponentProps=camera_props.rc_rotation;position.text=_D.join(str(_)for _ in xyalt.as_array(R=options.R,S=options.S));rotation.text=_D.join(str(_)for _ in rot.as_array(R=options.R,S=options.S))
-					if cam_props.distortion_model==constants.DistortionModel.NONE.name:desc.attrib[distortion_model_name]='perspective';coeff=(A for _ in range(6))
-					elif cam_props.distortion_model==constants.DistortionModel.DIVISION.name:desc.attrib[distortion_model_name]='division';coeff=(cam_props.k1_double,)+tuple(A for _ in range(5))
-					else:
-						dm='brown'
-						if cam_props.k4:dm+='4'
-						else:dm+='3'
-						if cam_props.p1 or cam_props.p2:dm+='t2'
-						desc.attrib[distortion_model_name]=dm;coeff=cam_props.k1_double,cam_props.k2_double,cam_props.k3_double,cam_props.k4_double,cam_props.p1_double,cam_props.p2_double
-					distortion_coeff.text=_D.join(coeff);desc.attrib[focal_length_35mm_name]=cam_props.lens_double;desc.attrib[skew_name]=cam_props.skew_double;desc.attrib[aspect_ratio_name]=cam_props.aspect_double;desc.attrib[principal_point_u_name]=cam_props.principal_x_double;desc.attrib[principal_point_v_name]=str(-cam_props.principal_y)
+				export_mode=RC_METADATA_XMP_ExportMode[rc_xmp_props.rc_metadata_xmp_export_mode]
+				if export_mode==RC_METADATA_XMP_ExportMode.DO_NOT_EXPORT:do_data=_A
+				else:desc.attrib.update(_EXPORT_MODE_ENUMS[export_mode])
+			if do_data:
+				xyalt:RC_XYAltProps=camera_props.rc_xyalt;rot:RC_MetadataXMP_RotationComponentProps=camera_props.rc_rotation;position.text=_D.join(str(_)for _ in xyalt.as_array(R=options.R,S=options.S));rotation.text=_D.join(str(_)for _ in rot.as_array(R=options.R,S=options.S))
+				if cam_props.distortion_model==constants.DistortionModel.NONE.name:desc.attrib[distortion_model_name]='perspective';coeff=(A for _ in range(6))
+				elif cam_props.distortion_model==constants.DistortionModel.DIVISION.name:desc.attrib[distortion_model_name]='division';coeff=(cam_props.k1_double,)+tuple(A for _ in range(5))
+				else:
+					dm='brown'
+					if cam_props.k4:dm+='4'
+					else:dm+='3'
+					if cam_props.p1 or cam_props.p2:dm+='t2'
+					desc.attrib[distortion_model_name]=dm;coeff=cam_props.k1_double,cam_props.k2_double,cam_props.k3_double,cam_props.k4_double,cam_props.p1_double,cam_props.p2_double
+				distortion_coeff.text=_D.join(coeff);desc.attrib[focal_length_35mm_name]=cam_props.lens_double;desc.attrib[skew_name]=cam_props.skew_double;desc.attrib[aspect_ratio_name]=cam_props.aspect_double;desc.attrib[principal_point_u_name]=cam_props.principal_x_double;desc.attrib[principal_point_v_name]=str(-cam_props.principal_y)
 			if do_calibration_group:desc.attrib[calibration_group_name]=str(rc_xmp_props.rc_metadata_xmp_calibration_group)
 			if do_distortion_group:desc.attrib[distortion_group_name]=str(rc_xmp_props.rc_metadata_xmp_distortion_group)
 			if do_in_texturing:desc.attrib[in_texturing_name]=str(int(rc_xmp_props.rc_metadata_xmp_in_texturing))
 			if do_in_meshing:desc.attrib[in_meshing_name]=str(int(rc_xmp_props.rc_metadata_xmp_in_meshing))
-			et.indent(tree,space=_D*4,level=0);tree.write(fp,encoding='utf-8');num_files+=1
+			et.indent(tree,space=_D*4,level=0);tree.write(fp,encoding='utf-8',short_empty_elements=_A);num_files+=1
 		return num_files

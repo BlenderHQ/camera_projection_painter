@@ -8,7 +8,7 @@ import bpy
 from bpy.types import ImagePreview
 import bpy.utils.previews
 _IMAGE_ICON_NAMES='cleanup','ensure_canvas'
-_DATA_ICON_NAMES='aa','appearance','bind','calibration','credits','dataset','double_precision','export_cameras','export_reality_capture','export','image','import_cameras','import_image','import_images','import_scene','import','info','inspection','keymap','lens_distortion','license','links','location','outline_checker','outline_fill','outline_lines','preferences','prv_size_large','prv_size_normal','readme','reality_capture','rotation','setup_context','single_precision','tooltip_fixed','tooltip_floating','tooltip_static','transform','ui','unit_mm','unit_px','update','viewport','youtube','patreon','github'
+_DATA_ICON_NAMES='aa','appearance','bind','calibration','credits','dataset','double_precision','export_cameras','export_reality_capture','export','facing_back','facing_front','github','image','import_cameras','import_image','import_images','import_scene','import','info','inspection','keymap','lens_distortion','license','links','location','outline_checker','outline_fill','outline_lines','patreon','preferences','prv_size_large','prv_size_normal','readme','reality_capture','rotation','setup_context','single_precision','tooltip_fixed','tooltip_floating','tooltip_static','transform','ui','unit_mm','unit_px','update','viewport','youtube'
 class IconsCache:
 	_package:str='';_cache:dict[str,int]=dict();_pcoll_cache:_A|bpy.utils.previews.ImagePreviewCollection=_A
 	@classmethod

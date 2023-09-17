@@ -35,8 +35,8 @@ _G='C'
 _F='WINDOW'
 _E=1.
 _D=True
-_C=.0
-_B=False
+_C=False
+_B=.0
 _A=None
 import os,math,time
 from.import log
@@ -79,7 +79,7 @@ class WindowInstances(CameraPainterMain):
 	def modal_ensure_operator_invoked_in_all_windows(cls,context:Context,*,idname:str)->_A:
 		cls._validate_running_instances();wm:WindowManager=context.window_manager
 		for window in wm.windows:
-			is_operator_invoked_in_window=_B
+			is_operator_invoked_in_window=_C
 			for operator_instance in cls.instances:
 				if operator_instance.window==window:is_operator_invoked_in_window=_D
 			if not is_operator_invoked_in_window:
@@ -95,7 +95,7 @@ class WindowInstances(CameraPainterMain):
 			if not existing_timer:cls.window_timers[window]=wm.event_timer_add(time_step=time_step,window=window)
 	@classmethod
 	def cancel_operator_instance(cls,context:Context,*,operator:CPP_OT_main):
-		cls._validate_running_instances();is_any_other_instance_in_window=_B
+		cls._validate_running_instances();is_any_other_instance_in_window=_C
 		for operator_instance in cls.instances:
 			if operator_instance==operator:continue
 			if operator_instance.window==operator.window:is_any_other_instance_in_window=_D
@@ -107,34 +107,34 @@ class WindowInstances(CameraPainterMain):
 	@staticmethod
 	def tag_redraw_all_regions():bhqab.utils_wm.tag_redraw_all_regions(area_type=_K,region_type=_F)
 class CheckPoint(CameraPainterMain):
-	objects:tuple[Object]=tuple();images:tuple[Image]=tuple();prev_camera_has_changes:bool=_B;camera:_A|Object=_A;cam:_A|Camera=_A;image:_A|Image=_A;width:float=_C;height:float=_C;lens:float=_C;sensor_fit:Literal['AUTO','HORIZONTAL','VERTICAL'];sensor:float=_C;clip_start:float=_C;clip_end:float=_C;principal_x:float=_C;principal_y:float=_C;skew:float=_C;aspect:float=_C;distortion_model:str='';k1:float=_C;k2:float=_C;k3:float=_C;k4:float=_C;p1:float=_C;p2:float=_C;object_matrix_world:Matrix=Matrix.Identity(4);camera_matrix_world:Matrix=Matrix.Identity(4);object_arr_has_changes:bool=_B;image_arr_has_changes:bool=_B;select_id:int=constants.CAMERA.SELECT.OFFSET
+	objects:tuple[Object]=tuple();images:tuple[Image]=tuple();prev_camera_has_changes:bool=_C;camera:_A|Object=_A;cam:_A|Camera=_A;image:_A|Image=_A;width:float=_B;height:float=_B;lens:float=_B;sensor_fit:Literal['AUTO','HORIZONTAL','VERTICAL'];sensor:float=_B;clip_start:float=_B;clip_end:float=_B;principal_x:float=_B;principal_y:float=_B;skew:float=_B;aspect:float=_B;distortion_model:str='';k1:float=_B;k2:float=_B;k3:float=_B;k4:float=_B;p1:float=_B;p2:float=_B;object_matrix_world:Matrix=Matrix.Identity(4);camera_matrix_world:Matrix=Matrix.Identity(4);object_arr_has_changes:bool=_C;image_arr_has_changes:bool=_C;select_id:int=constants.CAMERA.SELECT.OFFSET
 	class pref:
-		class view:use_mesh_preview:bool=_B;ui_line_width:str=''
-		dithering_mix_factor:float=_C;refine_previews:str='';cameras_transparency:float=_C
+		class view:use_mesh_preview:bool=_C;ui_line_width:str=''
+		dithering_mix_factor:float=_B;refine_previews:str='';cameras_transparency:float=_B
 	class scene_props:
-		highlight_orientation:bool=_B;highlight_border:bool=_B;highlight_border_type:int=constants.BorderType.FILL;highlight_border_color0:Vector=Vector((_C,_C,_C,_C));highlight_border_color1:Vector=Vector((_C,_C,_C,_C))
-		class image_paint:brush_size:float=_C
+		highlight_orientation:bool=_C;highlight_border:bool=_C;highlight_border_type:int=constants.BorderType.FILL;highlight_border_color0:Vector=Vector((_B,_B,_B,_B));highlight_border_color1:Vector=Vector((_B,_B,_B,_B));highlight_border_facing:set[str]=set()
+		class image_paint:brush_size:float=_B
 	@classmethod
-	def restore(cls,_context:Context)->bool:cls.objects=tuple();cls.images=tuple();cls.prev_camera_has_changes=_B;cls.camera=_A;cls.cam=_A;cls.image=_A;cls.width=_C;cls.height=_C;cls.lens=_C;cls.sensor_fit='AUTO';cls.sensor=_C;cls.clip_start=_C;cls.clip_end=_C;cls.principal_x=_C;cls.principal_y=_C;cls.skew=_C;cls.aspect=_C;cls.distortion_model='';cls.k1=_C;cls.k2=_C;cls.k3=_C;cls.k4=_C;cls.p1=_C;cls.p2=_C;cls.object_matrix_world.identity();cls.camera_matrix_world.identity();cls.object_arr_has_changes=_B;cls.image_arr_has_changes=_B;cls.select_id=constants.CAMERA.SELECT.OFFSET;cls.pref.view.use_mesh_preview=_B;cls.pref.view.ui_line_width='';cls.pref.dithering_mix_factor=_C;cls.pref.refine_previews='';cls.pref.cameras_transparency=_C;cls.scene_props.highlight_orientation=_B;cls.scene_props.highlight_border=_B;cls.scene_props.highlight_border_type=constants.BorderType.FILL;cls.scene_props.highlight_border_color0=Color((_C,_C,_C));cls.scene_props.highlight_border_color1=Color((_C,_C,_C));cls.scene_props.image_paint.brush_size=_C;return _D
+	def restore(cls,_context:Context)->bool:cls.objects=tuple();cls.images=tuple();cls.prev_camera_has_changes=_C;cls.camera=_A;cls.cam=_A;cls.image=_A;cls.width=_B;cls.height=_B;cls.lens=_B;cls.sensor_fit='AUTO';cls.sensor=_B;cls.clip_start=_B;cls.clip_end=_B;cls.principal_x=_B;cls.principal_y=_B;cls.skew=_B;cls.aspect=_B;cls.distortion_model='';cls.k1=_B;cls.k2=_B;cls.k3=_B;cls.k4=_B;cls.p1=_B;cls.p2=_B;cls.object_matrix_world.identity();cls.camera_matrix_world.identity();cls.object_arr_has_changes=_C;cls.image_arr_has_changes=_C;cls.select_id=constants.CAMERA.SELECT.OFFSET;cls.pref.view.use_mesh_preview=_C;cls.pref.view.ui_line_width='';cls.pref.dithering_mix_factor=_B;cls.pref.refine_previews='';cls.pref.cameras_transparency=_B;cls.scene_props.highlight_orientation=_C;cls.scene_props.highlight_border=_C;cls.scene_props.highlight_border_type=constants.BorderType.FILL;cls.scene_props.highlight_border_color0=Vector((_B,_B,_B,_B));cls.scene_props.highlight_border_color1=Vector((_B,_B,_B,_B));cls.scene_props.highlight_border_facing.clear();cls.scene_props.image_paint.brush_size=_B;return _D
 class Workflow(CameraPainterMain):
 	__slots__=()
 	@classmethod
 	def initialize(cls,context:Context)->bool:return cls.Cameras.process_cameras_visibility(context,hide=_D)
 	@classmethod
-	def restore(cls,context:Context)->bool:return cls.Mesh.restore(context)and cls.Cameras.process_cameras_visibility(context,hide=_B)and cls.ImagePaint.restore(context)
+	def restore(cls,context:Context)->bool:return cls.Mesh.restore(context)and cls.Cameras.process_cameras_visibility(context,hide=_C)and cls.ImagePaint.restore(context)
 	@staticmethod
 	def check_object_arr_has_changed(context:Context)->bool:
 		scene=context.scene
-		if not CheckPoint.objects:CheckPoint.objects=tuple(scene.objects);return _B
+		if not CheckPoint.objects:CheckPoint.objects=tuple(scene.objects);return _C
 		if len(scene.objects)!=len(CheckPoint.objects):CheckPoint.objects=tuple(scene.objects);return _D
-		if CheckPoint.object_arr_has_changes:CheckPoint.object_arr_has_changes=_B;return _D
-		return _B
+		if CheckPoint.object_arr_has_changes:CheckPoint.object_arr_has_changes=_C;return _D
+		return _C
 	@staticmethod
 	def check_image_arr_has_changed()->bool:
-		if not CheckPoint.images:CheckPoint.images=tuple(bpy.data.images);return _B
+		if not CheckPoint.images:CheckPoint.images=tuple(bpy.data.images);return _C
 		if len(bpy.data.images)!=len(CheckPoint.images):CheckPoint.images=tuple(bpy.data.images);return _D
-		if CheckPoint.image_arr_has_changes:CheckPoint.image_arr_has_changes=_B;return _D
-		return _B
+		if CheckPoint.image_arr_has_changes:CheckPoint.image_arr_has_changes=_C;return _D
+		return _C
 	@staticmethod
 	def object_poll(ob:_A|Object)->bool:
 		if ob and'MESH'==ob.type:
@@ -142,13 +142,13 @@ class Workflow(CameraPainterMain):
 			if me.polygons:
 				uv_layer=me.uv_layers.active
 				if uv_layer:return _D
-		return _B
+		return _C
 	@staticmethod
 	def camera_poll(ob:_A|Object)->bool:return ob and _I==ob.type and'PERSP'==ob.data.type
 	@staticmethod
 	def validate_id(*,item:bpy.types.ID)->bool:
 		try:getattr(item,_Y)
-		except ReferenceError:return _B
+		except ReferenceError:return _C
 		return _D
 	@staticmethod
 	def get_id_index(*,coll:bpy_prop_collection,id:ID)->int:
@@ -170,23 +170,23 @@ class Workflow(CameraPainterMain):
 				scene=context.scene
 				for ob in scene.objects:
 					if Workflow.camera_poll(ob):scene.camera=ob;return _D
-				return _B
+				return _C
 			return _D
 	class Mesh:
 		@classmethod
 		def modal_validate_uv_layers(cls)->bool:
 			mesh:Mesh=Workflow.mesh
 			if mesh:
-				if constants.TEMPORARY_DATA_NAME not in mesh.uv_layers:mesh.uv_layers.new(name=constants.TEMPORARY_DATA_NAME,do_init=_B)
+				if constants.TEMPORARY_DATA_NAME not in mesh.uv_layers:mesh.uv_layers.new(name=constants.TEMPORARY_DATA_NAME,do_init=_C)
 				uv_layer=mesh.uv_layers[constants.TEMPORARY_DATA_NAME]
 				if mesh.uv_layer_clone!=uv_layer:mesh.uv_layer_clone=uv_layer
 				check_tmp_not_active=_D
 				if mesh.uv_layers.active==uv_layer:
-					check_tmp_not_active=_B
+					check_tmp_not_active=_C
 					for layer in mesh.uv_layers:
 						if layer!=uv_layer:mesh.uv_layers.active=layer;check_tmp_not_active=_D;break
 				return check_tmp_not_active
-			return _B
+			return _C
 		@classmethod
 		def restore(cls,context:Context)->bool:
 			mesh=Workflow.mesh
@@ -195,12 +195,12 @@ class Workflow(CameraPainterMain):
 				if constants.TEMPORARY_DATA_NAME in uv_layers:uv_layers.remove(uv_layers[constants.TEMPORARY_DATA_NAME])
 			return _D
 	class ImagePaint:
-		is_paint:bool=_B
+		is_paint:bool=_C
 		@classmethod
-		def restore(cls,_context:Context)->bool:cls.is_paint=_B;return _D
+		def restore(cls,_context:Context)->bool:cls.is_paint=_C;return _D
 		@staticmethod
 		def __intern_get_clone_brush_tool(context:Context)->_A|WorkSpaceTool:
-			tool:WorkSpaceTool=context.workspace.tools.from_space_view3d_mode(context.mode,create=_B)
+			tool:WorkSpaceTool=context.workspace.tools.from_space_view3d_mode(context.mode,create=_C)
 			if tool and tool.idname=='builtin_brush.Clone':return tool
 		@classmethod
 		def tool_poll(cls,context:Context)->bool:ts=context.scene.tool_settings;return cls.__intern_get_clone_brush_tool(context)is not _A and ts.image_paint.mode=='IMAGE'and ts.image_paint.detect_data()
@@ -212,7 +212,7 @@ class Workflow(CameraPainterMain):
 			else:
 				brush=ts.image_paint.brush
 				if brush:return brush.size
-			return _C
+			return _B
 	@classmethod
 	@property
 	def object(cls)->_A|Object:
@@ -262,12 +262,12 @@ class Workflow(CameraPainterMain):
 	@property
 	def brush(cls)->_A|Brush:context=bpy.context;return context.scene.tool_settings.image_paint.brush
 class EventMouse(CameraPainterMain):
-	window:_A|Window=_A;region:_A|Region=_A;is_in_region_view_3d:bool=_B;position:Vector=Vector((_C,_C))
+	window:_A|Window=_A;region:_A|Region=_A;is_in_region_view_3d:bool=_C;position:Vector=Vector((_B,_B))
 	@classmethod
-	def restore(cls,_context:Context)->bool:cls.window=_A;cls.region=_A;cls.is_in_region_view_3d=_B;cls.position=Vector((_C,_C));return _D
+	def restore(cls,_context:Context)->bool:cls.window=_A;cls.region=_A;cls.is_in_region_view_3d=_C;cls.position=Vector((_B,_B));return _D
 	@classmethod
 	def update_from(cls,context:Context,event:Event)->_A:
-		active_window=context.window;cls.window=active_window;cls.is_in_region_view_3d=_B
+		active_window=context.window;cls.window=active_window;cls.is_in_region_view_3d=_C
 		for area in active_window.screen.areas:
 			if _K==area.type:
 				for region in area.regions:
@@ -279,11 +279,11 @@ class EventMouse(CameraPainterMain):
 		if cls.region:return cls.position-Vector((cls.region.x,cls.region.y))
 		return cls.position
 class GPUDrawCameras(CameraPainterMain):
-	batch_wires_data:_A|np.ndarray=_A;batch_wires:_A|GPUBatch=_A;select_framework:_A|bhqab.utils_gpu.FrameBufferFramework=_A;select_id:int=constants.CAMERA.SELECT.OFFSET;tt_info:str='';tt_info_text_pos:_A|Vector=_A;need_update_camera_info:bool=_B;prv_pixels:_A|np.ndarray=_A;prv_atlas_offscreen:_A|GPUOffScreen=_A;prv_image_indices:_A|np.ndarray=_A;prv_image_indices_texture:_A|GPUTexture=_A;prv_images:list[Image]=list();prv_i:int=0;prv_process_queue:list[Object]=list();prv_render_queue:list[Object]=list();prv_rendered:_A|Object=_A;LINE_THICKNESS_PX:float=_E;tooltip_ubo:_A|bhqglsl.ubo.UBO[shaders.TooltipParams]=_A;prv_ubo:_A|bhqglsl.ubo.UBO[shaders.PreviewParams]=_A;dithering_ubo:_A|bhqglsl.ubo.UBO[shaders.DitheringParams]=_A;common_ubo:_A|bhqglsl.ubo.UBO[shaders.CameraCommonParams]=_A
+	batch_wires_data:_A|np.ndarray=_A;batch_wires:_A|GPUBatch=_A;select_framework:_A|bhqab.utils_gpu.FrameBufferFramework=_A;select_id:int=constants.CAMERA.SELECT.OFFSET;tt_info:str='';tt_info_text_pos:_A|Vector=_A;need_update_camera_info:bool=_C;prv_pixels:_A|np.ndarray=_A;prv_atlas_offscreen:_A|GPUOffScreen=_A;prv_image_indices:_A|np.ndarray=_A;prv_image_indices_texture:_A|GPUTexture=_A;prv_images:list[Image]=list();prv_i:int=0;prv_process_queue:list[Object]=list();prv_render_queue:list[Object]=list();prv_rendered:_A|Object=_A;LINE_THICKNESS_PX:float=_E;tooltip_ubo:_A|bhqglsl.ubo.UBO[shaders.TooltipParams]=_A;prv_ubo:_A|bhqglsl.ubo.UBO[shaders.PreviewParams]=_A;dithering_ubo:_A|bhqglsl.ubo.UBO[shaders.DitheringParams]=_A;common_ubo:_A|bhqglsl.ubo.UBO[shaders.CameraCommonParams]=_A
 	@classmethod
 	def initialize(cls,context:Context)->bool:cls.modal_update_ubo_data(context);return cls.generate_batches(context,force=_D)and cls.update_select_framework(context)
 	@classmethod
-	def restore(cls,_context:Context)->bool:cls.batch_wires_data=_A;cls.batch_wires=_A;cls.select_framework=_A;cls.select_id=constants.CAMERA.SELECT.OFFSET;cls.tt_info='';cls.tt_info_text_pos=_A;cls.need_update_camera_info=_B;cls.clear_preview_data();cls.tooltip_ubo=_A;cls.prv_ubo=_A;cls.dithering_ubo=_A;cls.common_ubo=_A;return _D
+	def restore(cls,_context:Context)->bool:cls.batch_wires_data=_A;cls.batch_wires=_A;cls.select_framework=_A;cls.select_id=constants.CAMERA.SELECT.OFFSET;cls.tt_info='';cls.tt_info_text_pos=_A;cls.need_update_camera_info=_C;cls.clear_preview_data();cls.tooltip_ubo=_A;cls.prv_ubo=_A;cls.dithering_ubo=_A;cls.common_ubo=_A;return _D
 	@classmethod
 	def clear_preview_data(cls):bhqab.utils_ui.progress.complete(identifier='prv');cls.prv_pixels=_A;cls.prv_atlas_offscreen=_A;cls.prv_image_indices=_A;cls.prv_image_indices_texture=_A;cls.prv_images.clear();cls.prv_i=0;cls.prv_process_queue.clear();cls.prv_render_queue.clear();cls.prv_rendered=_A
 	@classmethod
@@ -292,10 +292,10 @@ class GPUDrawCameras(CameraPainterMain):
 	def shorten_path(fp:str,max_length:int)->str:
 		A='...'
 		if len(fp)<max_length:return fp
-		ret=A;parts=fp.split(os.sep);add_last_path=_B
+		ret=A;parts=fp.split(os.sep);add_last_path=_C
 		while len(ret)<max_length:
 			if len(parts)==0:return ret
-			if add_last_path:ret=ret.replace(A,f"...{os.sep}{parts[-1]}");del parts[-1];add_last_path=_B
+			if add_last_path:ret=ret.replace(A,f"...{os.sep}{parts[-1]}");del parts[-1];add_last_path=_C
 			else:ret=ret.replace(A,f"{parts[0]}{os.sep}...");del parts[0];add_last_path=_D
 		return ret
 	@staticmethod
@@ -304,7 +304,7 @@ class GPUDrawCameras(CameraPainterMain):
 		if image:image_props:ImageProps=image.cpp;aspect=image_props.aspect;preview_tile_index=Workflow.get_id_index(coll=bpy.data.images,id=image)
 		lens=cam.lens/cam_props.sensor;m4_rot_loc=camera.matrix_world.to_quaternion().to_matrix().transposed().to_4x4();m4_rot_loc.translation=camera.matrix_world.translation;return*m4_rot_loc.row[0],*m4_rot_loc.row[1],*m4_rot_loc.row[2],lens,aspect,camera_index,preview_tile_index
 	@classmethod
-	def generate_batches(cls,context:Context,force:bool=_B)->bool:
+	def generate_batches(cls,context:Context,force:bool=_C)->bool:
 		import numpy as np
 		if force or cls.batch_wires_data is _A:cls.batch_wires_data=np.array(tuple(cls.pack_camera_data_as_m4_flatten(camera=ob,camera_index=i)for(i,ob)in enumerate(context.scene.objects)if Workflow.camera_poll(ob)),dtype=np.float32,order=_G);cls.batch_wires=batch_for_shader(shaders.get(_Q),type=_a,content=dict(data=cls.batch_wires_data))
 		return _D
@@ -319,7 +319,7 @@ class GPUDrawCameras(CameraPainterMain):
 				cls.batch_wires_data[index]=updated_data
 		cls.batch_wires=batch_for_shader(shaders.get(_Q),type=_a,content=dict(data=cls.batch_wires_data))
 	@classmethod
-	def prv_add_to_process_queue(cls,*,camera:_A|Object,prior:bool=_B):
+	def prv_add_to_process_queue(cls,*,camera:_A|Object,prior:bool=_C):
 		image=_A
 		if Workflow.camera_poll(camera):cam_props:CameraProps=camera.data.cpp;image=cam_props.image
 		if image is not _A:
@@ -370,7 +370,7 @@ class GPUDrawCameras(CameraPainterMain):
 				tex=_get_pixels_float(image)
 				if tex:
 					if camera==camera_hover:cls.need_update_camera_info=_D
-					else:cls.need_update_camera_info=_B
+					else:cls.need_update_camera_info=_C
 					image.gl_free();image.buffers_free();textures.append((tex,image,image_index))
 				else:cls.prv_render_queue.append(camera)
 		if textures:
@@ -420,7 +420,7 @@ class GPUDrawCameras(CameraPainterMain):
 			if cls.need_update_camera_info:
 				camera=scene.objects[cls.select_id];cam:Camera=camera.data;cam_props:CameraProps=cam.cpp;image:Image=cam_props.image;image_fmt='';image_name=''
 				if image:
-					image_props:ImageProps=image.cpp;image_props.update_size_info(force=_B,free=not addon_pref.use_previews);image_fp_fmt=''
+					image_props:ImageProps=image.cpp;image_props.update_size_info(force=_C,free=not addon_pref.use_previews);image_fp_fmt=''
 					if image.source not in{'GENERATED','VIEWER'}and image.filepath:image_fp_fmt=cls.shorten_path(image.filepath,max_length=constants.UI.TOOLTIP.FILEPATH_MAX_LENGTH)+'\n'
 					image_source_fmt=bpy.types.UILayout.enum_item_name(image,'source',image.source);image_alpha_mode_fmt=bpy.types.UILayout.enum_item_name(image,'alpha_mode',image.alpha_mode);image_name=image.name;colorspace=image.colorspace_settings.name;has_data_fmt=pgettext('Yes'if image.has_data else'No',msgctxt);image_fmt=f"{image_fp_fmt}{image_props.size[0]} x {image_props.size[1]}, {image_source_fmt}, {image_alpha_mode_fmt}, {colorspace}\n"+pgettext('Loaded into memory: %s',msgctxt)%has_data_fmt+'\n'
 				id_indices_fmt=''
@@ -456,7 +456,7 @@ class GPUDrawCameras(CameraPainterMain):
 				if image_index!=-1:
 					if not cls.prv_ubo:cls.prv_ubo=bhqglsl.ubo.UBO(ubo_type=shaders.PreviewParams)
 					params=cls.prv_ubo.data;params.transform=prv_x,prv_y,prv_dimensions.x,prv_dimensions.y;params.tile_index=image_index;params.aspect=image_props.aspect_ratio[:];params.outline_color=color_wcol_outline;params.outline_thickness=cls.LINE_THICKNESS_PX;params.roundness=wcol.roundness;cls.prv_ubo.update()
-			cls.need_update_camera_info=_B
+			cls.need_update_camera_info=_C
 	@classmethod
 	def cb_SpaceView3D_POST_PIXEL(cls):
 		context=bpy.context;scene=context.scene;scene_props:SceneProps=scene.cpp;overlay:View3DOverlay=context.space_data.overlay
@@ -472,7 +472,7 @@ class GPUDrawCameras(CameraPainterMain):
 						aspect=image_props.aspect_ratio;view_frame=cam.view_frame();left_bottom_corner=view3d_utils.location_3d_to_region_2d(context.region,context.region_data,coord=camera.matrix_world@view_frame[2]);right_top_corner=view3d_utils.location_3d_to_region_2d(context.region,context.region_data,coord=camera.matrix_world@view_frame[0]);frame_dimensions:Vector=right_top_corner-left_bottom_corner;frame_center:Vector=left_bottom_corner+frame_dimensions*.5
 						with gpu.matrix.push_pop():gpu.state.blend_set(_N);shader_image=shaders.get('distorted_image');shader_image.bind();shader_image.uniform_sampler(_b,GPUDraw.image_texture);shader_image.uniform_float('u_Opacity',scene_props.current_image_alpha);shader_image.uniform_float('u_Aspect',aspect);viewport_metrics=bhqab.utils_gpu.get_viewport_metrics();shader_image.uniform_float(_O,viewport_metrics);shader_image.uniform_float('u_Transform',(frame_center.x,frame_center.y,frame_dimensions.x,frame_dimensions.y));shader_image.uniform_block(_R,GPUDraw.intrinsics_ubo.ubo);bhqab.utils_gpu.BatchPreset.ndc_rectangle_tris_P_UV.draw(shader_image)
 		if context.region==EventMouse.region and cls.tt_info:
-			do_draw_preview=_B
+			do_draw_preview=_C
 			if cls.prv_atlas_offscreen and cls.prv_image_indices_texture and cls.select_id!=constants.CAMERA.SELECT.OFFSET:
 				camera=scene.objects[cls.select_id];cam_props:CameraProps=camera.data.cpp;image=cam_props.image
 				if image and image.preview and image.preview.image_size[0]:do_draw_preview=_D
@@ -484,10 +484,10 @@ class GPUDrawCameras(CameraPainterMain):
 	def cb_SpaceView3D_POST_VIEW(cls):
 		context=bpy.context;overlay:View3DOverlay=context.space_data.overlay
 		if not overlay.show_overlays:return
-		viewport_metrics=bhqab.utils_gpu.get_viewport_metrics();do_draw_previews=_B
+		viewport_metrics=bhqab.utils_gpu.get_viewport_metrics();do_draw_previews=_C
 		if cls.prv_atlas_offscreen and cls.prv_image_indices_texture:do_draw_previews=_D
 		with gpu.matrix.push_pop():
-			gpu.state.line_width_set(cls.LINE_THICKNESS_PX+.5);gpu.state.blend_set(_N);gpu.state.depth_mask_set(_D);gpu.state.depth_test_set(_S);gpu.state.front_facing_set(_B);gpu.state.face_culling_set(_H)
+			gpu.state.line_width_set(cls.LINE_THICKNESS_PX+.5);gpu.state.blend_set(_N);gpu.state.depth_mask_set(_D);gpu.state.depth_test_set(_S);gpu.state.front_facing_set(_C);gpu.state.face_culling_set(_H)
 			if do_draw_previews:show_active_camera=context.region_data.view_perspective!=_I;shader_camera_frames=shaders.get('camera_frames');shader_camera_frames.bind();shader_camera_frames.uniform_float(_O,viewport_metrics);shader_camera_frames.uniform_block(_c,cls.dithering_ubo.ubo);shader_camera_frames.uniform_block(_J,cls.common_ubo.ubo);shader_camera_frames.uniform_bool(_f,show_active_camera);shader_camera_frames.uniform_sampler(_d,cls.prv_atlas_offscreen.texture_color);shader_camera_frames.uniform_sampler(_e,cls.prv_image_indices_texture);cls.batch_wires.draw(shader_camera_frames)
 			shader_camera_wires=shaders.get(_Q);shader_camera_wires.bind();shader_camera_wires.uniform_float(_O,viewport_metrics);shader_camera_wires.uniform_block(_J,cls.common_ubo.ubo);cls.batch_wires.draw(shader_camera_wires)
 	@classmethod
@@ -504,30 +504,30 @@ class GPUDrawCameras(CameraPainterMain):
 			else:depth_map=bhqab.utils_gpu.get_depth_map(depth_format=_M)
 			fb_scale=addon_pref.select_framebuffer_scale/1e2;selection_mouse_x=region_mouse.x*fb_scale;selection_mouse_y=region_mouse.y*fb_scale
 			with fb_select.bind():
-				fb_select.clear(color=(_C,_C,_C,_C),depth=_E)
-				with gpu.matrix.push_pop():viewport_metrics=bhqab.utils_gpu.get_viewport_metrics();gpu.state.line_width_set(_E);gpu.state.point_size_set(_E);gpu.state.blend_set(_H);gpu.state.depth_mask_set(_D);gpu.state.depth_test_set('LESS');gpu.state.front_facing_set(_B);gpu.state.face_culling_set(_H);shader=shaders.get('camera_select');shader.bind();shader.uniform_float('u_DepthMapMetrics',viewport_metrics[2:4]);shader.uniform_sampler(B,depth_map);shader.uniform_bool(_f,context.region_data.view_perspective!=_I);shader.uniform_block(_J,cls.common_ubo.ubo);cls.batch_wires.draw(shader);buff=gpu.types.Buffer(A,1);fb_select.read_color(x=int(selection_mouse_x),y=int(selection_mouse_y),xsize=1,ysize=1,channels=1,slot=0,format=A,data=buff)
+				fb_select.clear(color=(_B,_B,_B,_B),depth=_E)
+				with gpu.matrix.push_pop():viewport_metrics=bhqab.utils_gpu.get_viewport_metrics();gpu.state.line_width_set(_E);gpu.state.point_size_set(_E);gpu.state.blend_set(_H);gpu.state.depth_mask_set(_D);gpu.state.depth_test_set('LESS');gpu.state.front_facing_set(_C);gpu.state.face_culling_set(_H);shader=shaders.get('camera_select');shader.bind();shader.uniform_float('u_DepthMapMetrics',viewport_metrics[2:4]);shader.uniform_sampler(B,depth_map);shader.uniform_bool(_f,context.region_data.view_perspective!=_I);shader.uniform_block(_J,cls.common_ubo.ubo);cls.batch_wires.draw(shader);buff=gpu.types.Buffer(A,1);fb_select.read_color(x=int(selection_mouse_x),y=int(selection_mouse_y),xsize=1,ysize=1,channels=1,slot=0,format=A,data=buff)
 				cls.select_id=buff[0]+constants.CAMERA.SELECT.OFFSET
 			if addon_pref.use_previews:
 				with fb_select.bind():
-					fb_select.clear(color=(_C,_C,_C,_C),depth=_E)
+					fb_select.clear(color=(_B,_B,_B,_B),depth=_E)
 					with gpu.matrix.push_pop():
-						gpu.state.line_width_set(_E);gpu.state.point_size_set(_E);gpu.state.blend_set(_H);gpu.state.depth_mask_set(_B);gpu.state.depth_test_set(_S);gpu.state.front_facing_set(_B);gpu.state.face_culling_set(_H);shader=shaders.get('camera_roi');shader.bind();scene_props:SceneProps=context.scene.cpp;shader.uniform_float('u_Scale',scene_props.cameras_viewport_size);shader.uniform_sampler(B,depth_map);cls.batch_wires.draw(shader);w,h=fb_select.viewport_get()[2:];buff=gpu.types.Buffer(A,w*h);fb_select.read_color(x=0,y=0,xsize=w,ysize=h,channels=1,slot=0,format=A,data=buff);arr=np.array(buff,dtype=np.int32,copy=_B,order=_G);arr=arr[arr!=0]+constants.CAMERA.SELECT.OFFSET
+						gpu.state.line_width_set(_E);gpu.state.point_size_set(_E);gpu.state.blend_set(_H);gpu.state.depth_mask_set(_C);gpu.state.depth_test_set(_S);gpu.state.front_facing_set(_C);gpu.state.face_culling_set(_H);shader=shaders.get('camera_roi');shader.bind();scene_props:SceneProps=context.scene.cpp;shader.uniform_float('u_Scale',scene_props.cameras_viewport_size);shader.uniform_sampler(B,depth_map);cls.batch_wires.draw(shader);w,h=fb_select.viewport_get()[2:];buff=gpu.types.Buffer(A,w*h);fb_select.read_color(x=0,y=0,xsize=w,ysize=h,channels=1,slot=0,format=A,data=buff);arr=np.array(buff,dtype=np.int32,copy=_C,order=_G);arr=arr[arr!=0]+constants.CAMERA.SELECT.OFFSET
 						if arr.size:
 							counts=np.bincount(arr);max_count=np.max(counts);most_repetitive_items=np.argwhere(counts>=int(max_count/2)).flatten();queue_num=len(most_repetitive_items)
 							if queue_num>constants.UI.PRV.NUM_TILES:most_repetitive_items=most_repetitive_items[queue_num-constants.UI.PRV.NUM_TILES:]
 							for i in most_repetitive_items:
 								camera=context.scene.objects[i]
-								if Workflow.camera_poll(camera):cls.prv_add_to_process_queue(camera=camera,prior=_B)
+								if Workflow.camera_poll(camera):cls.prv_add_to_process_queue(camera=camera,prior=_C)
 class GPUDrawMesh(CameraPainterMain):
-	__slots__=();draw_framework:_A|bhqab.utils_gpu.DrawFramework=_A;batch_tris:_A|GPUBatch=_A;batch_loop_pairs:_A|GPUBatch=_A;brush_curve_points_data:_A|tuple[tuple[Vector,str]]=_A;brush_curve_size:float=_C;brush_curve_texture:_A|GPUTexture=_A;uv_project_offscreen:_A|GPUOffScreen=_A;camera_matrix:Matrix=Matrix.Identity(4);need_uv_project:bool=_B;uv_project_ubo:_A|bhqglsl.ubo.UBO[shaders.UVProjectParams]=_A;mesh_project_ubo:_A|bhqglsl.ubo.UBO[shaders.MeshProjectParams]=_A
+	__slots__=();draw_framework:_A|bhqab.utils_gpu.DrawFramework=_A;batch_tris:_A|GPUBatch=_A;batch_loop_pairs:_A|GPUBatch=_A;brush_curve_points_data:_A|tuple[tuple[Vector,str]]=_A;brush_curve_size:float=_B;brush_curve_texture:_A|GPUTexture=_A;uv_project_offscreen:_A|GPUOffScreen=_A;camera_matrix:Matrix=Matrix.Identity(4);need_uv_project:bool=_C;uv_project_ubo:_A|bhqglsl.ubo.UBO[shaders.UVProjectParams]=_A;mesh_project_ubo:_A|bhqglsl.ubo.UBO[shaders.MeshProjectParams]=_A
 	@classmethod
 	def initialize(cls,context:Context)->bool:return cls.generate_batches(context)and cls.__intern_update_uv_project_framebuffer()and cls.update_draw_framework(context)
 	@classmethod
-	def restore(cls,_context:Context)->bool:cls.draw_framework=_A;cls.batch_tris=_A;cls.batch_loop_pairs=_A;cls.brush_curve_points_data=_A;cls.brush_curve_size=_A;cls.brush_curve_texture=_A;cls.uv_project_offscreen=_A;cls.camera_matrix=Matrix.Identity(4);cls.need_uv_project=_B;cls.uv_project_ubo=_A;cls.mesh_project_ubo=_A;return _D
+	def restore(cls,_context:Context)->bool:cls.draw_framework=_A;cls.batch_tris=_A;cls.batch_loop_pairs=_A;cls.brush_curve_points_data=_A;cls.brush_curve_size=_A;cls.brush_curve_texture=_A;cls.uv_project_offscreen=_A;cls.camera_matrix=Matrix.Identity(4);cls.need_uv_project=_C;cls.uv_project_ubo=_A;cls.mesh_project_ubo=_A;return _D
 	@classmethod
 	def generate_batches(cls,context:Context):
 		B='TRIS';A='LINES';mesh=Workflow.mesh
-		if not mesh:return _B
+		if not mesh:return _C
 		addon_pref=get_addon_pref(context);do_batch_tris=addon_pref.use_mesh_preview
 		if cls.batch_loop_pairs:
 			if do_batch_tris:
@@ -541,20 +541,20 @@ class GPUDrawMesh(CameraPainterMain):
 		if do_batch_tris:vbo.attr_fill(id='ID',data=loop_indices.ravel())
 		if num_loops%2:loop_indices=np.concatenate((loop_indices,np.zeros(1,dtype=loop_indices.dtype)))
 		lines_ibo=GPUIndexBuf(type=A,seq=loop_indices.reshape(((num_loops+1)//2,2)));cls.batch_loop_pairs=GPUBatch(type=A,buf=vbo,elem=lines_ibo)
-		if do_batch_tris:mesh.calc_loop_triangles();num_loop_tri=len(mesh.loop_triangles);loop_tri_indices=loop_vertex_indices;loop_tri_indices.resize(num_loop_tri*3,refcheck=_B);mesh.loop_triangles.foreach_get('loops',loop_tri_indices);tris_ibo=GPUIndexBuf(type=B,seq=loop_tri_indices.reshape((num_loop_tri,3)));cls.batch_tris=GPUBatch(type=B,buf=vbo,elem=tris_ibo)
+		if do_batch_tris:mesh.calc_loop_triangles();num_loop_tri=len(mesh.loop_triangles);loop_tri_indices=loop_vertex_indices;loop_tri_indices.resize(num_loop_tri*3,refcheck=_C);mesh.loop_triangles.foreach_get('loops',loop_tri_indices);tris_ibo=GPUIndexBuf(type=B,seq=loop_tri_indices.reshape((num_loop_tri,3)));cls.batch_tris=GPUBatch(type=B,buf=vbo,elem=tris_ibo)
 		return _D
 	@classmethod
 	def __intern_update_uv_project_framebuffer(cls)->bool:
 		ob=Workflow.object
 		if ob:mesh:Mesh=ob.data;num_loops=len(mesh.loops);side=math.ceil(math.sqrt(num_loops/2));cls.uv_project_offscreen=GPUOffScreen(width=side,height=side,format=_g);return _D
-		return _B
+		return _C
 	@classmethod
 	def update_draw_framework(cls,context:Context)->bool:
 		addon_pref=get_addon_pref(context)
 		if addon_pref.use_mesh_preview:
 			if not cls.draw_framework:cls.draw_framework=bhqab.utils_gpu.DrawFramework(num=1,area_type=_K,region_type=_F)
 			if cls.draw_framework:cls.draw_framework.update_from_preferences(pref=addon_pref,attr_aa_method='aa_method',attr_smaa_preset='smaa_preset',attr_fxaa_preset='fxaa_preset',attr_fxaa_value='fxaa_value');cls.draw_framework.modal_eval(context,color_format=_g,depth_format=_M,percentage=100);return _D
-			return _B
+			return _C
 		return _D
 	@classmethod
 	def update_brush_curve_mapping_texture(cls,context:Context):
@@ -569,7 +569,7 @@ class GPUDrawMesh(CameraPainterMain):
 		if camera and image and ob:
 			image_props:ImageProps=image.cpp;dg=context.evaluated_depsgraph_get();image_width,image_height=image_props.size
 			if image_width and image_height:model_view=camera.matrix_world.inverted();projection=camera.calc_matrix_camera(depsgraph=dg,x=image_width,y=image_height);cls.camera_matrix=projection@model_view@ob.matrix_world;return _D
-		return _B
+		return _C
 	@classmethod
 	def cb_SpaceView3D_POST_VIEW(cls):
 		context=bpy.context
@@ -586,23 +586,23 @@ class GPUDrawMesh(CameraPainterMain):
 		if cls.brush_curve_texture:shader.uniform_sampler('u_BrushMask',cls.brush_curve_texture)
 		shader.uniform_sampler('u_UVProjectTexture',cls.uv_project_offscreen.texture_color);shader.uniform_float('u_BrushPos',mouse_pos);shader.uniform_float(_O,viewport_metrics);shader.uniform_block(_R,GPUDraw.intrinsics_ubo.ubo);shader.uniform_block(_h,cls.uv_project_ubo.ubo);shader.uniform_block('u_MeshProjectParams',cls.mesh_project_ubo.ubo)
 		with fb.bind():
-			with gpu.matrix.push_pop():fb.clear(color=(_C,_C,_C,_C),depth=_E);gpu.state.line_width_set(_E);gpu.state.blend_set(_N);gpu.state.depth_mask_set(_D);gpu.state.depth_test_set(_S);gpu.state.front_facing_set(_B);gpu.state.face_culling_set(_H);cls.batch_tris.draw(shader)
+			with gpu.matrix.push_pop():fb.clear(color=(_B,_B,_B,_B),depth=_E);gpu.state.line_width_set(_E);gpu.state.blend_set(_N);gpu.state.depth_mask_set(_D);gpu.state.depth_test_set(_S);gpu.state.front_facing_set(_C);gpu.state.face_culling_set(_H);cls.batch_tris.draw(shader)
 		texture=fb_framework.get_color_texture()
 		if texture:cls.draw_framework.draw(texture=texture)
 	@classmethod
 	def update_uv_project_ubo(cls,context:Context)->bool:
 		if not cls.uv_project_ubo:cls.uv_project_ubo=bhqglsl.ubo.UBO(ubo_type=shaders.UVProjectParams)
-		if not cls.update_camera_matrix(context):return _B
+		if not cls.update_camera_matrix(context):return _C
 		params=cls.uv_project_ubo.data;params.camera_matrix=tuple(_[:]for _ in cls.camera_matrix.col);params.uv_texture_resolution=cls.uv_project_offscreen.width;cls.uv_project_ubo.update();return _D
 	@classmethod
 	def update_mesh_project_ubo(cls,context:Context)->bool:
 		if not cls.mesh_project_ubo:cls.mesh_project_ubo=bhqglsl.ubo.UBO(ubo_type=shaders.MeshProjectParams)
 		ob=Workflow.object;camera=Workflow.camera;scene=context.scene;scene_props:SceneProps=scene.cpp
-		if not(ob and camera):return _B
+		if not(ob and camera):return _C
 		params=cls.mesh_project_ubo.data;params.model_matrix=tuple(_[:]for _ in ob.matrix_world.col);params.brush_radius=Workflow.ImagePaint.size
 		if scene_props.highlight_border:params.highlight_border_type=constants.BorderType[scene_props.highlight_border_type].value
 		else:params.highlight_border_type=constants.BorderType.NONE.value
-		params.highlight_border_color0=scene_props.highlight_border_color_0[:];params.highlight_border_color1=scene_props.highlight_border_color_1[:];params.draw_preview=not Workflow.ImagePaint.is_paint;params.use_uniforms=cls.need_uv_project;cls.mesh_project_ubo.update();return _D
+		params.highlight_border_color0=scene_props.highlight_border_color_0[:];params.highlight_border_color1=scene_props.highlight_border_color_1[:];params.highlight_border_facing=bhqglsl.ubo.prop_as_enum(enum_cls=constants.Facing,value=scene_props.highlight_border_facing);params.draw_preview=not Workflow.ImagePaint.is_paint;params.use_uniforms=cls.need_uv_project;cls.mesh_project_ubo.update();return _D
 	@classmethod
 	def uv_project(cls,context:Context)->bool:
 		import numpy as np
@@ -611,9 +611,9 @@ class GPUDrawMesh(CameraPainterMain):
 			if cam:cam_props:CameraProps=cam.cpp;cam_props.update_tool_settings(context)
 			shader=shaders.get('uv_project');shader.uniform_block(_R,GPUDraw.intrinsics_ubo.ubo);shader.uniform_block(_h,cls.uv_project_ubo.ubo);fb=cls.uv_project_offscreen
 			with fb.bind():
-				fb=gpu.state.active_framebuffer_get();fb.clear(color=(_C,_C,_C,_C));gpu.state.blend_set(_H);gpu.state.point_size_set(_E)
+				fb=gpu.state.active_framebuffer_get();fb.clear(color=(_B,_B,_B,_B));gpu.state.blend_set(_H);gpu.state.point_size_set(_E)
 				with gpu.matrix.push_pop():gpu.matrix.load_matrix(Matrix.Identity(4));gpu.matrix.load_projection_matrix(Matrix.Identity(4));cls.batch_loop_pairs.draw(shader)
-			mesh=Workflow.mesh;uv_layer=Workflow.clone_uv_layer;buff:gpu.types.Buffer=cls.uv_project_offscreen.texture_color.read();buff.dimensions=buff.dimensions[0]*buff.dimensions[1]*4;buffer_access=np.array(buff,dtype=np.float32,order=_G,copy=_B);uv_layer.uv.foreach_set('vector',buffer_access[:len(uv_layer.uv)*2]);mesh.update_tag();log.debug('UV Project');cls.need_uv_project=_B;cls.update_mesh_project_ubo(context)
+			mesh=Workflow.mesh;uv_layer=Workflow.clone_uv_layer;buff:gpu.types.Buffer=cls.uv_project_offscreen.texture_color.read();buff.dimensions=buff.dimensions[0]*buff.dimensions[1]*4;buffer_access=np.array(buff,dtype=np.float32,order=_G,copy=_C);uv_layer.uv.foreach_set('vector',buffer_access[:len(uv_layer.uv)*2]);mesh.update_tag();log.debug('UV Project');cls.need_uv_project=_C;cls.update_mesh_project_ubo(context)
 		return _D
 class GPUDraw(CameraPainterMain):
 	draw_handlers:dict[SpaceView3D|SpaceImageEditor,set[object]]=dict();_image_texture_source:_A|Image=_A;_image_texture:_A|GPUTexture=_A;intrinsics_ubo:_A|bhqglsl.ubo.UBO[shaders.IntrinsicsPixelCoo]=_A
@@ -665,7 +665,7 @@ def main(context:Context,event:Event):
 			cam:Camera=Workflow.cam
 			if cam:cam_props:CameraProps=cam.cpp;cam_props.update_sensor_fit_from_image();cam_props.update_render_settings(context);cam_props.update_tool_settings(context)
 		CheckPoint.pref.view.use_mesh_preview=addon_pref.use_mesh_preview
-	changed_camera=_B;changed_camera_params=_B;changed_cam=_B;changed_cam_props=_B;changed_image=_B;changed_image_props=_B
+	changed_camera=_C;changed_camera_params=_C;changed_cam=_C;changed_cam_props=_C;changed_image=_C;changed_image_props=_C
 	if CheckPoint.camera!=Workflow.camera:changed_camera=_D
 	elif CheckPoint.cam!=Workflow.cam:changed_cam=_D
 	else:
@@ -688,7 +688,7 @@ def main(context:Context,event:Event):
 			cam_props:CameraProps=cam.cpp;cam_props.update_sensor_fit_from_image();cam_props.update_render_settings(context)
 			if addon_pref.use_mesh_preview:cam_props.update_tool_settings(context)
 		GPUDrawMesh.need_uv_project=_D;GPUDraw.update_intrinsics_ubo();GPUDrawMesh.update_uv_project_ubo(context);GPUDrawMesh.update_mesh_project_ubo(context)
-		if CheckPoint.prev_camera_has_changes and changed_camera:GPUDrawCameras.update_batches_for_camera(context,camera=CheckPoint.camera);CheckPoint.prev_camera_has_changes=_B
+		if CheckPoint.prev_camera_has_changes and changed_camera:GPUDrawCameras.update_batches_for_camera(context,camera=CheckPoint.camera);CheckPoint.prev_camera_has_changes=_C
 		elif changed_camera_params or changed_cam or changed_cam_props or changed_image or changed_image_props:CheckPoint.prev_camera_has_changes=_D
 	if changed_camera or changed_camera_params or changed_cam or changed_cam_props or changed_image or changed_image_props:
 		CheckPoint.camera=Workflow.camera;CheckPoint.cam=Workflow.cam;CheckPoint.image=Workflow.image
@@ -697,21 +697,21 @@ def main(context:Context,event:Event):
 		if CheckPoint.image:cp_image_props:ImageProps=CheckPoint.image.cpp;CheckPoint.width=cp_image_props.size[0];CheckPoint.height=cp_image_props.size[1]
 	def _compare_colors_4f(li,ri)->bool:return li[0]==ri[0]and li[1]==ri[1]and li[2]==ri[2]and li[3]==ri[3]
 	scene_props:SceneProps=context.scene.cpp
-	if Workflow.object and CheckPoint.object_matrix_world!=Workflow.object.matrix_world or CheckPoint.scene_props.image_paint.brush_size!=Workflow.ImagePaint.size or CheckPoint.scene_props.highlight_border!=scene_props.highlight_border or CheckPoint.scene_props.highlight_border_type!=constants.BorderType[scene_props.highlight_border_type]or not _compare_colors_4f(CheckPoint.scene_props.highlight_border_color0,scene_props.highlight_border_color_0)or not _compare_colors_4f(CheckPoint.scene_props.highlight_border_color1,scene_props.highlight_border_color_1):GPUDrawMesh.update_mesh_project_ubo(context);CheckPoint.object_matrix_world=Workflow.object.matrix_world.copy();CheckPoint.scene_props.image_paint.brush_size=Workflow.ImagePaint.size;CheckPoint.scene_props.highlight_border=scene_props.highlight_border;CheckPoint.scene_props.highlight_border_type=constants.BorderType[scene_props.highlight_border_type];CheckPoint.scene_props.highlight_border_color0=scene_props.highlight_border_color_0[:];CheckPoint.scene_props.highlight_border_color1=scene_props.highlight_border_color_1[:]
+	if Workflow.object and CheckPoint.object_matrix_world!=Workflow.object.matrix_world or CheckPoint.scene_props.image_paint.brush_size!=Workflow.ImagePaint.size or CheckPoint.scene_props.highlight_border!=scene_props.highlight_border or CheckPoint.scene_props.highlight_border_type!=constants.BorderType[scene_props.highlight_border_type]or not _compare_colors_4f(CheckPoint.scene_props.highlight_border_color0,scene_props.highlight_border_color_0)or not _compare_colors_4f(CheckPoint.scene_props.highlight_border_color1,scene_props.highlight_border_color_1)or CheckPoint.scene_props.highlight_border_facing!=scene_props.highlight_border_facing:GPUDrawMesh.update_mesh_project_ubo(context);CheckPoint.object_matrix_world=Workflow.object.matrix_world.copy();CheckPoint.scene_props.image_paint.brush_size=Workflow.ImagePaint.size;CheckPoint.scene_props.highlight_border=scene_props.highlight_border;CheckPoint.scene_props.highlight_border_type=constants.BorderType[scene_props.highlight_border_type];CheckPoint.scene_props.highlight_border_color0=scene_props.highlight_border_color_0[:];CheckPoint.scene_props.highlight_border_color1=scene_props.highlight_border_color_1[:];CheckPoint.scene_props.highlight_border_facing=scene_props.highlight_border_facing
 	if'TIMER'==event.type:
 		if Workflow.check_object_arr_has_changed(context):log.debug('Objects array has changed at runtime!');GPUDrawCameras.generate_batches(context,force=_D)
 		if Workflow.check_image_arr_has_changed():log.debug('Image array has changed at runtime!');GPUDrawCameras.prv_image_indices_validate(context);GPUDrawCameras.generate_batches(context,force=_D)
 		GPUDrawCameras.modal_update_ubo_data(context);GPUDrawCameras.update_select_framework(context);GPUDrawCameras.modal_process_previews_render_queue(context);GPUDrawMesh.generate_batches(context);GPUDrawMesh.update_brush_curve_mapping_texture(context);GPUDrawMesh.update_draw_framework(context)
 	if event.type=='MOUSEMOVE':WindowInstances.tag_redraw_all_regions()
 class CPP_OT_main(Operator):
-	bl_idname='cpp.main';bl_label='CPP Main (internal)';bl_translation_context=_U;bl_options={_P};window:Window;initialized:bool=_B;_INIT_QUEUE=WindowInstances,Workflow,EventMouse,GPUDrawCameras,GPUDrawMesh,GPUDraw,CheckPoint
+	bl_idname='cpp.main';bl_label='CPP Main (internal)';bl_translation_context=_U;bl_options={_P};window:Window;initialized:bool=_C;_INIT_QUEUE=WindowInstances,Workflow,EventMouse,GPUDrawCameras,GPUDrawMesh,GPUDraw,CheckPoint
 	@classmethod
 	def queue_initialized(cls,context:Context)->bool:
 		if not cls.initialized:
 			log.debug('begin').push_indent();dt0=time.time();shaders.register()
 			for item in cls._INIT_QUEUE:
 				qualname=item.__qualname__;log.debug(_i.format(qualname=qualname)).push_indent();dt1=time.time();init=getattr(item,'initialize',_A)
-				if not init(context):log.pop_indent().warning('{qualname} not done, queue not initialized'.format(qualname=qualname));return _B
+				if not init(context):log.pop_indent().warning('{qualname} not done, queue not initialized'.format(qualname=qualname));return _C
 				log.pop_indent().debug(_j.format(qualname=qualname,elapsed=time.time()-dt1))
 			cls.initialized=_D;log.pop_indent().debug(_k.format(elapsed=time.time()-dt0))
 		return _D
@@ -721,13 +721,13 @@ class CPP_OT_main(Operator):
 			log.debug('begin').push_indent();dt0=time.time()
 			for item in reversed(cls._INIT_QUEUE):
 				qualname=item.__qualname__;dt1=time.time();log.debug(_i.format(qualname=qualname));ret=getattr(item,'restore',_A)
-				if not ret(context):log.warning('{qualname} not done, queue not restored'.format(qualname=qualname));return _B
+				if not ret(context):log.warning('{qualname} not done, queue not restored'.format(qualname=qualname));return _C
 				log.debug(_j.format(qualname=qualname,elapsed=time.time()-dt1))
-			cls.initialized=_B;log.pop_indent().debug(_k.format(elapsed=time.time()-dt0)).pop_indent()
+			cls.initialized=_C;log.pop_indent().debug(_k.format(elapsed=time.time()-dt0)).pop_indent()
 		return _D
 	def cancel(self,context:Context):
 		cls=self.__class__;WindowInstances.cancel_operator_instance(context,operator=self)
-		if not WindowInstances.instances:cls.queue_restore(context);WindowInstances.tag_redraw_all_regions();CPP_OT_main.initialized=_B
+		if not WindowInstances.instances:cls.queue_restore(context);WindowInstances.tag_redraw_all_regions();CPP_OT_main.initialized=_C
 	def invoke(self,context:Context,_event:Event):WindowInstances.invoke_register_operator_instance_in_window(context,operator=self);return{_l}
 	def modal(self,context:Context,event:Event):
 		cls=self.__class__;WindowInstances.modal_ensure_operator_invoked_in_all_windows(context,idname=CPP_OT_main.bl_idname)
@@ -743,7 +743,7 @@ class CPP_OT_draw(Operator):
 	def invoke(self,context:Context,_event:Event):GPUDrawMesh.uv_project(context);wm=context.window_manager;wm.modal_handler_add(self);Workflow.ImagePaint.is_paint=_D;return bpy.ops.paint.image_paint(_m)
 	def modal(self,context:Context,event:Event):
 		EventMouse.update_from(context,event)
-		if event.type!='TIMER':Workflow.ImagePaint.is_paint=_B;return{_T}
+		if event.type!='TIMER':Workflow.ImagePaint.is_paint=_C;return{_T}
 		return{_l}
 class CPP_OT_select(Operator):
 	bl_idname='cpp.select';bl_label='Select';bl_options={_P};bl_translation_context=_W

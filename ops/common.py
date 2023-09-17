@@ -1,13 +1,13 @@
 from __future__ import annotations
 _L='EXEC_DEFAULT'
-_K='un_flags'
-_J='directory'
-_I='global_scale'
-_H='PROP_UN_FLAGS'
-_G='utf-8'
-_F=False
-_E='lval'
-_D='SKIP_SAVE'
+_K='SKIP_SAVE'
+_J='un_flags'
+_I='directory'
+_H='global_scale'
+_G='PROP_UN_FLAGS'
+_F='utf-8'
+_E=False
+_D='lval'
 _C='HIDDEN'
 _B='CPP_IO'
 _A=None
@@ -27,7 +27,7 @@ import bpy_extras
 from bpy_extras.io_utils import orientation_helper
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:from io import TextIOWrapper;from typing import Callable,Iterable,Type;from..props import Object;from..props import Camera,Image;from..props.wm import WMProps;from..props.intern.common import Float64ArrayT
-__all__='UnifiedNameOptions','DEFAULT_UnifiedNameOptions','FileFormat','IMAGE_FILE_EXTENSIONS','CSV_FILE_EXTENSIONS','XML_FILE_EXTENSIONS','UnifiedName','UnifiedNameCache',_H,'IOFormat','IOOptionsBase','IOFileHandler','IOProcessor','io_helper','CENTERED_DIALOG_ICON_SCALE','CENTERED_DIALOG_PROPS_UI_UNITS_X','invoke_props_dialog_centered','StageStatus','SetupContextOperator'
+__all__='UnifiedNameOptions','DEFAULT_UnifiedNameOptions','FileFormat','IMAGE_FILE_EXTENSIONS','CSV_FILE_EXTENSIONS','XML_FILE_EXTENSIONS','UnifiedName','UnifiedNameCache',_G,'IOFormat','IOOptionsBase','IOFileHandler','IOProcessor','io_helper','CENTERED_DIALOG_ICON_SCALE','CENTERED_DIALOG_PROPS_UI_UNITS_X','invoke_props_dialog_centered','StageStatus','SetupContextOperator'
 class UnifiedNameOptions(IntFlag):
 	IGNORE_LETTER_CASE=auto();IGNORE_EXTENSION=auto();USE_CAMERA_NAME=auto();USE_CAM_NAME=auto();USE_IMAGE_NAME=auto();USE_IMAGE_FILEPATH=auto()
 	@staticmethod
@@ -41,7 +41,7 @@ IMAGE_FILE_EXTENSIONS={'.bmp','.sgi','.rgb','.bw','.png','.jpg','.jpeg','.jp2','
 CSV_FILE_EXTENSIONS={'.csv','.txt'}
 XML_FILE_EXTENSIONS={'.xmp'}
 class UnifiedName:
-	__slots__='item',_E,'done';item:str|Object|Image;lval:set[str];done:bool
+	__slots__='item',_D,'done';item:str|Object|Image;lval:set[str];done:bool
 	def _evaluate_lval(self,*,names:set[str],flags:UnifiedNameOptions=DEFAULT_UnifiedNameOptions):
 		self.lval=names
 		if flags&UnifiedNameOptions.IGNORE_LETTER_CASE and flags&UnifiedNameOptions.IGNORE_EXTENSION:self.lval=set(os.path.splitext(_)[0].lower()for _ in self.lval);return
@@ -68,8 +68,8 @@ class UnifiedName:
 	def __hash__(self)->int:return hash(self.item)
 	def __eq__(self,other:UnifiedName)->bool:return self.lval&other.lval
 	def __repr__(self)->str:return'|'.join(self.lval)
-	def __getstate__(self):return{_E:self.lval}
-	def __setstate__(self,state):self.lval=state[_E]
+	def __getstate__(self):return{_D:self.lval}
+	def __setstate__(self,state):self.lval=state[_D]
 class UnifiedNameCache:
 	__slots__=();_cached_image_names:set[UnifiedName]=set();_cached_camera_names:set[UnifiedName]=set();_cached_file_names:set[UnifiedName]=set();_cache_flags:UnifiedNameOptions=DEFAULT_UnifiedNameOptions
 	@classmethod
@@ -100,21 +100,21 @@ class UnifiedNameCache:
 		un=UnifiedName.from_string(val=name,flags=cls.cache_flags)
 		for item in cls.cached_camera_names:
 			if un==item:
-				if getattr(item,'done',_F):log.info(f"{name} skipped as already done");return
+				if getattr(item,'done',_E):log.info(f"{name} skipped as already done");return
 				item.done=True;return item.item
 		cam=bpy.data.cameras.new(name='');camera=bpy.data.objects.new(name=name,object_data=cam);bpy.context.collection.objects.link(camera);log.info(f'A missing camera object was created "{name}"');new_un=UnifiedName.from_object(ob=camera,flags=cls._cache_flags);new_un.done=True;cls._cached_camera_names.add(new_un);return camera
 class IOFormat(IntEnum):UNKNOWN=auto();RC_IECP=auto();RC_NXYZ=auto();RC_NXYZHPR=auto();RC_NXYZOPK=auto();RC_METADATA_XMP=auto()
 class IOOptionsBase:
 	__slots__='has_transform','R','S';has_transform:bool;R:Float64ArrayT;S:float
 	def __init__(self,**kwargs):
-		import numpy as np;axis_forward=kwargs['axis_forward'];axis_up=kwargs['axis_up'];global_scale=kwargs[_I]
-		if axis_forward=='Y'and axis_up=='Z'and global_scale==1.:self.has_transform=_F;self.R=_A;self.S=_A
+		import numpy as np;axis_forward=kwargs['axis_forward'];axis_up=kwargs['axis_up'];global_scale=kwargs[_H]
+		if axis_forward=='Y'and axis_up=='Z'and global_scale==1.:self.has_transform=_E;self.R=_A;self.S=_A
 		else:self.has_transform=True;self.R=np.array(bpy_extras.io_utils.axis_conversion(from_forward='Y',from_up='Z',to_forward=axis_forward,to_up=axis_up),dtype=np.float64,order='C');self.S=global_scale
 IOOptionsBaseT=TypeVar('IOOptionsBaseT',bound=IOOptionsBase)
 class IOFileHandler:
 	io_format:IOFormat;extension:str;size_max:int=-1;export_options:Type[IOOptionsBase]=IOOptionsBase
 	@classmethod
-	def check(*,file:TextIOWrapper)->bool:return _F
+	def check(*,file:TextIOWrapper)->bool:return _E
 	@classmethod
 	def evaluate_filename(cls,*,name:str)->str:return name
 	@classmethod
@@ -153,7 +153,7 @@ class IOProcessor:
 			if ext in cls.supported_extensions:
 				filepath=os.path.join(directory,elem.name)
 				if os.path.isfile(filepath):
-					with open(filepath,'r',encoding=_G,newline='')as file:
+					with open(filepath,'r',encoding=_F,newline='')as file:
 						for handler_cls in cls.__format_registry:
 							if ext==handler_cls.extension:
 								if handler_cls.size_max!=-1:
@@ -168,7 +168,7 @@ class IOProcessor:
 			if ext in cls.supported_extensions:
 				filepath=os.path.join(directory,elem.name)
 				if os.path.isfile(filepath):
-					with open(filepath,'r',encoding=_G,newline='')as file:
+					with open(filepath,'r',encoding=_F,newline='')as file:
 						for handler_cls in cls.__format_registry:
 							if ext==handler_cls.extension:
 								if handler_cls.size_max!=-1:
@@ -178,13 +178,13 @@ class IOProcessor:
 		return IOFormat.UNKNOWN
 	@classmethod
 	def read(cls,context:Context,**kwargs)->tuple[int,int]:
-		num_cameras=0;num_files=0;directory=kwargs[_J];files=kwargs['files'];options=IOOptionsBase(**kwargs)
+		num_cameras=0;num_files=0;directory=kwargs[_I];files=kwargs['files'];options=IOOptionsBase(**kwargs)
 		for elem in files:
 			_name,ext=os.path.splitext(elem.name);ext=ext.lower()
 			if ext in cls.supported_extensions:
 				filepath=os.path.join(directory,elem.name)
 				if os.path.isfile(filepath):
-					with open(filepath,'r',encoding=_G,newline='')as file:
+					with open(filepath,'r',encoding=_F,newline='')as file:
 						for handler_cls in cls.__format_registry:
 							if ext==handler_cls.extension:
 								file.seek(0)
@@ -211,7 +211,7 @@ class IOProcessor:
 		cls.cached_export_items=tuple(_iter_items())
 	@classmethod
 	def write(cls,context:Context,**kwargs)->tuple[int,int]:
-		flags=UnifiedNameOptions.from_string_set({kwargs['name_source']});directory=kwargs[_J];filename=kwargs['filename'];format=IOFormat[kwargs['fmt']];num_files=0;cls.eval_export_cameras(context,flags=flags);num_cameras=len(cls.cached_export_items)
+		flags=UnifiedNameOptions.from_string_set({kwargs['name_source']});directory=kwargs[_I];filename=kwargs['filename'];format=IOFormat[kwargs['fmt']];num_files=0;cls.eval_export_cameras(context,flags=flags);num_cameras=len(cls.cached_export_items)
 		if num_cameras:
 			for handler_cls in cls.__format_registry:
 				if handler_cls.io_format==format:options=handler_cls.export_options(**kwargs);num_files=handler_cls.write(directory=directory,filename=filename,options=options)
@@ -226,7 +226,7 @@ IOProcessor.register_file_format(rc_csv.RC_NXYZ)
 IOProcessor.register_file_format(rc_csv.RC_NXYZHPR)
 IOProcessor.register_file_format(rc_csv.RC_NXYZOPK)
 class IOUnifiedName_Params:
-	def _get_un_flags(self):return self.get(_K,DEFAULT_UnifiedNameOptions)
+	def _get_un_flags(self):return self.get(_J,DEFAULT_UnifiedNameOptions)
 	def _set_un_flags(self,value:int):
 		curr_enum_value=UnifiedNameOptions.from_string_set(self.un_flags);enum_value=UnifiedNameOptions(value)
 		if UnifiedNameOptions.USE_CAMERA_NAME not in enum_value and UnifiedNameOptions.USE_CAM_NAME not in enum_value:
@@ -235,15 +235,15 @@ class IOUnifiedName_Params:
 		if UnifiedNameOptions.USE_IMAGE_NAME not in enum_value and UnifiedNameOptions.USE_IMAGE_FILEPATH not in enum_value:
 			if curr_enum_value&UnifiedNameOptions.USE_IMAGE_NAME:enum_value|=UnifiedNameOptions.USE_IMAGE_FILEPATH
 			if curr_enum_value&UnifiedNameOptions.USE_IMAGE_FILEPATH:enum_value|=UnifiedNameOptions.USE_IMAGE_NAME
-		self[_K]=enum_value
-	un_flags:EnumProperty(items=((UnifiedNameOptions.IGNORE_LETTER_CASE.name,'Ignore Letter Case','Ignore character register for matching',0,UnifiedNameOptions.IGNORE_LETTER_CASE.value),(UnifiedNameOptions.IGNORE_EXTENSION.name,'Ignore Extensions','Use name only, no file extension when searching',0,UnifiedNameOptions.IGNORE_EXTENSION.value),_A,(UnifiedNameOptions.USE_CAMERA_NAME.name,'Use Object Name','Use camera object name for comparison',0,UnifiedNameOptions.USE_CAMERA_NAME.value),(UnifiedNameOptions.USE_CAM_NAME.name,'Use Camera Name','Use camera data name for comparison',0,UnifiedNameOptions.USE_CAM_NAME.value),_A,(UnifiedNameOptions.USE_IMAGE_NAME.name,'Use Image Name','Use image data-block name for comparison',0,UnifiedNameOptions.USE_IMAGE_NAME.value),(UnifiedNameOptions.USE_IMAGE_FILEPATH.name,'Use Image File Name','Use image file name for comparison',0,UnifiedNameOptions.USE_IMAGE_FILEPATH.value)),options={'ENUM_FLAG',_D},get=_get_un_flags,set=_set_un_flags,translation_context=_H,name='Comparison Options',description='Options for comparing names. At least one of the options must be selected for each compared type (object, image, etc.)')
-class IOFileBase_Params:filename:StringProperty(maxlen=1024,subtype='FILE_NAME',translation_context=_B,name='File Name');directory:StringProperty(subtype='DIR_PATH',maxlen=1024,options={_C,_D},translation_context=_B,name='Directory');filepath:StringProperty(subtype='FILE_PATH',maxlen=1024,options={_C,_D},translation_context=_B,name='File Path')
+		self[_J]=enum_value
+	un_flags:EnumProperty(items=((UnifiedNameOptions.IGNORE_LETTER_CASE.name,'Ignore Letter Case','Ignore character register for matching',0,UnifiedNameOptions.IGNORE_LETTER_CASE.value),(UnifiedNameOptions.IGNORE_EXTENSION.name,'Ignore Extensions','Use name only, no file extension when searching',0,UnifiedNameOptions.IGNORE_EXTENSION.value),_A,(UnifiedNameOptions.USE_CAMERA_NAME.name,'Use Object Name','Use camera object name for comparison',0,UnifiedNameOptions.USE_CAMERA_NAME.value),(UnifiedNameOptions.USE_CAM_NAME.name,'Use Camera Name','Use camera data name for comparison',0,UnifiedNameOptions.USE_CAM_NAME.value),_A,(UnifiedNameOptions.USE_IMAGE_NAME.name,'Use Image Name','Use image data-block name for comparison',0,UnifiedNameOptions.USE_IMAGE_NAME.value),(UnifiedNameOptions.USE_IMAGE_FILEPATH.name,'Use Image File Name','Use image file name for comparison',0,UnifiedNameOptions.USE_IMAGE_FILEPATH.value)),options={'ENUM_FLAG',_K},get=_get_un_flags,set=_set_un_flags,translation_context=_G,name='Comparison Options',description='Options for comparing names. At least one of the options must be selected for each compared type (object, image, etc.)')
+class IOFileBase_Params:filename:StringProperty(maxlen=1024,subtype='FILE_NAME',translation_context=_B,name='File Name');directory:StringProperty(subtype='DIR_PATH',maxlen=1024,options={_C},translation_context=_B,name='Directory');filepath:StringProperty(subtype='FILE_PATH',maxlen=1024,options={_C},translation_context=_B,name='File Path')
 class IOFile_Params:
-	files:CollectionProperty(type=OperatorFileListElement,options={_C,_D})
+	files:CollectionProperty(type=OperatorFileListElement,options={_C,_K})
 	def _get_filter_glob(self):return IOProcessor.filter_glob
 	filter_glob:StringProperty(get=_get_filter_glob,maxlen=255,options={_C},translation_context=_B)
 @orientation_helper(axis_forward='Y',axis_up='Z')
-class IOTransform_Params:attr_name=_I;_global_scale_single_T,_global_scale_double_T,global_scale=double.property_group(attr_name,default=1.,min=constants.IEEE754.FLT_EXP,max=constants.IEEE754.FLT_MAX,options={_C},translation_context=_B,name='Global Scale',description='The global scale of the dataset');global_scale_single:_global_scale_single_T;global_scale_double:_global_scale_double_T
+class IOTransform_Params:attr_name=_H;_global_scale_single_T,_global_scale_double_T,global_scale=double.property_group(attr_name,default=1.,min=constants.IEEE754.FLT_EXP,max=constants.IEEE754.FLT_MAX,options={_C},translation_context=_B,name='Global Scale',description='The global scale of the dataset');global_scale_single:_global_scale_single_T;global_scale_double:_global_scale_double_T
 CENTERED_DIALOG_ICON_SCALE=6.
 CENTERED_DIALOG_PROPS_UI_UNITS_X=8
 def invoke_props_dialog_centered(context:Context,event:Event,*,operator:Operator):dialog_height=284;wm=context.window_manager;window=context.window;initial_mouse_x,initial_mouse_y=event.mouse_x,event.mouse_y;window.cursor_warp(int(window.width/2),int(window.height/2)+int(dialog_height/2));wm.invoke_props_dialog(operator,width=400);window.cursor_warp(initial_mouse_x,initial_mouse_y)

@@ -58,7 +58,7 @@ def _unregister_classes():
 	props.unregister()
 @persistent
 def _handler_load_post(_=_A):
-	_register_classes();bhqab.utils_ui.check_addon_updates(force=False)
+	if not _classes_registered:_register_classes();bhqab.utils_ui.check_addon_updates(force=False)
 	if not main.WindowInstances.instances:main.WindowInstances.modal_ensure_operator_invoked_in_all_windows(context=bpy.context,idname=main.CPP_OT_main.bl_idname)
 	if bpy.app.timers.is_registered(_handler_load_post):bpy.app.timers.unregister(_handler_load_post)
 @persistent
