@@ -31,7 +31,7 @@ import os,logging
 from..import ADDON_PKG,DATA_DIR,log,LOG_FILE
 from..lib import bhqab
 from..import icons
-from..import localization
+from..import langs
 from..import main
 from..import reports
 from..import ops
@@ -79,7 +79,7 @@ class Preferences(AddonPreferences):
 					if kmi:rna_keymap_ui.draw_kmi([],kc,km,kmi,col,0)
 			case'INFO':
 				for flag in(_I,_N,_O):
-					if bhqab.utils_ui.template_disclosure_enum_flag(layout,item=self,prop_enum_flag=_F,flag=flag):text=bhqab.utils_ui.request_localization_from_file(module=ADDON_PKG,langs=localization.LANGS,msgctxt=flag,src=os.path.join(DATA_DIR,f"{flag}.txt"),dst={'uk_UA':os.path.join(DATA_DIR,f"{flag}_uk_UA.txt")});bhqab.utils_ui.draw_wrapped_text(context,layout,text=text,text_ctxt=flag)
+					if bhqab.utils_ui.template_disclosure_enum_flag(layout,item=self,prop_enum_flag=_F,flag=flag):text=bhqab.utils_ui.request_localization_from_file(module=ADDON_PKG,langs=langs.LANGS,msgctxt=flag,src=os.path.join(DATA_DIR,f"{flag}.txt"),dst={'uk':os.path.join(DATA_DIR,f"{flag}_uk.txt")});bhqab.utils_ui.draw_wrapped_text(context,layout,text=text,text_ctxt=flag)
 				if bhqab.utils_ui.template_disclosure_enum_flag(layout,item=self,prop_enum_flag=_F,flag=_M):update_props:bhqab.utils_ui.PreferencesUpdateProperties=self.update_props;update_props.draw(context,layout)
 				if bhqab.utils_ui.template_disclosure_enum_flag(layout,item=self,prop_enum_flag=_F,flag='LINKS'):
 					row=layout.column_flow(columns=3,align=_A)

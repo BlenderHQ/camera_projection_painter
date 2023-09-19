@@ -45,7 +45,7 @@ def _ot_result_to_bool(result:set)->bool:
 	elif result=={_F}:return _A
 	else:raise AssertionError('Operator should be executed default, not running modal.')
 def _cb_REALITY_CAPTURE_FBX(context:Context,abs_fp:str)->bool:ret=bpy.ops.import_scene.fbx(_G,filepath=abs_fp,use_manual_orientation=_A,global_scale=1.,bake_space_transform=_A,use_custom_normals=_B,use_image_search=_A,use_alpha_decals=_A,use_anim=_B,anim_offset=1.,use_subsurf=_A,use_custom_props=_B,use_custom_props_enum_as_string=_B,ignore_leaf_bones=_A,force_connect_children=_A,automatic_bone_orientation=_A,primary_bone_axis='Y',secondary_bone_axis='X',use_prepost_rot=_B,axis_forward='-Z',axis_up='Y');return _ot_result_to_bool(ret)
-def _cb_REALITY_CAPTURE_OBJ(context:Context,abs_fp:str)->bool:ret=bpy.ops.import_scene.obj(_G,filepath=abs_fp,filter_glob='*.obj;*.mtl',use_edges=_B,use_smooth_groups=_B,use_split_objects=_B,use_split_groups=_A,use_groups_as_vgroups=_A,use_image_search=_A,split_mode='ON',global_clamp_size=.0,axis_forward='-Z',axis_up='Y');return _ot_result_to_bool(ret)
+def _cb_REALITY_CAPTURE_OBJ(context:Context,abs_fp:str)->bool:ret=bpy.ops.wm.obj_import(_G,filepath=abs_fp,global_scale=1.,clamp_size=.0,forward_axis='NEGATIVE_Z',up_axis='Y',use_split_objects=_B,use_split_groups=_A,import_vertex_groups=_A,validate_meshes=_A);return _ot_result_to_bool(ret)
 def _cb_REALITY_CAPTURE_DAE(context:Context,abs_fp:str)->bool:ret=bpy.ops.wm.collada_import(_G,filepath=abs_fp,import_units=_A,fix_orientation=_A,find_chains=_A,auto_connect=_A,min_chain_length=0,keep_bind_info=_A);return _ot_result_to_bool(ret)
 _CALLBACKS={'REALITY_CAPTURE':{_C:_cb_REALITY_CAPTURE_FBX,_D:_cb_REALITY_CAPTURE_OBJ,_E:_cb_REALITY_CAPTURE_DAE}}
 def _apply_udim_materials_fix(context:Context,*,objects:set[Object]):

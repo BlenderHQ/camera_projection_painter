@@ -16,8 +16,8 @@ LOG_FILE=_log.LOG_FILE
 def register_class(cls):bpy.utils.register_class(cls);_classes_registered.append(cls)
 def unregister_class(cls):bpy.utils.unregister_class(cls);_classes_registered.remove(cls)
 def get_addon_pref(context)->props.pref.Preferences:return context.preferences.addons[ADDON_PKG].preferences
-if'bpy'in locals():reload(_log);reload(reports);reload(constants);reload(bhqab);reload(bhqglsl);reload(icons);reload(props);reload(shaders);reload(main);reload(ops);reload(localization);reload(ui);reload(manual_map)
-else:_classes_registered=list();from.import reports,constants;from.lib import bhqab;from.lib import bhqglsl;from.import icons,props,shaders,main,ops,localization,ui,manual_map
+if'bpy'in locals():reload(_log);reload(reports);reload(constants);reload(bhqab);reload(bhqglsl);reload(icons);reload(props);reload(shaders);reload(main);reload(ops);reload(langs);reload(ui);reload(manual_map)
+else:_classes_registered=list();from.import reports,constants;from.lib import bhqab;from.lib import bhqglsl;from.import icons,props,shaders,main,ops,langs,ui,manual_map
 HAS_BPY=False
 try:import bpy
 except ImportError:pass
@@ -51,7 +51,7 @@ if HAS_BPY and not bpy.app.background:_classes=_persistent_classes+_gpu_require_
 def _register_classes():
 	props.register()
 	for cls in _classes:register_class(cls)
-	if not bpy.app.background:bhqab.utils_ui.register_addon_update_operators();bpy.app.translations.register(ADDON_PKG,localization.LANGS);bpy.utils.register_manual_map(eval_manual_map);register_keymap()
+	if not bpy.app.background:bhqab.utils_ui.register_addon_update_operators();bpy.app.translations.register(ADDON_PKG,langs.LANGS);bpy.utils.register_manual_map(eval_manual_map);register_keymap()
 def _unregister_classes():
 	if not bpy.app.background:unregister_keymap();bpy.utils.unregister_manual_map(eval_manual_map);bpy.app.translations.unregister(ADDON_PKG);bhqab.utils_ui.unregister_addon_update_operators()
 	for cls in reversed(_classes_registered):unregister_class(cls)
