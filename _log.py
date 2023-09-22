@@ -24,7 +24,7 @@ class _IndentLogger(logging.Logger):
 	def log(self,level,msg):self._indented(level,msg);return self
 LOG=_IndentLogger(_LOGGER_NAME)
 LOG.setLevel(logging.DEBUG)
-if not LOG.handlers:__fh=logging.FileHandler(filename=LOG_FILE,mode='w',encoding='utf-8');__fh.setLevel(logging.DEBUG);__ch=logging.StreamHandler();__ch.setLevel(logging.WARNING);__ch.setFormatter(_ColoredFormatter());__fh.setFormatter(logging.Formatter('%(levelname)10s: %(message)s'));LOG.addHandler(__ch);LOG.addHandler(__fh)
+if not LOG.handlers:__fh=logging.FileHandler(filename=LOG_FILE,mode='w',encoding='utf-8');__fh.setLevel(logging.DEBUG);__ch=logging.StreamHandler();__ch.setLevel(logging.WARNING);__fh.setFormatter(logging.Formatter('%(levelname)10s: %(message)s'));__ch.setFormatter(_ColoredFormatter());LOG.addHandler(__fh);LOG.addHandler(__ch)
 pattern=re.compile('log (\\d{2}-\\d{2}-\\d{4} \\d{2}-\\d{2}-\\d{2}\\.\\d{6})\\.txt')
 def extract_datetime(filename):
 	match=re.search(pattern,filename)

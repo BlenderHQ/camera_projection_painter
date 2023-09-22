@@ -38,7 +38,7 @@ _D=True
 _C=False
 _B=.0
 _A=None
-import os,math,time
+import logging,math,os,time
 from.import log
 from.import get_addon_pref
 from.lib import bhqab
@@ -107,7 +107,7 @@ class WindowInstances(CameraPainterMain):
 	@staticmethod
 	def tag_redraw_all_regions():bhqab.utils_wm.tag_redraw_all_regions(area_type=_K,region_type=_F)
 class CheckPoint(CameraPainterMain):
-	objects:tuple[Object]=tuple();images:tuple[Image]=tuple();prev_camera_has_changes:bool=_C;camera:_A|Object=_A;cam:_A|Camera=_A;image:_A|Image=_A;width:float=_B;height:float=_B;lens:float=_B;sensor_fit:Literal['AUTO','HORIZONTAL','VERTICAL'];sensor:float=_B;clip_start:float=_B;clip_end:float=_B;principal_x:float=_B;principal_y:float=_B;skew:float=_B;aspect:float=_B;distortion_model:str='';k1:float=_B;k2:float=_B;k3:float=_B;k4:float=_B;p1:float=_B;p2:float=_B;object_matrix_world:Matrix=Matrix.Identity(4);camera_matrix_world:Matrix=Matrix.Identity(4);object_arr_has_changes:bool=_C;image_arr_has_changes:bool=_C;select_id:int=constants.CAMERA.SELECT.OFFSET
+	objects:tuple[Object]=tuple();images:tuple[Image]=tuple();prev_camera_has_changes:bool=_C;camera:_A|Object=_A;cam:_A|Camera=_A;image:_A|Image=_A;width:float=_B;height:float=_B;lens:float=_B;sensor_fit:Literal['AUTO','HORIZONTAL','VERTICAL'];sensor:float=_B;clip_start:float=_B;clip_end:float=_B;principal_x:float=_B;principal_y:float=_B;skew:float=_B;aspect:float=_B;distortion_model:str='';k1:float=_B;k2:float=_B;k3:float=_B;k4:float=_B;p1:float=_B;p2:float=_B;object_matrix_world:Matrix=Matrix.Identity(4);camera_matrix_world:Matrix=Matrix.Identity(4);object_arr_has_changes:bool=_C;image_arr_has_changes:bool=_C;select_id:int=constants.CAMERA.SELECT.OFFSET;tmp_data_name:str=''
 	class pref:
 		class view:use_mesh_preview:bool=_C;ui_line_width:str=''
 		dithering_mix_factor:float=_B;refine_previews:str='';cameras_transparency:float=_B
@@ -115,11 +115,11 @@ class CheckPoint(CameraPainterMain):
 		highlight_orientation:bool=_C;highlight_border:bool=_C;highlight_border_type:int=constants.BorderType.FILL;highlight_border_color0:Vector=Vector((_B,_B,_B,_B));highlight_border_color1:Vector=Vector((_B,_B,_B,_B));highlight_border_facing:set[str]=set()
 		class image_paint:brush_size:float=_B
 	@classmethod
-	def restore(cls,_context:Context)->bool:cls.objects=tuple();cls.images=tuple();cls.prev_camera_has_changes=_C;cls.camera=_A;cls.cam=_A;cls.image=_A;cls.width=_B;cls.height=_B;cls.lens=_B;cls.sensor_fit='AUTO';cls.sensor=_B;cls.clip_start=_B;cls.clip_end=_B;cls.principal_x=_B;cls.principal_y=_B;cls.skew=_B;cls.aspect=_B;cls.distortion_model='';cls.k1=_B;cls.k2=_B;cls.k3=_B;cls.k4=_B;cls.p1=_B;cls.p2=_B;cls.object_matrix_world.identity();cls.camera_matrix_world.identity();cls.object_arr_has_changes=_C;cls.image_arr_has_changes=_C;cls.select_id=constants.CAMERA.SELECT.OFFSET;cls.pref.view.use_mesh_preview=_C;cls.pref.view.ui_line_width='';cls.pref.dithering_mix_factor=_B;cls.pref.refine_previews='';cls.pref.cameras_transparency=_B;cls.scene_props.highlight_orientation=_C;cls.scene_props.highlight_border=_C;cls.scene_props.highlight_border_type=constants.BorderType.FILL;cls.scene_props.highlight_border_color0=Vector((_B,_B,_B,_B));cls.scene_props.highlight_border_color1=Vector((_B,_B,_B,_B));cls.scene_props.highlight_border_facing.clear();cls.scene_props.image_paint.brush_size=_B;return _D
+	def restore(cls,_context:Context)->bool:cls.objects=tuple();cls.images=tuple();cls.prev_camera_has_changes=_C;cls.camera=_A;cls.cam=_A;cls.image=_A;cls.width=_B;cls.height=_B;cls.lens=_B;cls.sensor_fit='AUTO';cls.sensor=_B;cls.clip_start=_B;cls.clip_end=_B;cls.principal_x=_B;cls.principal_y=_B;cls.skew=_B;cls.aspect=_B;cls.distortion_model='';cls.k1=_B;cls.k2=_B;cls.k3=_B;cls.k4=_B;cls.p1=_B;cls.p2=_B;cls.object_matrix_world.identity();cls.camera_matrix_world.identity();cls.object_arr_has_changes=_C;cls.image_arr_has_changes=_C;cls.select_id=constants.CAMERA.SELECT.OFFSET;cls.tmp_data_name='';cls.pref.view.use_mesh_preview=_C;cls.pref.view.ui_line_width='';cls.pref.dithering_mix_factor=_B;cls.pref.refine_previews='';cls.pref.cameras_transparency=_B;cls.scene_props.highlight_orientation=_C;cls.scene_props.highlight_border=_C;cls.scene_props.highlight_border_type=constants.BorderType.FILL;cls.scene_props.highlight_border_color0=Vector((_B,_B,_B,_B));cls.scene_props.highlight_border_color1=Vector((_B,_B,_B,_B));cls.scene_props.highlight_border_facing.clear();cls.scene_props.image_paint.brush_size=_B;return _D
 class Workflow(CameraPainterMain):
 	__slots__=()
 	@classmethod
-	def initialize(cls,context:Context)->bool:return cls.Cameras.process_cameras_visibility(context,hide=_D)
+	def initialize(cls,context:Context)->bool:return cls.Cameras.process_cameras_visibility(context,hide=_D)and cls.Mesh.eval_temp_data_name()
 	@classmethod
 	def restore(cls,context:Context)->bool:return cls.Mesh.restore(context)and cls.Cameras.process_cameras_visibility(context,hide=_C)and cls.ImagePaint.restore(context)
 	@staticmethod
@@ -174,11 +174,16 @@ class Workflow(CameraPainterMain):
 			return _D
 	class Mesh:
 		@classmethod
+		def eval_temp_data_name(cls)->bool:
+			arr=tuple();me=Workflow.mesh
+			if me:arr=me.uv_layers
+			CheckPoint.tmp_data_name=bhqab.utils_ui.eval_unique_name(arr=arr);return _D
+		@classmethod
 		def modal_validate_uv_layers(cls)->bool:
 			mesh:Mesh=Workflow.mesh
 			if mesh:
-				if constants.TEMPORARY_DATA_NAME not in mesh.uv_layers:mesh.uv_layers.new(name=constants.TEMPORARY_DATA_NAME,do_init=_C)
-				uv_layer=mesh.uv_layers[constants.TEMPORARY_DATA_NAME]
+				if CheckPoint.tmp_data_name not in mesh.uv_layers:mesh.uv_layers.new(name=CheckPoint.tmp_data_name,do_init=_C)
+				uv_layer=mesh.uv_layers[CheckPoint.tmp_data_name]
 				if mesh.uv_layer_clone!=uv_layer:mesh.uv_layer_clone=uv_layer
 				check_tmp_not_active=_D
 				if mesh.uv_layers.active==uv_layer:
@@ -188,12 +193,13 @@ class Workflow(CameraPainterMain):
 				return check_tmp_not_active
 			return _C
 		@classmethod
-		def restore(cls,context:Context)->bool:
+		def restore(cls,context:Context)->bool:cls.remove_temp_data();return _D
+		@classmethod
+		def remove_temp_data(cls):
 			mesh=Workflow.mesh
 			if mesh:
 				uv_layers=mesh.uv_layers
-				if constants.TEMPORARY_DATA_NAME in uv_layers:uv_layers.remove(uv_layers[constants.TEMPORARY_DATA_NAME])
-			return _D
+				if CheckPoint.tmp_data_name in uv_layers:uv_layers.remove(uv_layers[CheckPoint.tmp_data_name]);GPUDrawMesh.need_uv_project=_D
 	class ImagePaint:
 		is_paint:bool=_C
 		@classmethod
@@ -203,7 +209,7 @@ class Workflow(CameraPainterMain):
 			tool:WorkSpaceTool=context.workspace.tools.from_space_view3d_mode(context.mode,create=_C)
 			if tool and tool.idname=='builtin_brush.Clone':return tool
 		@classmethod
-		def tool_poll(cls,context:Context)->bool:ts=context.scene.tool_settings;return cls.__intern_get_clone_brush_tool(context)is not _A and ts.image_paint.mode=='IMAGE'and ts.image_paint.detect_data()
+		def tool_poll(cls,context:Context)->bool:ts=context.scene.tool_settings;return cls.__intern_get_clone_brush_tool(context)is not _A and ts.image_paint.mode=='IMAGE'
 		@classmethod
 		@property
 		def size(cls)->float:
@@ -605,9 +611,8 @@ class GPUDrawMesh(CameraPainterMain):
 		params.highlight_border_color0=scene_props.highlight_border_color_0[:];params.highlight_border_color1=scene_props.highlight_border_color_1[:];params.highlight_border_facing=bhqglsl.ubo.prop_as_enum(enum_cls=constants.Facing,value=scene_props.highlight_border_facing);params.draw_preview=not Workflow.ImagePaint.is_paint;params.use_uniforms=cls.need_uv_project;cls.mesh_project_ubo.update();return _D
 	@classmethod
 	def uv_project(cls,context:Context)->bool:
-		import numpy as np
 		if cls.need_uv_project:
-			cam:Camera=Workflow.cam
+			import numpy as np;cam:Camera=Workflow.cam
 			if cam:cam_props:CameraProps=cam.cpp;cam_props.update_tool_settings(context)
 			shader=shaders.get('uv_project');shader.uniform_block(_R,GPUDraw.intrinsics_ubo.ubo);shader.uniform_block(_h,cls.uv_project_ubo.ubo);fb=cls.uv_project_offscreen
 			with fb.bind():
@@ -656,8 +661,7 @@ class GPUDraw(CameraPainterMain):
 	@classmethod
 	def cb_SpaceView3D_POST_VIEW(cls):GPUDrawMesh.cb_SpaceView3D_POST_VIEW();GPUDrawCameras.cb_SpaceView3D_POST_VIEW()
 def main(context:Context,event:Event):
-	if not Workflow.Cameras.modal_validate_scene_camera_has_been_set(context):return
-	if not Workflow.Mesh.modal_validate_uv_layers():return
+	if not Workflow.Cameras.modal_validate_scene_camera_has_been_set(context):log.warning('Scene camera is not set');return
 	addon_pref=get_addon_pref(context)
 	if CheckPoint.select_id!=GPUDrawCameras.select_id:GPUDrawCameras.need_update_camera_info=_D;camera:Object=context.scene.objects[GPUDrawCameras.select_id];GPUDrawCameras.update_batches_for_camera(context,camera=camera);GPUDrawCameras.prv_add_to_process_queue(camera=camera,prior=_D);CheckPoint.select_id=GPUDrawCameras.select_id
 	if CheckPoint.pref.view.use_mesh_preview!=addon_pref.use_mesh_preview:
@@ -740,7 +744,11 @@ class CPP_OT_draw(Operator):
 	bl_idname='cpp.draw';bl_label='Draw';bl_options={_P};bl_translation_context=_V
 	@classmethod
 	def poll(cls,_context:Context):return GPUDrawCameras.select_id==constants.CAMERA.SELECT.OFFSET
-	def invoke(self,context:Context,_event:Event):GPUDrawMesh.uv_project(context);wm=context.window_manager;wm.modal_handler_add(self);Workflow.ImagePaint.is_paint=_D;return bpy.ops.paint.image_paint(_m)
+	def invoke(self,context:Context,_event:Event):
+		A='CANCELLED';cls=self.__class__;msgctxt=cls.bl_translation_context;ts=context.scene.tool_settings
+		if not ts.image_paint.detect_data():reports.report_and_log(self,level=logging.WARNING,message='Missing image paint data, unable to paint',msgctxt=msgctxt);return{A}
+		if not Workflow.Mesh.modal_validate_uv_layers():reports.report_and_log(self,level=logging.WARNING,message='Canvas object is missing active UV map',msgctxt=msgctxt);return{A}
+		GPUDrawMesh.uv_project(context);wm=context.window_manager;wm.modal_handler_add(self);Workflow.ImagePaint.is_paint=_D;return bpy.ops.paint.image_paint(_m)
 	def modal(self,context:Context,event:Event):
 		EventMouse.update_from(context,event)
 		if event.type!='TIMER':Workflow.ImagePaint.is_paint=_C;return{_T}

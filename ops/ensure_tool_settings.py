@@ -5,23 +5,32 @@ from.import common
 from..import main
 from..import reports
 import bpy
-from bpy.types import Context
+from bpy.types import Context,Mesh
 __all__=_A,
 class CPP_OT_ensure_tool_settings(metaclass=common.SetupContextOperator):
 	bl_idname='cpp.ensure_tool_settings';bl_label='Ensure Tool Settings';bl_translation_context=_A;options={'INTERNAL'}
 	def execute(self,context:Context):
-		E='IMAGE';D='VIEW_3D';C='builtin_brush.Clone';B=False;A='TEXTURE_PAINT';cls=self.__class__;msgctxt=cls.bl_translation_context;ob=main.Workflow.object
+		F='IMAGE';E='VIEW_3D';D='builtin_brush.Clone';C='TEXTURE_PAINT';B=False;A=True;cls=self.__class__;msgctxt=cls.bl_translation_context;ob=main.Workflow.object
 		if not main.Workflow.object_poll(ob):
 			for ob in context.visible_objects:
 				if main.Workflow.object_poll(ob):context.view_layer.objects.active=ob;break
-		ob=main.Workflow.object
-		if not main.Workflow.object_poll(ob):reports.report_and_log(self,level=logging.WARNING,message='Scene is missing paint object',msgctxt=msgctxt);return{'CANCELLED'}
+		is_ob_ok=A;ob=main.Workflow.object
+		if not main.Workflow.object_poll(ob):
+			is_ob_ok=B
+			if ob:
+				me:Mesh=ob.data
+				if me.polygons:
+					uv_layer=me.uv_layers.active
+					if not uv_layer:is_ob_ok=A;reports.report_and_log(self,level=logging.WARNING,message='Active UV map is missing, continue with limited capabilities',msgctxt=msgctxt)
+				else:reports.report_and_log(self,level=logging.WARNING,message='Canvas object has no polygons',msgctxt=msgctxt)
+			else:reports.report_and_log(self,level=logging.WARNING,message='Scene is missing canvas object',msgctxt=msgctxt)
+		if not is_ob_ok:return{'CANCELLED'}
 		scene=context.scene;imapaint=scene.tool_settings.image_paint
-		if ob.mode!=A:bpy.ops.object.mode_set(mode=A)
+		if ob.mode!=C:bpy.ops.object.mode_set(mode=C)
 		tool=context.workspace.tools.from_space_view3d_mode(context.mode,create=B)
-		if tool.idname!=C:bpy.ops.wm.tool_set_by_id(name=C,cycle=B,space_type=D)
-		if imapaint.mode!=E:imapaint.mode=E
-		if not imapaint.use_clone_layer:imapaint.use_clone_layer=True
+		if tool.idname!=D:bpy.ops.wm.tool_set_by_id(name=D,cycle=B,space_type=E)
+		if imapaint.mode!=F:imapaint.mode=F
+		if not imapaint.use_clone_layer:imapaint.use_clone_layer=A
 		for area in context.screen.areas:
-			if area.type==D:area.spaces.active.shading.light='FLAT'
+			if area.type==E:area.spaces.active.shading.light='FLAT'
 		return{'FINISHED'}

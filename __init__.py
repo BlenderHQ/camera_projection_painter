@@ -58,11 +58,11 @@ def _unregister_classes():
 	props.unregister()
 @persistent
 def _handler_load_post(_=_A):
-	if not _classes_registered:_register_classes();bhqab.utils_ui.check_addon_updates(force=False)
+	if not _classes_registered:_register_classes();bhqab.utils_ui.check_addon_updates(force=False);addon_pref=get_addon_pref(bpy.context);addon_pref.log_level=addon_pref.log_level
 	if not main.WindowInstances.instances:main.WindowInstances.modal_ensure_operator_invoked_in_all_windows(context=bpy.context,idname=main.CPP_OT_main.bl_idname)
 	if bpy.app.timers.is_registered(_handler_load_post):bpy.app.timers.unregister(_handler_load_post)
 @persistent
-def _handler_save_pre(_=_A):scene_props:props.scene.SceneProps=bpy.context.scene.cpp;scene_props.version=bpy.app.version[0]*100+bpy.app.version[1]%100
+def _handler_save_pre(_=_A):scene_props:props.scene.SceneProps=bpy.context.scene.cpp;scene_props.version=bpy.app.version[0]*100+bpy.app.version[1]%100;main.Workflow.Mesh.remove_temp_data()
 _application_handlers=(bpy.app.handlers.load_post,_handler_load_post),(bpy.app.handlers.save_pre,_handler_save_pre)
 def register():
 	dt=time.time()
