@@ -81,6 +81,7 @@ class CPP_OT_import_scene(common.IOFileBase_Params,metaclass=common.SetupContext
 	def invoke(self,context:Context,_event:Event):wm=context.window_manager;wm.fileselect_add(self);return{'RUNNING_MODAL'}
 	def execute(self,context:Context):
 		cls=self.__class__;msgctxt=cls.bl_translation_context
+		if not self.filename:return{_F}
 		if self.is_filepath_recognized is _A:reports.report_and_log(self,level=logging.WARNING,message='Unable to import file with unknown file extension',msgctxt=msgctxt);return{_F}
 		addon_pref=get_addon_pref(context);wm=context.window_manager;wm_props:WMProps=wm.cpp;initial_objects=set(context.scene.objects);result=_CALLBACKS[addon_pref.preferred_software_workflow][self.file_format](context,self.filepath);imported_objects=set(context.scene.objects)-initial_objects
 		if wm_props.apply_udim_materials_fix:_apply_udim_materials_fix(context,objects=imported_objects)
