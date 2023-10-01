@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:from..props.camera import CameraProps
 __all__=_A,
 class CPP_OT_bind_history_remove(Operator):
-	bl_idname='cpp.bind_history_remove';bl_options={'INTERNAL'};bl_translation_context=_A;bl_label='Remove';bl_description='Remove item from image bind history';index:IntProperty(default=0,options={'HIDDEN','SKIP_SAVE'})
+	bl_idname='cpp.bind_history_remove';bl_options={'REGISTER'};bl_translation_context=_A;bl_label='Remove Image from Bind History';bl_description='Remove item from image bind history';index:IntProperty(default=0,options={'HIDDEN','SKIP_SAVE'})
 	@classmethod
 	def poll(cls,_context:Context):
 		cam=main.Workflow.cam

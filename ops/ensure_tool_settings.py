@@ -8,7 +8,7 @@ import bpy
 from bpy.types import Context,Mesh
 __all__=_A,
 class CPP_OT_ensure_tool_settings(metaclass=common.SetupContextOperator):
-	bl_idname='cpp.ensure_tool_settings';bl_label='Ensure Tool Settings';bl_translation_context=_A;options={'INTERNAL'}
+	bl_idname='cpp.ensure_tool_settings';bl_label='Ensure Tool Settings';bl_translation_context=_A;options={'REGISTER'}
 	def execute(self,context:Context):
 		F='IMAGE';E='VIEW_3D';D='builtin_brush.Clone';C='TEXTURE_PAINT';B=False;A=True;cls=self.__class__;msgctxt=cls.bl_translation_context;ob=main.Workflow.object
 		if not main.Workflow.object_poll(ob):

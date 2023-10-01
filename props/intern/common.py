@@ -25,9 +25,9 @@ def remapped_matrix_setter_helper(mapping:tuple[int,int,int],i:int,j:int):
 	return set_value
 def matrix_eval_attr_name(i:int,j:int):return f"r{i}{j}"
 def create_props_rotation_matrix()->RotationMatrixProps:
-	_annotations_dict=dict();_properties_dict=dict()
+	A='RotationMatrixProperties';_annotations_dict=dict();_properties_dict=dict()
 	for i in range(3):
-		for j in range(3):attr_name=matrix_eval_attr_name(i,j);_prop_single_T,_prop_double_T,_prop=double.property_group(attr_name,name=f"Row: {i+1}, Column: {j+1}",get=matrix_getter_helper(i,j),set=matrix_setter_helper(i,j));_annotations_dict[double.eval_prop_single_name(name=attr_name)]=_prop_single_T;_annotations_dict[double.eval_prop_double_name(name=attr_name)]=_prop_double_T;_properties_dict[attr_name]=_prop
+		for j in range(3):attr_name=matrix_eval_attr_name(i,j);_prop_single_T,_prop_double_T,_prop=double.property_group(attr_name,get=matrix_getter_helper(i,j),set=matrix_setter_helper(i,j),translation_context=A,name=f"Row: {i+1}, Column: {j+1}",description=f"Represents {i+1} row and {j+1} column of row-major object rotation matrix 3x3 in Blender (Cartesian) coordinate system");_annotations_dict[double.eval_prop_single_name(name=attr_name)]=_prop_single_T;_annotations_dict[double.eval_prop_double_name(name=attr_name)]=_prop_double_T;_properties_dict[attr_name]=_prop
 	def _impl_draw(self,context:Context,layout:UILayout):
 		grid=layout.grid_flow(row_major=_B,columns=3,even_columns=_B,align=_B);grid.use_property_split=_B;grid.use_property_decorate=False
 		for i in range(3):
@@ -37,9 +37,9 @@ def create_props_rotation_matrix()->RotationMatrixProps:
 		if R is _A:return rmat
 		else:return np.matmul(R,rmat)
 	def _impl_apply_transform(self,*,R:_A|Float64ArrayT,S:_A|float):self.r00,self.r01,self.r02;self.r10,self.r11,self.r12;self.r20,self.r21,self.r22=self.as_array(R=R,S=S)
-	return type('RotationMatrixProperties',(PropertyGroup,),{_C:_annotations_dict,'draw':_impl_draw,_D:_impl_as_array,_E:_impl_apply_transform,**_properties_dict})
+	return type(A,(PropertyGroup,),{_C:_annotations_dict,'draw':_impl_draw,_D:_impl_as_array,_E:_impl_apply_transform,**_properties_dict})
 def create_props_location()->LocationProps:
-	_annotations_dict=dict();_properties_dict=dict();attr_name='x';_prop_single_T,_prop_double_T,_prop=double.property_group(attr_name,name='X',get=matrix_getter_helper(0,3),set=matrix_setter_helper(0,3));_annotations_dict[double.eval_prop_single_name(name=attr_name)]=_prop_single_T;_annotations_dict[double.eval_prop_double_name(name=attr_name)]=_prop_double_T;_properties_dict[attr_name]=_prop;attr_name='y';_prop_single_T,_prop_double_T,_prop=double.property_group(attr_name,name='Y',get=matrix_getter_helper(1,3),set=matrix_setter_helper(1,3));_annotations_dict[double.eval_prop_single_name(name=attr_name)]=_prop_single_T;_annotations_dict[double.eval_prop_double_name(name=attr_name)]=_prop_double_T;_properties_dict[attr_name]=_prop;attr_name='z';_prop_single_T,_prop_double_T,_prop=double.property_group(attr_name,name='Z',get=matrix_getter_helper(2,3),set=matrix_setter_helper(2,3));_annotations_dict[double.eval_prop_single_name(name=attr_name)]=_prop_single_T;_annotations_dict[double.eval_prop_double_name(name=attr_name)]=_prop_double_T;_properties_dict[attr_name]=_prop
+	A='LocationProperties';_annotations_dict=dict();_properties_dict=dict();attr_name='x';_prop_single_T,_prop_double_T,_prop=double.property_group(attr_name,get=matrix_getter_helper(0,3),set=matrix_setter_helper(0,3),translation_context=A,name='X',description="The position of the object in Blender's Cartesian coordinate system by X axis");_annotations_dict[double.eval_prop_single_name(name=attr_name)]=_prop_single_T;_annotations_dict[double.eval_prop_double_name(name=attr_name)]=_prop_double_T;_properties_dict[attr_name]=_prop;attr_name='y';_prop_single_T,_prop_double_T,_prop=double.property_group(attr_name,get=matrix_getter_helper(1,3),set=matrix_setter_helper(1,3),translation_context=A,name='Y',description="The position of the object in Blender's Cartesian coordinate system by Y axis");_annotations_dict[double.eval_prop_single_name(name=attr_name)]=_prop_single_T;_annotations_dict[double.eval_prop_double_name(name=attr_name)]=_prop_double_T;_properties_dict[attr_name]=_prop;attr_name='z';_prop_single_T,_prop_double_T,_prop=double.property_group(attr_name,get=matrix_getter_helper(2,3),set=matrix_setter_helper(2,3),translation_context=A,name='Z',description="The position of the object in Blender's Cartesian coordinate system by Z axis");_annotations_dict[double.eval_prop_single_name(name=attr_name)]=_prop_single_T;_annotations_dict[double.eval_prop_double_name(name=attr_name)]=_prop_double_T;_properties_dict[attr_name]=_prop
 	def _impl_draw(self,context:Context,layout:UILayout):col=layout.column(align=_B);double.properties_draw(self,'x',context,col);double.properties_draw(self,'y',context,col);double.properties_draw(self,'z',context,col)
 	def _impl_as_array(self,*,R:_A|Float64ArrayT,S:_A|float)->Float64ArrayT:
 		import numpy as np;loc=np.array((self.x,self.y,self.z),dtype=np.float64,order='C')
@@ -48,4 +48,4 @@ def create_props_location()->LocationProps:
 		if S is _A:return loc
 		else:return loc*S
 	def _impl_apply_transform(self,*,R:_A|Float64ArrayT,S:_A|float):self.x,self.y,self.z=self.as_array(R=R,S=S)
-	return type('LocationProperties',(PropertyGroup,),{_C:_annotations_dict,'draw':_impl_draw,_D:_impl_as_array,_E:_impl_apply_transform,**_properties_dict})
+	return type(A,(PropertyGroup,),{_C:_annotations_dict,'draw':_impl_draw,_D:_impl_as_array,_E:_impl_apply_transform,**_properties_dict})
