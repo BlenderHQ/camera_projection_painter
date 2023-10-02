@@ -16,15 +16,15 @@ import os,re,sys,logging
 from datetime import datetime
 from typing import Generator,Iterable,List
 import importlib,random,string,bpy
-from bpy.types import Context,Event,ID,Menu,Operator,PropertyGroup,STATUSBAR_HT_header,Timer,UILayout,WindowManager
+from bpy.types import Context,Event,ID,ImagePreview,Menu,Operator,PropertyGroup,STATUSBAR_HT_header,Timer,UILayout,WindowManager
 from bpy.props import BoolProperty,CollectionProperty,FloatProperty,IntProperty,StringProperty
 from mathutils import Vector
 import blf
 from bl_ui import space_statusbar
 from bpy.app.translations import pgettext
-import addon_utils
+import bpy.utils.previews,addon_utils
 from.import updater
-__all__='eval_unique_name','eval_text_pixel_dimensions','draw_wrapped_text','developer_extras_poll','template_developer_extras_warning','progress','copy_default_presets_from','template_preset','template_disclosure_enum_flag','update_localization','request_localization_from_file','safe_register','UPDATE_PROPS_ATTR_NAME','PreferencesUpdateProperties','BHQAB_OT_check_addon_updates','BHQAB_OT_install_addon_update','register_addon_update_operators','unregister_addon_update_operators'
+__all__='eval_unique_name','eval_text_pixel_dimensions','draw_wrapped_text','developer_extras_poll','template_developer_extras_warning','progress','copy_default_presets_from','template_preset','template_disclosure_enum_flag','update_localization','request_localization_from_file','safe_register','UPDATE_PROPS_ATTR_NAME','PreferencesUpdateProperties','BHQAB_OT_check_addon_updates','BHQAB_OT_install_addon_update','register_addon_update_operators','unregister_addon_update_operators','IconsCache'
 _UI_TIME_FMT='%d-%m-%Y %H:%M:%S'
 def eval_unique_name(*,arr:Iterable,prefix:str='',suffix:str='')->str:
 	if arr is bpy.ops:
@@ -268,3 +268,28 @@ if getattr(bpy.app,_K):
 		return _registered
 	def unregister_addon_update_operators():
 		for cls in reversed(_classes):bpy.utils.unregister_class(cls)
+class IconsCache:
+	_directory:str='';_cache:dict[str,int]=dict();_pcoll_cache:_B|bpy.utils.previews.ImagePreviewCollection=_B
+	@classmethod
+	def _intern_initialize_from_data_files(cls,*,directory:str,ids:Iterable[str]):
+		for identifier in ids:
+			try:icon_value=bpy.app.icons.new_triangles_from_file(os.path.join(directory,f"{identifier}.dat"))
+			except ValueError:icon_value=0
+			cls._cache[identifier]=icon_value
+	@classmethod
+	def _intern_initialize_from_image_files(cls,*,directory:str,ids:Iterable[str]):
+		pcoll=bpy.utils.previews.new()
+		for identifier in ids:prv:ImagePreview=pcoll.load(identifier,os.path.join(directory,f"{identifier}.png"),'IMAGE');cls._cache[identifier]=prv.icon_id
+		cls._pcoll_cache=pcoll
+	@classmethod
+	def initialize(cls,*,directory:str,data_identifiers:Iterable[str],image_identifiers:Iterable[str]):
+		if cls._cache and cls._directory==directory:return
+		cls.release()
+		if directory:cls._intern_initialize_from_data_files(directory=directory,ids=data_identifiers);cls._intern_initialize_from_image_files(directory=directory,ids=image_identifiers)
+		cls._directory=directory
+	@classmethod
+	def release(cls):
+		if cls._pcoll_cache is not _B:bpy.utils.previews.remove(cls._pcoll_cache);cls._pcoll_cache=_B
+		cls._cache.clear()
+	@classmethod
+	def get_id(cls,identifier:str)->int:return cls._cache.get(identifier,0)

@@ -15,10 +15,9 @@ import glob,os,time
 from importlib import reload
 from enum import auto,IntEnum,IntFlag
 from typing import TypeVar
+from..import Reports,log
 from..import constants
-from..import log
 from..import main
-from..import reports
 from..props.intern import double
 import bpy
 from bpy.types import Context,Event,Operator,OperatorFileListElement
@@ -263,7 +262,7 @@ class SetupContextOperator(type):
 		return _wrapper
 	@staticmethod
 	def __execute_wrapped(func:Callable):
-		func_wrapped_report=reports.log_execution_helper(func)
+		func_wrapped_report=Reports.log_execution_helper(func)
 		def _wrapper(self,context:Context):
 			ret=func_wrapped_report(self,context);wm_props:WMProps=context.window_manager.cpp
 			if wm_props.setup_context_stage!=constants.SetupStage.PASS_THROUGH.name:bpy.ops.cpp.setup_context(_L,status=next(iter(ret)))

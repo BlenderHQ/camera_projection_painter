@@ -39,13 +39,12 @@ _C=False
 _B=.0
 _A=None
 import logging,math,os,time
-from.import log
+from.import Reports,log
 from.import get_addon_pref
 from.lib import bhqab
 from.lib import bhqglsl
 from.import constants
 from.import shaders
-from.import reports
 import bpy
 from bpy.types import bpy_prop_collection,Brush,Context,Event,ID,Mesh,MeshUVLoopLayer,Operator,Region,SpaceImageEditor,SpaceView3D,Timer,View3DOverlay,Window,WorkSpaceTool
 import bl_math
@@ -746,8 +745,8 @@ class CPP_OT_draw(Operator):
 	def poll(cls,_context:Context):return GPUDrawCameras.select_id==constants.CAMERA.SELECT.OFFSET
 	def invoke(self,context:Context,_event:Event):
 		A='CANCELLED';cls=self.__class__;msgctxt=cls.bl_translation_context;ts=context.scene.tool_settings
-		if not ts.image_paint.detect_data():reports.report_and_log(self,level=logging.WARNING,message='Missing image paint data, unable to paint',msgctxt=msgctxt);return{A}
-		if not Workflow.Mesh.modal_validate_uv_layers():reports.report_and_log(self,level=logging.WARNING,message='Canvas object is missing active UV map',msgctxt=msgctxt);return{A}
+		if not ts.image_paint.detect_data():Reports.report_and_log(self,level=logging.WARNING,message='Missing image paint data, unable to paint',msgctxt=msgctxt);return{A}
+		if not Workflow.Mesh.modal_validate_uv_layers():Reports.report_and_log(self,level=logging.WARNING,message='Canvas object is missing active UV map',msgctxt=msgctxt);return{A}
 		GPUDrawMesh.uv_project(context);wm=context.window_manager;wm.modal_handler_add(self);Workflow.ImagePaint.is_paint=_D;return bpy.ops.paint.image_paint(_m)
 	def modal(self,context:Context,event:Event):
 		EventMouse.update_from(context,event)
@@ -757,7 +756,7 @@ class CPP_OT_select(Operator):
 	bl_idname='cpp.select';bl_label='Select';bl_options={_P};bl_translation_context=_W
 	@classmethod
 	def poll(cls,_context:Context):return GPUDrawCameras.select_id!=constants.CAMERA.SELECT.OFFSET
-	@reports.log_execution_helper
+	@Reports.log_execution_helper
 	def execute(self,context:Context):
 		scene=context.scene;camera=scene.objects[GPUDrawCameras.select_id]
 		if context.scene.camera!=camera:context.scene.camera=camera
@@ -771,5 +770,5 @@ class CPP_OT_view_camera(Operator):
 	bl_idname='cpp.exit_camera_view';bl_label='Exit Camera View';bl_options={_P};bl_translation_context=_X
 	@classmethod
 	def poll(cls,context:Context):view_3d=context.region_data;return Workflow.ImagePaint.tool_poll(context)and view_3d and view_3d.view_perspective==_I
-	@reports.log_execution_helper
+	@Reports.log_execution_helper
 	def execute(self,context:Context):bpy.ops.view3d.view_camera(_m);return{_T}

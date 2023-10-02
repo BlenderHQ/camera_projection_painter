@@ -5,9 +5,9 @@ _C='CPP_OT_canvas_new'
 _B='REGISTER'
 _A='FINISHED'
 import logging,re
+from..import Reports
 from.import common
 from..import icons
-from..import reports
 import bpy
 from bpy.types import Context,Event,ImagePaint,Material,Operator,ShaderNode,ShaderNodeTree
 from typing import TYPE_CHECKING
@@ -16,7 +16,7 @@ __all__=_C,_D
 _PATTERN='[^.]+\\.\\d+\\.[^.]+'
 class CPP_OT_canvas_new(Operator):
 	bl_idname='cpp.canvas_new';bl_label='Create New Canvas';bl_translation_context=_C;bl_options={_B}
-	@reports.log_execution_helper
+	@Reports.log_execution_helper
 	def execute(self,context:Context):imapaint:ImagePaint=context.tool_settings.image_paint;new_image=bpy.data.images.new(name='Canvas',width=2048,height=2048,alpha=True,float_buffer=True);imapaint.canvas=new_image;return{_A}
 def _eval_image_by_object_name(context:Context)->None|Image:
 	ob=context.active_object
@@ -39,8 +39,8 @@ class CPP_OT_canvas_quick_select(Operator):
 		if image:
 			imapaint:ImagePaint=context.tool_settings.image_paint
 			if imapaint.canvas!=image:imapaint.canvas=image
-			reports.report_and_log(self,level=logging.INFO,message='Selected image "{filename}"',msgctxt=msgctxt,filename=image.name);return{_A}
-		reports.report_and_log(self,level=logging.WARNING,message='Unable to evaluate image for quick select',msgctxt=msgctxt);return{_E}
+			Reports.report_and_log(self,level=logging.INFO,message='Selected image "{filename}"',msgctxt=msgctxt,filename=image.name);return{_A}
+		Reports.report_and_log(self,level=logging.WARNING,message='Unable to evaluate image for quick select',msgctxt=msgctxt);return{_E}
 class CPP_OT_ensure_canvas(metaclass=common.SetupContextOperator):
 	bl_idname='cpp.ensure_canvas';bl_label='Ensure Canvas';bl_translation_context=_D;bl_options={_B}
 	def draw(self:Operator,context:Context):
@@ -58,6 +58,6 @@ class CPP_OT_ensure_canvas(metaclass=common.SetupContextOperator):
 			ob=context.object
 			if ob and imapaint.canvas:
 				pattern=ob.name_full+_PATTERN;match=re.match(pattern,imapaint.canvas.name_full)
-				if match:imapaint.canvas.source='TILED';reports.report_and_log(self,level=logging.INFO,message='Selected "{filename}" as UDIM paint canvas',msgctxt=msgctxt,filename=imapaint.canvas.name_full);return{_A}
-		if imapaint.canvas:reports.report_and_log(self,level=logging.INFO,message='Selected "{filename}" as paint canvas',msgctxt=msgctxt,filename=imapaint.canvas.name_full);return{_A}
-		else:reports.report_and_log(self,level=logging.WARNING,message='Paint canvas is missing',msgctxt=msgctxt);return{_E}
+				if match:imapaint.canvas.source='TILED';Reports.report_and_log(self,level=logging.INFO,message='Selected "{filename}" as UDIM paint canvas',msgctxt=msgctxt,filename=imapaint.canvas.name_full);return{_A}
+		if imapaint.canvas:Reports.report_and_log(self,level=logging.INFO,message='Selected "{filename}" as paint canvas',msgctxt=msgctxt,filename=imapaint.canvas.name_full);return{_A}
+		else:Reports.report_and_log(self,level=logging.WARNING,message='Paint canvas is missing',msgctxt=msgctxt);return{_E}

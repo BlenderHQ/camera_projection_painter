@@ -7,12 +7,12 @@ _C='reality_capture'
 _B='HIDDEN'
 _A=True
 import logging,os,time
+from..import Reports
 from.import common
 from..import constants
 from..import icons
 from..import main
 from..import props
-from..import reports
 import bpy
 from bpy.types import Context,Event,Operator
 from bpy.props import BoolProperty,EnumProperty
@@ -43,13 +43,13 @@ class CPP_OT_export_cameras(Operator,common.IOFileBase_Params,common.IOFile_Para
 				if main.Workflow.camera_poll(ob):return _A
 		return _E
 	def invoke(self,context:Context,event:Event):self.filename=_F;wm=context.window_manager;wm.fileselect_add(self);return{'RUNNING_MODAL'}
-	@reports.log_execution_helper
+	@Reports.log_execution_helper
 	def execute(self,context:Context):
 		dt=time.time();msgctxt=self.__class__.__qualname__
 		if not(self.directory and os.path.isdir(self.directory)):return{'CANCELLED'}
 		keywords=self.as_keywords(ignore=('check_existing','fmt_locked','filter_glob',_G,'global_scale_single','global_scale_double'));keywords['global_scale']=self.global_scale;done_num_files,done_num_cameras=common.IOProcessor.write(context,**keywords);done_in=time.time()-dt
 		if done_num_files and done_num_cameras:
-			reports.report_and_log(self,level=logging.INFO,message='Exported {num_cameras:d} camera(s) to {num_files:d} file(s) in {elapsed:.3f} seconds',msgctxt=msgctxt,num_cameras=done_num_cameras,num_files=done_num_files,elapsed=done_in)
+			Reports.report_and_log(self,level=logging.INFO,message='Exported {num_cameras:d} camera(s) to {num_files:d} file(s) in {elapsed:.3f} seconds',msgctxt=msgctxt,num_cameras=done_num_cameras,num_files=done_num_files,elapsed=done_in)
 			if self.open_directory:bpy.ops.wm.path_open('EXEC_DEFAULT',filepath=self.directory)
-		else:reports.report_and_log(self,level=logging.WARNING,message='No file(s) exported',msgctxt=msgctxt)
+		else:Reports.report_and_log(self,level=logging.WARNING,message='No file(s) exported',msgctxt=msgctxt)
 		return{'FINISHED'}

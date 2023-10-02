@@ -4,10 +4,9 @@ _C='CPP_OT_bind_images'
 _B='HIDDEN'
 _A=False
 import logging,os,time
+from..import Reports,log
 from.import common
 from..import main
-from..import reports
-from..import log
 import bpy
 from bpy.types import Context,Event,Operator
 from bpy.props import BoolProperty,EnumProperty,StringProperty
@@ -37,7 +36,7 @@ class CPP_OT_bind_images(common.IOUnifiedName_Params,metaclass=common.SetupConte
 		match self.mode:
 			case'ACTIVE':
 				camera=main.Workflow.camera
-				if not camera:reports.report_and_log(self,level=logging.WARNING,message='No active camera, operation skipped');return{'CANCELLED'}
+				if not camera:Reports.report_and_log(self,level=logging.WARNING,message='No active camera, operation skipped');return{'CANCELLED'}
 				camera_names={common.UnifiedName().from_object(ob=camera,flags=flags)}
 			case'ALL':camera_names=common.UnifiedNameCache.cached_camera_names
 		image_names=list(common.UnifiedNameCache.cached_image_names)
@@ -70,17 +69,17 @@ class CPP_OT_bind_images(common.IOUnifiedName_Params,metaclass=common.SetupConte
 			if num_done==num_cameras:
 				if num_done==1:
 					if num_changed:
-						if num_opened:reports.report_and_log(self,level=logging.INFO,message='The image is open and binded, the previous value has been changed. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,elapsed=time_done)
-						else:reports.report_and_log(self,level=logging.INFO,message='Binded image, the previous value has been changed. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,elapsed=time_done)
-					else:reports.report_and_log(self,level=logging.INFO,message='The appropriate image is already binded to the options selected. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,elapsed=time_done)
+						if num_opened:Reports.report_and_log(self,level=logging.INFO,message='The image is open and binded, the previous value has been changed. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,elapsed=time_done)
+						else:Reports.report_and_log(self,level=logging.INFO,message='Binded image, the previous value has been changed. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,elapsed=time_done)
+					else:Reports.report_and_log(self,level=logging.INFO,message='The appropriate image is already binded to the options selected. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,elapsed=time_done)
 				elif num_changed:
-					if num_opened:reports.report_and_log(self,level=logging.INFO,message='Binded all images, opened {num_opened:d} new, replaced {num_changed:d}. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,num_opened=num_opened,num_changed=num_changed,elapsed=time_done)
-					else:reports.report_and_log(self,level=logging.INFO,message='Binded all images, {num_changed:d} replaced. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,num_changed=num_changed,elapsed=time_done)
-				else:reports.report_and_log(self,level=logging.INFO,message='For the selected options, all the necessary images are already binded. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,elapsed=time_done)
+					if num_opened:Reports.report_and_log(self,level=logging.INFO,message='Binded all images, opened {num_opened:d} new, replaced {num_changed:d}. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,num_opened=num_opened,num_changed=num_changed,elapsed=time_done)
+					else:Reports.report_and_log(self,level=logging.INFO,message='Binded all images, {num_changed:d} replaced. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,num_changed=num_changed,elapsed=time_done)
+				else:Reports.report_and_log(self,level=logging.INFO,message='For the selected options, all the necessary images are already binded. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,elapsed=time_done)
 			elif num_changed:
-				if num_opened:reports.report_and_log(self,level=logging.INFO,message='Binded {num_done:d}/{num_cameras:d} required images, opened {num_opened:d} new, replaced {num_changed:d}{fmt_failed_to_open:s}. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,num_done=num_done,num_cameras=num_cameras,num_opened=num_opened,num_changed=num_changed,fmt_failed_to_open=fmt_failed_to_open,elapsed=time_done)
-				else:reports.report_and_log(self,level=logging.INFO,message='Binded {num_done:d}/{num_cameras:d} required images, replaced {num_changed:d}. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,num_done=num_done,num_cameras=num_cameras,num_changed=num_changed,elapsed=time_done)
-			else:reports.report_and_log(self,level=logging.INFO,message='{num_done:d}/{num_cameras:d} of the necessary images are binded for the selected options. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,num_done=num_done,num_cameras=num_cameras,elapsed=time_done)
-		elif do_directory_search:reports.report_and_log(self,level=logging.INFO,message='Could not bind image(s) of either available or "{directory:s}" directory with selected options{fmt_failed_to_open:s}',msgctxt=msgctxt,directory=self.directory,fmt_failed_to_open=fmt_failed_to_open)
-		else:reports.report_and_log(self,level=logging.INFO,message='Could not bind image(s) with selected options{fmt_failed_to_open:s}',msgctxt=msgctxt,fmt_failed_to_open=fmt_failed_to_open)
+				if num_opened:Reports.report_and_log(self,level=logging.INFO,message='Binded {num_done:d}/{num_cameras:d} required images, opened {num_opened:d} new, replaced {num_changed:d}{fmt_failed_to_open:s}. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,num_done=num_done,num_cameras=num_cameras,num_opened=num_opened,num_changed=num_changed,fmt_failed_to_open=fmt_failed_to_open,elapsed=time_done)
+				else:Reports.report_and_log(self,level=logging.INFO,message='Binded {num_done:d}/{num_cameras:d} required images, replaced {num_changed:d}. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,num_done=num_done,num_cameras=num_cameras,num_changed=num_changed,elapsed=time_done)
+			else:Reports.report_and_log(self,level=logging.INFO,message='{num_done:d}/{num_cameras:d} of the necessary images are binded for the selected options. Search time - {elapsed:.3f} second(s)',msgctxt=msgctxt,num_done=num_done,num_cameras=num_cameras,elapsed=time_done)
+		elif do_directory_search:Reports.report_and_log(self,level=logging.INFO,message='Could not bind image(s) of either available or "{directory:s}" directory with selected options{fmt_failed_to_open:s}',msgctxt=msgctxt,directory=self.directory,fmt_failed_to_open=fmt_failed_to_open)
+		else:Reports.report_and_log(self,level=logging.INFO,message='Could not bind image(s) with selected options{fmt_failed_to_open:s}',msgctxt=msgctxt,fmt_failed_to_open=fmt_failed_to_open)
 		scene_props:SceneProps=context.scene.cpp;scene_props.source_dir=self.directory;return{'FINISHED'}

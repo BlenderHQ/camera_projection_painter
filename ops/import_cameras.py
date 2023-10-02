@@ -2,10 +2,10 @@ from __future__ import annotations
 _B='CPP_OT_import_cameras'
 _A=True
 import logging,os,time
+from..import Reports
 from.import common
 from..import icons
 from..import main
-from..import reports
 from..lib import bhqab
 import bpy
 from bpy.types import Context,Event,Operator
@@ -38,6 +38,6 @@ class CPP_OT_import_cameras(common.IOUnifiedName_Params,common.IOFileBase_Params
 		keywords=self.as_keywords(ignore=('filter_glob','global_scale_single','global_scale_double'));keywords['global_scale']=self.global_scale
 		if not self.use_existing_caches:flags=common.UnifiedNameOptions.from_string_set(self.un_flags);common.UnifiedNameCache.update_eval_cameras_cache(context,flags=flags)
 		done_num_files,done_num_cameras=common.IOProcessor.read(context,**keywords);main.CheckPoint.object_arr_has_changes=_A;done_in=time.time()-dt
-		if done_num_cameras:scene_props.source_dir=self.directory;reports.report_and_log(self,level=logging.INFO,message='Imported data of {done_num_cameras:d} camera(s) from {done_num_files:d}/{num_files:d} file(s) in {elapsed:.3f} second(s)',msgctxt=msgctxt,done_num_cameras=done_num_cameras,done_num_files=done_num_files,num_files=num_files,elapsed=done_in)
-		else:reports.report_and_log(self,level=logging.WARNING,message='Unable to import {num_files:d} file(s)',msgctxt=msgctxt,num_files=num_files)
+		if done_num_cameras:scene_props.source_dir=self.directory;Reports.report_and_log(self,level=logging.INFO,message='Imported data of {done_num_cameras:d} camera(s) from {done_num_files:d}/{num_files:d} file(s) in {elapsed:.3f} second(s)',msgctxt=msgctxt,done_num_cameras=done_num_cameras,done_num_files=done_num_files,num_files=num_files,elapsed=done_in)
+		else:Reports.report_and_log(self,level=logging.WARNING,message='Unable to import {num_files:d} file(s)',msgctxt=msgctxt,num_files=num_files)
 		return{'FINISHED'}

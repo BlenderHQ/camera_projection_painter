@@ -10,10 +10,10 @@ _C='fbx'
 _B=True
 _A=False
 import logging,os,re
+from..import Reports
 from.import common
 from..import get_addon_pref
 from..import main
-from..import reports
 from..lib import bhqab
 import bpy
 from bpy.types import Context,Event,Material,Operator
@@ -82,8 +82,8 @@ class CPP_OT_import_scene(common.IOFileBase_Params,metaclass=common.SetupContext
 	def execute(self,context:Context):
 		cls=self.__class__;msgctxt=cls.bl_translation_context
 		if not self.filename:return{_F}
-		if self.is_filepath_recognized is _A:reports.report_and_log(self,level=logging.WARNING,message='Unable to import file with unknown file extension',msgctxt=msgctxt);return{_F}
+		if self.is_filepath_recognized is _A:Reports.report_and_log(self,level=logging.WARNING,message='Unable to import file with unknown file extension',msgctxt=msgctxt);return{_F}
 		addon_pref=get_addon_pref(context);wm=context.window_manager;wm_props:WMProps=wm.cpp;initial_objects=set(context.scene.objects);result=_CALLBACKS[addon_pref.preferred_software_workflow][self.file_format](context,self.filepath);imported_objects=set(context.scene.objects)-initial_objects
 		if wm_props.configure_udim:_apply_udim_materials_fix(context,objects=imported_objects)
-		if result is _B:reports.report_and_log(self,level=logging.INFO,message='Imported "{filepath}"',msgctxt=msgctxt,filepath=os.path.basename(self.filepath));return{_I}
-		else:reports.report_and_log(self,level=logging.WARNING,message='Import Failed "{filepath}"',msgctxt=msgctxt,filepath=self.filepath);return{_F}
+		if result is _B:Reports.report_and_log(self,level=logging.INFO,message='Imported "{filepath}"',msgctxt=msgctxt,filepath=os.path.basename(self.filepath));return{_I}
+		else:Reports.report_and_log(self,level=logging.WARNING,message='Import Failed "{filepath}"',msgctxt=msgctxt,filepath=self.filepath);return{_F}

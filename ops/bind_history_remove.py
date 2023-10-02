@@ -1,7 +1,7 @@
 from __future__ import annotations
 _A='CPP_OT_bind_history_remove'
+from..import Reports
 from..import main
-from..import reports
 from bpy.types import Context,Operator
 from bpy.props import IntProperty
 from typing import TYPE_CHECKING
@@ -16,7 +16,7 @@ class CPP_OT_bind_history_remove(Operator):
 			cam_props:CameraProps=cam.cpp
 			if cam_props.bind_history:return True
 		return False
-	@reports.log_execution_helper
+	@Reports.log_execution_helper
 	def execute(self,_context:Context):
 		cam=main.Workflow.cam;cam_props:CameraProps=cam.cpp;cam_props.bind_history.remove(self.index);len_history=len(cam_props.bind_history)
 		if len_history:cam_props.active_bind_index=min(max(self.index-1,0),len_history-1)

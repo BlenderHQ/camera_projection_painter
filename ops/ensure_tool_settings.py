@@ -1,9 +1,9 @@
 from __future__ import annotations
 _A='CPP_OT_ensure_tool_settings'
 import logging
+from..import Reports
 from.import common
 from..import main
-from..import reports
 import bpy
 from bpy.types import Context,Mesh
 __all__=_A,
@@ -21,9 +21,9 @@ class CPP_OT_ensure_tool_settings(metaclass=common.SetupContextOperator):
 				me:Mesh=ob.data
 				if me.polygons:
 					uv_layer=me.uv_layers.active
-					if not uv_layer:is_ob_ok=A;reports.report_and_log(self,level=logging.WARNING,message='Active UV map is missing, continue with limited capabilities',msgctxt=msgctxt)
-				else:reports.report_and_log(self,level=logging.WARNING,message='Canvas object has no polygons',msgctxt=msgctxt)
-			else:reports.report_and_log(self,level=logging.WARNING,message='Scene is missing canvas object',msgctxt=msgctxt)
+					if not uv_layer:is_ob_ok=A;Reports.report_and_log(self,level=logging.WARNING,message='Active UV map is missing, continue with limited capabilities',msgctxt=msgctxt)
+				else:Reports.report_and_log(self,level=logging.WARNING,message='Canvas object has no polygons',msgctxt=msgctxt)
+			else:Reports.report_and_log(self,level=logging.WARNING,message='Scene is missing canvas object',msgctxt=msgctxt)
 		if not is_ob_ok:return{'CANCELLED'}
 		scene=context.scene;imapaint=scene.tool_settings.image_paint
 		if ob.mode!=C:bpy.ops.object.mode_set(mode=C)

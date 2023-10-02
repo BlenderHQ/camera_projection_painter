@@ -2,22 +2,21 @@ from __future__ import annotations
 _C='LEFTMOUSE'
 _B='PRESS'
 _A=None
-bl_info={'name':'Camera Projection Painter','author':'Vlad Kuzmin (ssh4), Ivan Perevala (ivpe)','version':(3,6,0),'blender':(3,6,0),'description':'Expanding the capabilities of clone brush for working with photo scans','location':'Tool settings > Camera Painter','support':'COMMUNITY','category':'Paint','doc_url':'https://github.com/BlenderHQ/camera_projection_painter'}
+bl_info={'name':'Camera Projection Painter','author':'Vlad Erium (ssh4), Ivan Perevala (ivpe)','version':(3,6,0),'blender':(3,6,0),'description':'Expanding the capabilities of clone brush for working with photo scans','location':'Tool settings > Camera Painter','support':'COMMUNITY','category':'Paint','doc_url':'https://github.com/BlenderHQ/camera_projection_painter'}
 ADDON_PKG=__package__.split('.')[0]
 import os,time
 from importlib import reload
 dt=time.time()
 DATA_DIR=os.path.join(os.path.dirname(__file__),'data')
-if'_log'in locals():reload(_log)
-else:from.import _log
-log=_log.LOG
-LOG_DIR=_log.LOG_DIR
-LOG_FILE=_log.LOG_FILE
+from.lib import bhqab
+class Reports(bhqab.reports.AddonLogger):0
+Reports.initialize(logger_name=bl_info['name'],directory=os.path.join(os.path.dirname(__file__),'logs'),max_num_logs=30)
+log=Reports.log
 def register_class(cls):bpy.utils.register_class(cls);_classes_registered.append(cls)
 def unregister_class(cls):bpy.utils.unregister_class(cls);_classes_registered.remove(cls)
 def get_addon_pref(context)->props.pref.Preferences:return context.preferences.addons[ADDON_PKG].preferences
-if'bpy'in locals():reload(_log);reload(reports);reload(constants);reload(bhqab);reload(bhqglsl);reload(icons);reload(props);reload(shaders);reload(main);reload(ops);reload(langs);reload(ui);reload(manual_map)
-else:_classes_registered=list();from.import reports,constants;from.lib import bhqab;from.lib import bhqglsl;from.import icons,props,shaders,main,ops,langs,ui,manual_map
+if'bpy'in locals():reload(_log);reload(constants);reload(bhqab);reload(bhqglsl);reload(icons);reload(props);reload(shaders);reload(main);reload(ops);reload(langs);reload(ui);reload(manual_map)
+else:_classes_registered=list();from.import constants;from.lib import bhqglsl;from.import icons,props,shaders,main,ops,langs,ui,manual_map
 HAS_BPY=False
 try:import bpy
 except ImportError:pass
@@ -56,9 +55,11 @@ def _unregister_classes():
 	if not bpy.app.background:unregister_keymap();bpy.utils.unregister_manual_map(eval_manual_map);bpy.app.translations.unregister(ADDON_PKG);bhqab.utils_ui.unregister_addon_update_operators()
 	for cls in reversed(_classes_registered):unregister_class(cls)
 	props.unregister()
+def _log_settings(_=_A):log.debug('Loaded with settings:').push_indent();context=bpy.context;log.debug('Preferences:').push_indent();addon_pref=get_addon_pref(context);Reports.log_settings(item=addon_pref);log.pop_indent();log.debug('Scene:').push_indent();scene_props:props.scene.SceneProps=context.scene.cpp;Reports.log_settings(item=scene_props);log.pop_indent();log.pop_indent()
 @persistent
 def _handler_load_post(_=_A):
 	if not _classes_registered:_register_classes();bhqab.utils_ui.check_addon_updates(force=False);addon_pref=get_addon_pref(bpy.context);addon_pref.log_level=addon_pref.log_level
+	_log_settings()
 	if not main.WindowInstances.instances:main.WindowInstances.modal_ensure_operator_invoked_in_all_windows(context=bpy.context,idname=main.CPP_OT_main.bl_idname)
 	if bpy.app.timers.is_registered(_handler_load_post):bpy.app.timers.unregister(_handler_load_post)
 @persistent
@@ -70,11 +71,11 @@ def register():
 	else:
 		for(handle,func)in _application_handlers:handle.append(func)
 		bpy.app.timers.register(_handler_load_post,first_interval=.1)
-	bpy.app.handlers.load_post.append(reports.load_post_log_settings);log.debug('Register finished in {:.6f} second(s)'.format(time.time()-dt))
+	log.debug('Register finished in {:.6f} second(s)'.format(time.time()-dt))
 def unregister():
-	dt=time.time();bpy.app.handlers.load_post.remove(reports.load_post_log_settings)
+	dt=time.time()
 	if not bpy.app.background:
-		icons.IconsCache.release();main.WindowInstances.cancel_all()
+		icons.CameraPainterIcons.release();main.WindowInstances.cancel_all()
 		for(handle,func)in reversed(_application_handlers):
 			if func in handle:handle.remove(func)
 	_unregister_classes();log.debug('Un-registering finished in {:.6f} second(s)'.format(time.time()-dt))

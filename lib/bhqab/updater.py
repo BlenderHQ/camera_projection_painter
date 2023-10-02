@@ -50,7 +50,7 @@ def check_for_updates(*,module_name:str,cache_filepath:str,release_url:str,int_v
 	B='zip';A='tag_name';setup_logger(module_name=module_name);log=logging.getLogger(module_name);cache=UpdateCache.get(directory=cache_filepath);headers=dict()
 	if auth_token:headers['Authorization']=f"Bearer {auth_token}"
 	release_data=_safe_make_cb_request(module_name=module_name,callback=_cb_get_release_data,release_url=release_url,headers=headers)
-	if release_data is _B:log.warning('Unable to check for updates');return
+	if release_data is _B:return
 	byte_data,rate_limit,remaining,reset_at=release_data;cache.rate_limit=rate_limit;cache.remaining=remaining;cache.reset_at=reset_at;cache.checked_at=int(datetime.timestamp(datetime.now()));data:dict=json.loads(byte_data,strict=_A);tag_name=data.get(A,_B)
 	if tag_name is not _B:
 		try:version=int(tag_name[1:])
@@ -144,7 +144,9 @@ def _safe_make_cb_request(*,module_name:str,callback:FunctionType,**kwargs)->_B|
 	from urllib.error import HTTPError,URLError;log=logging.getLogger(module_name)
 	try:ret=callback(**kwargs)
 	except HTTPError as err:
-		if getattr(err,'code',-1)==403:log.warning('Exceeded rate limit')
+		err_code=getattr(err,'code',-1)
+		if err_code==403:log.warning('Exceeded rate limit')
+		elif err_code==404:return
 		else:log.warning(f"The server could not fulfill the request:\n{err}")
 		return
 	except URLError:log.warning('Failed to reach the server');return
