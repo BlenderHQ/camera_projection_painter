@@ -1,7 +1,7 @@
 from __future__ import annotations
-_J='HIDDEN'
-_I='FINISHED'
-_H='CPP_OT_import_scene'
+_J='FINISHED'
+_I='CPP_OT_import_scene'
+_H='HIDDEN'
 _G='EXEC_DEFAULT'
 _F='CANCELLED'
 _E='dae'
@@ -19,9 +19,10 @@ import bpy
 from bpy.types import Context,Event,Material,Operator
 from bpy.props import BoolProperty,EnumProperty,StringProperty
 import addon_utils
+from bpy.app.translations import pgettext
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:from..props import Object;from..props.wm import WMProps
-__all__=_H,
+__all__=_I,
 def check_additional_builtin_io_addons()->set:
 	ret=set()
 	if addon_utils.check('io_scene_fbx')[1]:ret.add(_C)
@@ -41,7 +42,7 @@ def _get_file_fmt_enum_item_name_from_fp(fp:str)->str:
 			for(enum_str,_enum_name,_enum_desc)in get_prop_file_format_items():
 				if ext==f".{enum_str}":return enum_str
 def _ot_result_to_bool(result:set)->bool:
-	if result=={_I}:return _B
+	if result=={_J}:return _B
 	elif result=={_F}:return _A
 	else:raise AssertionError('Operator should be executed default, not running modal.')
 def _cb_REALITY_CAPTURE_FBX(context:Context,abs_fp:str)->bool:ret=bpy.ops.import_scene.fbx(_G,filepath=abs_fp,use_manual_orientation=_A,global_scale=1.,bake_space_transform=_A,use_custom_normals=_B,use_image_search=_A,use_alpha_decals=_A,use_anim=_B,anim_offset=1.,use_subsurf=_A,use_custom_props=_B,use_custom_props_enum_as_string=_B,ignore_leaf_bones=_A,force_connect_children=_A,automatic_bone_orientation=_A,primary_bone_axis='Y',secondary_bone_axis='X',use_prepost_rot=_B,axis_forward='-Z',axis_up='Y');return _ot_result_to_bool(ret)
@@ -63,16 +64,16 @@ def _apply_udim_materials_fix(context:Context,*,objects:set[Object]):
 				while len(ob.material_slots)>1:bpy.ops.object.material_slot_remove()
 				if ob.material_slots:mat=ob.material_slots[0].material;mat.name=ob_name+'.<UDIM>'
 class CPP_OT_import_scene(common.IOFileBase_Params,metaclass=common.SetupContextOperator):
-	bl_idname='cpp.import_scene';bl_label='Import Scene';bl_description='Import paint object';bl_translation_context=_H;bl_options={'REGISTER','UNDO'}
+	bl_idname='cpp.import_scene';bl_label='Import Scene';bl_description='Import a scene from third-party software';bl_translation_context=_I;bl_options={'REGISTER','UNDO'}
 	def _get_file_fmt_filter_glob(self)->str:
 		ret=''
 		for(enum_str,_enum_name,_enum_desc)in get_prop_file_format_items():ret+=f"*.{enum_str};"
 		return ret
-	filter_glob:StringProperty(get=_get_file_fmt_filter_glob,options={_J});is_filepath_recognized:BoolProperty(options={_J});file_format:EnumProperty(items=get_prop_file_format_items,name='Type',description='File type to be imported')
+	filter_glob:StringProperty(get=_get_file_fmt_filter_glob,options={_H});is_filepath_recognized:BoolProperty(options={_H});file_format:EnumProperty(items=get_prop_file_format_items,options={_H,'SKIP_SAVE'},name='Type',description='File type to be imported')
 	def draw(self:Operator,context:Context):
-		layout=self.layout;layout.use_property_split=_B;addon_pref=get_addon_pref(context);layout.prop(addon_pref,'preferred_software_workflow')
-		if self.is_filepath_recognized:text='Selected file recognized as\n'+layout.enum_item_name(self,'file_format',self.file_format)
-		else:text='Please, select your reconstructed scene file.'
+		cls=self.__class__;msgctxt=cls.bl_translation_context;layout=self.layout;layout.use_property_split=_B;addon_pref=get_addon_pref(context);layout.prop(addon_pref,'preferred_software_workflow')
+		if self.is_filepath_recognized:text=pgettext('Selected file recognized as\n{file_format}',msgctxt).format(file_format=layout.enum_item_name(self,'file_format',self.file_format))
+		else:text=pgettext('Please, select your reconstructed scene file.',msgctxt)
 		bhqab.utils_ui.draw_wrapped_text(context,layout,text=text)
 	def check(self,_context):
 		file_fmt=_get_file_fmt_enum_item_name_from_fp(self.filepath);self.is_filepath_recognized=_A
@@ -85,5 +86,5 @@ class CPP_OT_import_scene(common.IOFileBase_Params,metaclass=common.SetupContext
 		if self.is_filepath_recognized is _A:Reports.report_and_log(self,level=logging.WARNING,message='Unable to import file with unknown file extension',msgctxt=msgctxt);return{_F}
 		addon_pref=get_addon_pref(context);wm=context.window_manager;wm_props:WMProps=wm.cpp;initial_objects=set(context.scene.objects);result=_CALLBACKS[addon_pref.preferred_software_workflow][self.file_format](context,self.filepath);imported_objects=set(context.scene.objects)-initial_objects
 		if wm_props.configure_udim:_apply_udim_materials_fix(context,objects=imported_objects)
-		if result is _B:Reports.report_and_log(self,level=logging.INFO,message='Imported "{filepath}"',msgctxt=msgctxt,filepath=os.path.basename(self.filepath));return{_I}
+		if result is _B:Reports.report_and_log(self,level=logging.INFO,message='Imported "{filepath}"',msgctxt=msgctxt,filepath=os.path.basename(self.filepath));return{_J}
 		else:Reports.report_and_log(self,level=logging.WARNING,message='Import Failed "{filepath}"',msgctxt=msgctxt,filepath=self.filepath);return{_F}

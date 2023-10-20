@@ -32,8 +32,8 @@ def _eval_image_by_object_name(context:Context)->None|Image:
 						if'ShaderNodeTexImage'==node.bl_idname:return node.image
 		for image in bpy.data.images:
 			if re.match(ob_name+_PATTERN,image.name_full):return image
-class CPP_OT_canvas_quick_select(Operator):
-	bl_idname='cpp.canvas_quick_select';bl_label='Image Quick Select';bl_description='Select image';bl_translation_context='CPP_OT_canvas_quick_select';bl_options={_B}
+class CPP_OT_quick_select_canvas(Operator):
+	bl_idname='cpp.canvas_quick_select';bl_label='Quick Select Canvas';bl_description='Quick canvas image selection for paint object';bl_translation_context='CPP_OT_quick_select_canvas';bl_options={_B}
 	def execute(self,context:Context):
 		cls=self.__class__;msgctxt=cls.__qualname__;image=_eval_image_by_object_name(context)
 		if image:
@@ -50,7 +50,7 @@ class CPP_OT_ensure_canvas(metaclass=common.SetupContextOperator):
 		if imapaint.canvas:col.prop(wm_props,'configure_udim')
 		image=_eval_image_by_object_name(context)
 		if image:
-			if image!=imapaint.canvas:prv=image.preview_ensure();col.operator(operator=CPP_OT_canvas_quick_select.bl_idname,icon_value=prv.icon_id,text=image.name_full)
+			if image!=imapaint.canvas:prv=image.preview_ensure();col.operator(operator=CPP_OT_quick_select_canvas.bl_idname,icon_value=prv.icon_id,text=image.name_full)
 	def invoke(self,context:Context,event:Event):common.invoke_props_dialog_centered(context,event,operator=self);return{'RUNNING_MODAL'}
 	def execute(self,context:Context):
 		cls=self.__class__;msgctxt=cls.__qualname__;wm_props:WMProps=context.window_manager.cpp;imapaint:ImagePaint=context.tool_settings.image_paint

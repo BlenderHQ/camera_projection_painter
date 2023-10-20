@@ -8,13 +8,13 @@ _H='doc_url'
 _G='UNSIGNED'
 _F='utf-8'
 _E='CANCELLED'
-_D='HIDDEN'
-_C=False
+_D=False
+_C='HIDDEN'
 _B=None
 _A=True
 import os,re,sys,logging
 from datetime import datetime
-from typing import Generator,Iterable,List
+from typing import Generator,Iterable
 import importlib,random,string,bpy
 from bpy.types import Context,Event,ID,ImagePreview,Menu,Operator,PropertyGroup,STATUSBAR_HT_header,Timer,UILayout,WindowManager
 from bpy.props import BoolProperty,CollectionProperty,FloatProperty,IntProperty,StringProperty
@@ -24,8 +24,9 @@ from bl_ui import space_statusbar
 from bpy.app.translations import pgettext
 import bpy.utils.previews,addon_utils
 from.import updater
-__all__='eval_unique_name','eval_text_pixel_dimensions','draw_wrapped_text','developer_extras_poll','template_developer_extras_warning','progress','copy_default_presets_from','template_preset','template_disclosure_enum_flag','update_localization','request_localization_from_file','safe_register','UPDATE_PROPS_ATTR_NAME','PreferencesUpdateProperties','BHQAB_OT_check_addon_updates','BHQAB_OT_install_addon_update','register_addon_update_operators','unregister_addon_update_operators','IconsCache'
+__all__='get_addon_package_name','eval_unique_name','eval_text_pixel_dimensions','draw_wrapped_text','developer_extras_poll','template_developer_extras_warning','progress','copy_default_presets_from','template_preset','template_disclosure_enum_flag','update_localization','request_localization_from_file','safe_register','UPDATE_PROPS_ATTR_NAME','PreferencesUpdateProperties','BHQAB_OT_check_addon_updates','BHQAB_OT_install_addon_update','register_addon_update_operators','unregister_addon_update_operators','IconsCache'
 _UI_TIME_FMT='%d-%m-%Y %H:%M:%S'
+def get_addon_package_name()->str:return __package__.split('.')[0]
 def eval_unique_name(*,arr:Iterable,prefix:str='',suffix:str='')->str:
 	if arr is bpy.ops:
 		ret=prefix+'.'+str().join(random.sample(string.ascii_lowercase,k=10))+suffix
@@ -62,7 +63,7 @@ def draw_wrapped_text(context:Context,layout:UILayout,*,text:str,text_ctxt:_B|st
 		for subline in sublines:col.label(text=subline)
 def developer_extras_poll(context:Context)->bool:return context.preferences.view.show_developer_ui
 def template_developer_extras_warning(context:Context,layout:UILayout)->_B:
-	if developer_extras_poll(context):col=layout.column(align=_A);col.label(text='Warning',icon='INFO');text='This section is intended for developers. You see it because you have an active "Developers Extras" option in the Blender user preferences.';draw_wrapped_text(context,col,text=text);col.prop(context.preferences.view,'show_developer_ui')
+	if developer_extras_poll(context):col=layout.column(align=_A);scol=col.column(align=_A);scol.alert=_A;scol.label(text='Warning',icon='INFO');text='This section is intended for developers. You see it because you have an active "Developers Extras" option in the Blender user preferences.';draw_wrapped_text(context,scol,text=text,text_ctxt='BHQAB_Preferences');col.prop(context.preferences.view,'show_developer_ui')
 def _update_statusbar():bpy.context.workspace.status_text_set(text=_B)
 class _progress_meta(type):
 	@property
@@ -70,22 +71,22 @@ class _progress_meta(type):
 	@PROGRESS_BAR_UI_UNITS.setter
 	def PROGRESS_BAR_UI_UNITS(cls,value):cls._PROGRESS_BAR_UI_UNITS=max(cls._PROGRESS_BAR_UI_UNITS_MIN,min(value,cls._PROGRESS_BAR_UI_UNITS_MAX))
 class progress(metaclass=_progress_meta):
-	_PROGRESS_BAR_UI_UNITS=6;_PROGRESS_BAR_UI_UNITS_MIN=4;_PROGRESS_BAR_UI_UNITS_MAX=12;_is_drawn=_C;_attrname=''
+	_PROGRESS_BAR_UI_UNITS=6;_PROGRESS_BAR_UI_UNITS_MIN=4;_PROGRESS_BAR_UI_UNITS_MAX=12;_is_drawn=_D;_attrname=''
 	class ProgressPropertyItem(PropertyGroup):
-		identifier:StringProperty(maxlen=64,options={_D})
+		identifier:StringProperty(maxlen=64,options={_C})
 		def _common_value_update(self,_context):_update_statusbar()
-		valid:BoolProperty(default=_A,update=_common_value_update);num_steps:IntProperty(min=1,default=1,subtype=_G,options={_D},update=_common_value_update);step:IntProperty(min=0,default=0,subtype=_G,options={_D},update=_common_value_update)
+		valid:BoolProperty(default=_A,update=_common_value_update);num_steps:IntProperty(min=1,default=1,subtype=_G,options={_C},update=_common_value_update);step:IntProperty(min=0,default=0,subtype=_G,options={_C},update=_common_value_update)
 		def _get_progress(self):return self.step/self.num_steps*100
 		def _set_progress(self,_value):0
-		value:FloatProperty(min=.0,max=1e2,precision=1,get=_get_progress,subtype='PERCENTAGE',options={_D});icon:StringProperty(default='NONE',maxlen=64,options={_D},update=_common_value_update);icon_value:IntProperty(min=0,default=0,subtype=_G,options={_D},update=_common_value_update);label:StringProperty(default='Progress',options={_D},update=_common_value_update);cancellable:BoolProperty(default=_C,options={_D},update=_common_value_update)
+		value:FloatProperty(min=.0,max=1e2,precision=1,get=_get_progress,subtype='PERCENTAGE',options={_C});icon:StringProperty(default='NONE',maxlen=64,options={_C},update=_common_value_update);icon_value:IntProperty(min=0,default=0,subtype=_G,options={_C},update=_common_value_update);label:StringProperty(default='Progress',options={_C},update=_common_value_update);cancellable:BoolProperty(default=_D,options={_C},update=_common_value_update)
 	def _func_draw_progress(self,context:Context):
-		layout:UILayout=self.layout;layout.use_property_split=_A;layout.use_property_decorate=_C;layout.template_input_status();layout.separator_spacer();layout.template_reports_banner()
+		layout:UILayout=self.layout;layout.use_property_split=_A;layout.use_property_decorate=_D;layout.template_input_status();layout.separator_spacer();layout.template_reports_banner()
 		if hasattr(WindowManager,progress._attrname):
 			layout.separator_spacer()
 			for item in progress.valid_progress_items():
 				row=layout.row(align=_A);row.label(text=item.label,icon=item.icon,icon_value=item.icon_value);srow=row.row(align=_A);srow.ui_units_x=progress.PROGRESS_BAR_UI_UNITS;srow.prop(item,'value',text='')
 				if item.cancellable:row.prop(item,'valid',text='',icon='X',toggle=_A,invert_checkbox=_A)
-		layout.separator_spacer();row=layout.row();row.alignment='RIGHT';row.label(text=context.screen.statusbar_info(),translate=_C)
+		layout.separator_spacer();row=layout.row();row.alignment='RIGHT';row.label(text=context.screen.statusbar_info())
 	@classmethod
 	def progress_items(cls)->tuple[ProgressPropertyItem]:return tuple(getattr(bpy.context.window_manager,cls._attrname,tuple()))
 	@classmethod
@@ -98,19 +99,19 @@ class progress(metaclass=_progress_meta):
 	def get(cls,*,identifier:str='')->ProgressPropertyItem:
 		ret=cls._get(identifier=identifier)
 		if ret:ret.valid=_A;return ret
-		if not cls._is_drawn:bpy.utils.register_class(progress.ProgressPropertyItem);cls._attrname=eval_unique_name(arr=WindowManager,prefix='bhq_',suffix='_progress');setattr(WindowManager,cls._attrname,CollectionProperty(type=progress.ProgressPropertyItem));STATUSBAR_HT_header.draw=cls._func_draw_progress;_update_statusbar()
+		if not cls._is_drawn:bpy.utils.register_class(progress.ProgressPropertyItem);cls._attrname=eval_unique_name(arr=WindowManager,prefix='bhq_',suffix='_progress');setattr(WindowManager,cls._attrname,CollectionProperty(type=progress.ProgressPropertyItem,options={_C}));STATUSBAR_HT_header.draw=cls._func_draw_progress;_update_statusbar()
 		cls._is_drawn=_A;ret:progress.ProgressPropertyItem=getattr(bpy.context.window_manager,cls._attrname).add();ret.identifier=identifier;return ret
 	@classmethod
 	def complete(cls,*,identifier:str):
 		item=cls._get(identifier=identifier)
 		if item:
-			item.valid=_C
+			item.valid=_D
 			for _ in cls.valid_progress_items():return
 			cls.release_all()
 	@classmethod
 	def release_all(cls):
 		if not cls._is_drawn:return
-		delattr(WindowManager,cls._attrname);bpy.utils.unregister_class(progress.ProgressPropertyItem);importlib.reload(space_statusbar);STATUSBAR_HT_header.draw=space_statusbar.STATUSBAR_HT_header.draw;_update_statusbar();cls._is_drawn=_C
+		delattr(WindowManager,cls._attrname);bpy.utils.unregister_class(progress.ProgressPropertyItem);importlib.reload(space_statusbar);STATUSBAR_HT_header.draw=space_statusbar.STATUSBAR_HT_header.draw;_update_statusbar();cls._is_drawn=_D
 def copy_default_presets_from(*,src_root:str):
 	for(root,_dir,files)in os.walk(src_root):
 		for filename in files:
@@ -118,9 +119,9 @@ def copy_default_presets_from(*,src_root:str):
 			if not tar_dir:print('Failed to create presets path');return
 			tar_fp=os.path.join(tar_dir,filename)
 			with open(src_fp,'r',encoding=_F)as src_file,open(tar_fp,'w',encoding=_F)as tar_file:tar_file.write(src_file.read())
-def template_preset(layout:UILayout,*,menu:Menu,operator:str)->_B:row=layout.row(align=_A);row.use_property_split=_C;row.menu(menu=menu.__name__,text=menu.bl_label);row.operator(operator=operator,text='',icon='ADD');row.operator(operator=operator,text='',icon='REMOVE').remove_active=_A
+def template_preset(layout:UILayout,*,menu:Menu,operator:str)->_B:row=layout.row(align=_A);row.use_property_split=_D;row.menu(menu=menu.__name__,text=menu.bl_label);row.operator(operator=operator,text='',icon='ADD');row.operator(operator=operator,text='',icon='REMOVE').remove_active=_A
 def template_disclosure_enum_flag(layout:UILayout,*,item:ID,prop_enum_flag:str,flag:str)->bool:
-	row=layout.row(align=_A);row.use_property_split=_C;row.emboss='NONE_OR_STATUS';row.alignment='LEFT';icon='DISCLOSURE_TRI_RIGHT';ret=_C
+	row=layout.row(align=_A);row.use_property_split=_D;row.emboss='NONE_OR_STATUS';row.alignment='LEFT';icon='DISCLOSURE_TRI_RIGHT';ret=_D
 	if flag in getattr(item,prop_enum_flag):icon='DISCLOSURE_TRI_DOWN';ret=_A
 	icon_value=UILayout.enum_item_icon(item,prop_enum_flag,flag)
 	if icon_value:row.label(icon_value=icon_value)
@@ -138,7 +139,9 @@ def request_localization_from_file(*,module:str,langs:dict,msgctxt:str,src:str,d
 	with open(src,'r',encoding=_F)as src_file:
 		src_data=src_file.read()
 		for(dst_locale,dst_filename)in dst.items():
-			with open(dst_filename,'r',encoding=_F)as dst_file:langs[dst_locale][msgctxt,src_data]=dst_file.read()
+			with open(dst_filename,'r',encoding=_F)as dst_file:
+				if dst_locale not in langs:langs[dst_locale]=dict()
+				langs[dst_locale][msgctxt,src_data]=dst_file.read()
 	update_localization(module=module,langs=langs);return src_data
 def safe_register(cls):
 	try:bpy.utils.unregister_class(cls)
@@ -147,7 +150,7 @@ def safe_register(cls):
 def _intern_update_post_restart_blender(module_name:str):import subprocess;startupinfo=subprocess.STARTUPINFO();startupinfo.dwFlags=subprocess.DETACHED_PROCESS;subprocess.Popen([bpy.app.binary_path,'-con','--python-expr','import bpy; bpy.ops.wm.recover_last_session(); '],startupinfo=startupinfo);bpy.ops.wm.quit_blender()
 UPDATE_PROPS_ATTR_NAME='update_props'
 class PreferencesUpdateProperties(PropertyGroup):
-	auto_check:BoolProperty(default=_A,options={_D,_J},translation_context=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT,name='Check for Updates',description='Automatically check for updates when you open Blender');auth_token:StringProperty(maxlen=256,subtype='PASSWORD',options={_D},translation_context=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT,name='Authorization Token',description='Authorization token to increase the limit of responses during development');has_updates:BoolProperty(options={_D});url:StringProperty(options={_D},maxlen=256)
+	auto_check:BoolProperty(default=_A,options={_C,_J},translation_context=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT,name='Check for Updates',description='Automatically check for updates when you open Blender');auth_token:StringProperty(maxlen=256,subtype='PASSWORD',options={_C},translation_context=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT,name='Authorization Token',description='Authorization token to increase the limit of responses during development');has_updates:BoolProperty(options={_C});url:StringProperty(options={_C},maxlen=256)
 	@classmethod
 	@property
 	def _addon_module_name(cls)->str:return __package__.split('.')[0]
@@ -171,13 +174,13 @@ class PreferencesUpdateProperties(PropertyGroup):
 	def _addon_latest_release_url(cls)->str:import urllib.parse;doc_url=cls._addon_module.bl_info[_H];parsed=urllib.parse.urlparse(doc_url);owner,repo_name=parsed.path[1:].split('/');api_path=f"/repos/{owner}/{repo_name}/releases/latest";api_url=urllib.parse.urlunparse((parsed.scheme,'api.github.com',api_path,'','',''));return api_url
 	@classmethod
 	def check_poll(cls)->bool:
-		if BHQAB_OT_check_addon_updates.proc:return _C
+		if BHQAB_OT_check_addon_updates.proc:return _D
 		cache=updater.UpdateCache.get(directory=cls._addon_update_cache_directory)
 		if cache.checked_at:
 			if cache.remaining>0:return _A
 			elif datetime.now()>datetime.fromtimestamp(cache.reset_at):return _A
 		else:return _A
-		return _C
+		return _D
 	@staticmethod
 	def _format_timestamp(value:int|float):return datetime.fromtimestamp(value).strftime(_UI_TIME_FMT)
 	def draw(self,context:Context,layout:UILayout):
@@ -191,7 +194,7 @@ class PreferencesUpdateProperties(PropertyGroup):
 class format_dict(dict):
 	def __missing__(self,key):return'...'
 class BHQAB_OT_check_addon_updates(Operator):
-	bl_idname='bhqab.check_addon_updates';bl_label='Check Now';bl_translation_context=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT;bl_options={_L};proc=_B;timers:Timer;force:BoolProperty(options={_D,_J})
+	bl_idname='bhqab.check_addon_updates';bl_label='Check Now';bl_translation_context=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT;bl_options={_L};proc=_B;timers:Timer;force:BoolProperty(options={_C,_J})
 	@classmethod
 	def description(cls,_context:Context,_properties:BHQAB_OT_check_addon_updates):
 		msgctxt=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT
@@ -241,7 +244,7 @@ class BHQAB_OT_install_addon_update(Operator):
 		if not result:self.report(type={A},message='Failed to create backup directory');return{_E}
 		result=updater.copy_directory(module_name=module_name,src=module_directory,dst=backup_directory)
 		if not result:self.report(type={A},message='Failed to make backup');return{_E}
-		self.report(type={'INFO'},message='Installing update');addon_utils.disable(module_name,default_set=_C);result=updater.remove_directory(module_name=module_name,directory=module_directory)
+		self.report(type={'INFO'},message='Installing update');addon_utils.disable(module_name,default_set=_D);result=updater.remove_directory(module_name=module_name,directory=module_directory)
 		if not result:addon_utils.enable(module_name,persistent=_A);self.report(type={A},message='Unable to remove local installation files, please, check directory permissions');return{_E}
 		def _intern_critical():print('\n\nA critical error occurred while installing "{module_name:s}" the update, unable to restore the installation from backup. Use the link {doc_url:s} to visit the repository and download the latest update. If you do not have access to the Internet, "{backup_directory:s}" contains a backup files\n\n'.format(module_name=module_name,doc_url=doc_url,backup_directory=backup_directory));bpy.ops.wm.url_open(_I,url=doc_url);bpy.ops.wm.path_open(_I,filepath=backup_directory);return{_E}
 		def _intern_restore_backup():
@@ -256,8 +259,8 @@ class BHQAB_OT_install_addon_update(Operator):
 		log.info(f'Removing update zip archive from "{local_filename}"');result=updater.remove_file(module_name=module_name,filepath=local_filename)
 		if result:log.info('Update zip archive removed')
 		else:log.warning('Unable to remove update zip archive')
-		cache.has_updates=_C;cache.write(module_name=module_name);log.info('Restarting Blender');_intern_update_post_restart_blender(module_name=clean_module_name);return{_M}
-def check_addon_updates(*,force:bool=_C):cb=eval(f"bpy.ops.{BHQAB_OT_check_addon_updates.bl_idname}");cb('INVOKE_DEFAULT',force=force)
+		cache.has_updates=_D;cache.write(module_name=module_name);log.info('Restarting Blender');_intern_update_post_restart_blender(module_name=clean_module_name);return{_M}
+def check_addon_updates(*,force:bool=_D):cb=eval(f"bpy.ops.{BHQAB_OT_check_addon_updates.bl_idname}");cb('INVOKE_DEFAULT',force=force)
 _classes=BHQAB_OT_check_addon_updates,BHQAB_OT_install_addon_update
 def register_addon_update_operators()->list[Operator]:...
 def unregister_addon_update_operators():...
@@ -274,7 +277,7 @@ class IconsCache:
 	def _intern_initialize_from_data_files(cls,*,directory:str,ids:Iterable[str]):
 		for identifier in ids:
 			try:icon_value=bpy.app.icons.new_triangles_from_file(os.path.join(directory,f"{identifier}.dat"))
-			except ValueError:icon_value=0
+			except ValueError:log.warning(f'Unable to load icon "{identifier}"');icon_value=0
 			cls._cache[identifier]=icon_value
 	@classmethod
 	def _intern_initialize_from_image_files(cls,*,directory:str,ids:Iterable[str]):

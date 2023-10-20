@@ -119,7 +119,7 @@ class CPP_PT_io_cameras_transform(Panel,IOPanelMembers):
 	@classmethod
 	def poll(cls,context:Context):sfile:SpaceFileBrowser=context.space_data;operator=sfile.active_operator;return operator.bl_idname in{ops.import_cameras.CPP_OT_import_cameras.__qualname__,ops.export_cameras.CPP_OT_export_cameras.__qualname__}
 	def draw_header(self,context:Context):layout=self.layout;layout.label(icon_value=icons.get_id(_L))
-	def draw(self,context:Context):layout=self.layout;layout.use_property_split=_A;sfile:SpaceFileBrowser=context.space_data;operator=sfile.active_operator;props.intern.double.properties_draw(operator,'global_scale',context,layout);layout.prop(operator,'axis_up');layout.prop(operator,'axis_forward')
+	def draw(self,context:Context):layout=self.layout;layout.use_property_split=_A;sfile:SpaceFileBrowser=context.space_data;operator=sfile.active_operator;props.intern.double.properties_draw(operator,'global_scale',context,layout);layout.prop(operator,'up_axis');layout.prop(operator,'forward_axis')
 class CPP_PT_export_cameras_rc_csv(Panel,IOPanelMembers,PanelHeaderIcon):
 	bl_label='Character Separated Values';bl_translation_context=_M;header_icon=_F
 	@classmethod

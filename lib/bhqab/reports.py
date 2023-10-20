@@ -1,8 +1,9 @@
 from __future__ import annotations
+_B='BHQAB_Preferences'
 _A=None
 from datetime import datetime
 import inspect,logging,logging.handlers,os,pprint,re,textwrap,time,bpy
-from bpy.types import Context,Operator,bpy_prop_array
+from bpy.types import bpy_prop_array,Context,Operator,UILayout
 from bpy.props import EnumProperty
 from bpy.app.translations import pgettext
 from typing import TYPE_CHECKING
@@ -103,4 +104,6 @@ class AddonLogger:
 			for handle in log.handlers:
 				if type(handle)==logging.StreamHandler:handle.setLevel(self.log_level)
 			_update_log_log_level(self,context)
-		return EnumProperty(items=((logging.getLevelName(logging.DEBUG),'Debug','',0,logging.DEBUG),(logging.getLevelName(logging.INFO),'Info','',0,logging.INFO),(logging.getLevelName(logging.WARNING),'Warning','',0,logging.WARNING),(logging.getLevelName(logging.ERROR),'Error','',0,logging.ERROR),(logging.getLevelName(logging.CRITICAL),'Critical','',0,logging.CRITICAL)),default=logging.getLevelName(logging.WARNING),update=_update_log_level,options={'HIDDEN'},translation_context='BHQAB_Preferences',name='Log Level',description='The level of the log that will be output to the console. For log to file, this level value will not change')
+		return EnumProperty(items=((logging.getLevelName(logging.DEBUG),'Debug','',0,logging.DEBUG),(logging.getLevelName(logging.INFO),'Info','',0,logging.INFO),(logging.getLevelName(logging.WARNING),'Warning','',0,logging.WARNING),(logging.getLevelName(logging.ERROR),'Error','',0,logging.ERROR),(logging.getLevelName(logging.CRITICAL),'Critical','',0,logging.CRITICAL)),default=logging.getLevelName(logging.WARNING),update=_update_log_level,options={'SKIP_SAVE'},translation_context=_B,name='Log Level',description='The level of the log that will be output to the console. For log to file, this level value will not change')
+	@classmethod
+	def template_ui_draw_paths(cls,layout:UILayout):A='wm.path_open';layout.operator(operator=A,text='Open Log Files Directory',text_ctxt=_B).filepath=cls.directory;layout.operator(operator=A,text=pgettext('Open Log: "{filename}"',_B).format(filename=cls.filename)).filepath=os.path.join(cls.directory,cls.filename)

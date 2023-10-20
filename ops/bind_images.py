@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:from..props import Image;from..props.camera import CameraProps;from..props.scene import SceneProps
 __all__=_C,
 class CPP_OT_bind_images(common.IOUnifiedName_Params,metaclass=common.SetupContextOperator):
-	bl_idname='cpp.bind_images';bl_description='';bl_label='Bind Camera Images';bl_options={'REGISTER','UNDO'};bl_translation_context=_C;use_existing_caches:BoolProperty(default=_A,options={_B,_D});directory:StringProperty(subtype='DIR_PATH',maxlen=1024,options={_B},translation_context='CPP_IO',name='Directory');mode:EnumProperty(items=(('ACTIVE','Active',''),('ALL','All','')),options={_B,_D})
+	bl_idname='cpp.bind_images';bl_label='Bind Camera Images';bl_options={'REGISTER','UNDO'};bl_translation_context=_C;use_existing_caches:BoolProperty(default=_A,options={_B,_D});directory:StringProperty(subtype='DIR_PATH',maxlen=1024,options={_B},translation_context='CPP_IO',name='Directory');mode:EnumProperty(items=(('ACTIVE','Active',''),('ALL','All','')),options={_B,_D})
 	@classmethod
 	def description(cls,context:Context,properties:CPP_OT_bind_images)->str:
 		msgctxt=cls.__qualname__
@@ -23,7 +23,9 @@ class CPP_OT_bind_images(common.IOUnifiedName_Params,metaclass=common.SetupConte
 			case'ACTIVE':return pgettext('Bind the image to the active camera',msgctxt)
 			case'ALL':return pgettext('Bind images to all cameras in the scene',msgctxt)
 		return''
-	def draw(self:Operator,context:Context):0
+	def draw(self:Operator,context:Context):
+		layout=self.layout
+		if context.area.type=='VIEW_3D':layout.prop(self,'un_flags')
 	def invoke(self,context:Context,_event:Event):
 		scene_props:SceneProps=context.scene.cpp
 		if scene_props.source_dir and os.path.isdir(scene_props.source_dir):self.directory=scene_props.source_dir
@@ -36,7 +38,7 @@ class CPP_OT_bind_images(common.IOUnifiedName_Params,metaclass=common.SetupConte
 		match self.mode:
 			case'ACTIVE':
 				camera=main.Workflow.camera
-				if not camera:Reports.report_and_log(self,level=logging.WARNING,message='No active camera, operation skipped');return{'CANCELLED'}
+				if not camera:Reports.report_and_log(self,level=logging.WARNING,message='No active camera, operation skipped',msgctxt=msgctxt);return{'CANCELLED'}
 				camera_names={common.UnifiedName().from_object(ob=camera,flags=flags)}
 			case'ALL':camera_names=common.UnifiedNameCache.cached_camera_names
 		image_names=list(common.UnifiedNameCache.cached_image_names)

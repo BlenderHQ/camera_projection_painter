@@ -58,5 +58,5 @@ def create_props_rc_opk()->_C:
 	def _impl_as_array(self,*,R:_A|Float64ArrayT,S:_A|float)->Float64ArrayT:import numpy as np;ob_props:ObjectProps=self.id_data.cpp;rmat:RotationMatrixProps=ob_props.rotation_matrix;rot=rmat.as_array(R=R,S=S);return np.array((degrees(-atan2(rot[0][0],rot[0][1])),degrees(-asin(rot[0][2])),degrees(-atan2(rot[1][2],rot[2][2]))),dtype=np.float64,order='C')
 	return type(_C,(PropertyGroup,),{_E:_annotations_dict,_F:_draw,_G:_impl_as_array,**_properties_dict})
 class RC_CSV_ExportParams:
-	rc_csv_write_num_cameras:BoolProperty(default=False,options={'HIDDEN'},translation_context='CPP_OT_export_cameras',name='Number of Cameras',description='Write number of cameras into a file')
+	rc_csv_write_num_cameras:BoolProperty(default=False,options={'SKIP_SAVE'},translation_context='RC_CSV_ExportParams',name='Number of Cameras',description='Write number of cameras into a file for Reality Capture CSV-like file formats')
 	def ui_draw_rc_csv_export_params(self,context:Context,layout:UILayout):layout.prop(self,'rc_csv_write_num_cameras')

@@ -2,26 +2,26 @@ from __future__ import annotations
 _C='LEFTMOUSE'
 _B='PRESS'
 _A=None
-bl_info={'name':'Camera Projection Painter','author':'Vlad Erium (ssh4), Ivan Perevala (ivpe)','version':(3,6,0),'blender':(3,6,0),'description':'Expanding the capabilities of clone brush for working with photo scans','location':'Tool settings > Camera Painter','support':'COMMUNITY','category':'Paint','doc_url':'https://github.com/BlenderHQ/camera_projection_painter'}
-ADDON_PKG=__package__.split('.')[0]
+bl_info={'name':'Camera Projection Painter','author':'Vlad Erium (ssh4), Ivan Perevala (ivpe)','version':(3,6,0),'blender':(3,6,0),'description':'Photogrammetry textures refinement','location':'Tool Settings > Camera Painter','support':'COMMUNITY','category':'Paint','doc_url':'https://github.com/BlenderHQ/camera_projection_painter'}
 import os,time
 from importlib import reload
 dt=time.time()
-DATA_DIR=os.path.join(os.path.dirname(__file__),'data')
 from.lib import bhqab
+ADDON_PKG=bhqab.utils_ui.get_addon_package_name()
+DATA_DIR=os.path.join(os.path.dirname(__file__),'data')
+def get_addon_pref(context:Context)->props.pref.Preferences:return context.preferences.addons[ADDON_PKG].preferences
 class Reports(bhqab.reports.AddonLogger):0
 Reports.initialize(logger_name=bl_info['name'],directory=os.path.join(os.path.dirname(__file__),'logs'),max_num_logs=30)
 log=Reports.log
 def register_class(cls):bpy.utils.register_class(cls);_classes_registered.append(cls)
 def unregister_class(cls):bpy.utils.unregister_class(cls);_classes_registered.remove(cls)
-def get_addon_pref(context)->props.pref.Preferences:return context.preferences.addons[ADDON_PKG].preferences
-if'bpy'in locals():reload(_log);reload(constants);reload(bhqab);reload(bhqglsl);reload(icons);reload(props);reload(shaders);reload(main);reload(ops);reload(langs);reload(ui);reload(manual_map)
-else:_classes_registered=list();from.import constants;from.lib import bhqglsl;from.import icons,props,shaders,main,ops,langs,ui,manual_map
+if'bpy'in locals():reload(bhqab);reload(bhqglsl);reload(constants);reload(icons);reload(props);reload(shaders);reload(main);reload(ops);reload(langs);reload(ui);reload(manual_map)
+else:_classes_registered=list();from.lib import bhqglsl;from.import constants;from.import icons;from.import props;from.import shaders;from.import main;from.import ops;from.import langs;from.import ui;from.import manual_map
 HAS_BPY=False
 try:import bpy
 except ImportError:pass
 else:HAS_BPY=bpy.app.version is not _A
-from bpy.types import KeyMap,KeyMapItem
+from bpy.types import Context,KeyMap,KeyMapItem
 from bpy.app.handlers import persistent
 log.debug('Sub-modules import time: {:.6f} second(s)'.format(time.time()-dt))
 _addon_keymaps:dict[str,tuple[tuple[dict[str,str|bool|int],dict[str|any]]]]
@@ -42,8 +42,8 @@ def unregister_keymap():
 	if HAS_BPY and not bpy.app.background:
 		for(km,kmi)in _keymap_registry:km.keymap_items.remove(kmi)
 		_keymap_registry.clear()
-def eval_manual_map():return'https://bhqcpp.readthedocs.io/en/latest/',manual_map.MANUAL_MAP
-_persistent_classes=ops.bind_history_remove.CPP_OT_bind_history_remove,ops.bind_images.CPP_OT_bind_images,ops.data_cleanup.CPP_OT_data_cleanup,ops.ensure_canvas.CPP_OT_canvas_new,ops.ensure_canvas.CPP_OT_canvas_quick_select,ops.ensure_canvas.CPP_OT_ensure_canvas,ops.ensure_tool_settings.CPP_OT_ensure_tool_settings,ops.export_cameras.CPP_OT_export_cameras,ops.import_cameras.CPP_OT_import_cameras,ops.import_scene.CPP_OT_import_scene
+def eval_manual_map():return'https://docs.camera-painter.com/en/latest/',manual_map.MANUAL_MAP
+_persistent_classes=ops.bind_history_remove.CPP_OT_bind_history_remove,ops.bind_images.CPP_OT_bind_images,ops.data_cleanup.CPP_OT_data_cleanup,ops.ensure_canvas.CPP_OT_canvas_new,ops.ensure_canvas.CPP_OT_quick_select_canvas,ops.ensure_canvas.CPP_OT_ensure_canvas,ops.ensure_tool_settings.CPP_OT_ensure_tool_settings,ops.export_cameras.CPP_OT_export_cameras,ops.import_cameras.CPP_OT_import_cameras,ops.import_scene.CPP_OT_import_scene
 _gpu_require_classes=main.CPP_OT_main,main.CPP_OT_draw,main.CPP_OT_select,main.CPP_OT_view_camera,ops.pref_show.CPP_OT_pref_show,ops.setup_context.CPP_OT_setup_context,ui.CPP_PT_dataset,ui.CPP_UL_bind_history_item,ui.CPP_PT_image,ui.CPP_PT_transform,ui.CPP_PT_transform_location_default,ui.CPP_PT_transform_location_rc_xyalt,ui.CPP_PT_transform_rotation,ui.CPP_PT_transform_rotation_rc_hpr,ui.CPP_PT_transform_rotation_rc_opk,ui.CPP_PT_rc_rc_xmp_params,ui.CPP_PT_transform_rotation_rc_rotation,ui.CPP_PT_calibration,ui.CPP_PT_lens_distortion,ui.CPP_PT_inspection,ui.CPP_PT_inspection_image_orientation,ui.CPP_PT_inspection_highlight_border,ui.CPP_PT_io_cameras_transform,ui.CPP_PT_unified_name_props,ui.CPP_PT_export_cameras_rc_csv,ui.CPP_PT_export_cameras_rc_metadata_xmp,ui.CPP_PT_io_import_scene
 _classes=_persistent_classes
 if HAS_BPY and not bpy.app.background:_classes=_persistent_classes+_gpu_require_classes
@@ -60,7 +60,7 @@ def _log_settings(_=_A):log.debug('Loaded with settings:').push_indent();context
 def _handler_load_post(_=_A):
 	if not _classes_registered:_register_classes();bhqab.utils_ui.check_addon_updates(force=False);addon_pref=get_addon_pref(bpy.context);addon_pref.log_level=addon_pref.log_level
 	_log_settings()
-	if not main.WindowInstances.instances:main.WindowInstances.modal_ensure_operator_invoked_in_all_windows(context=bpy.context,idname=main.CPP_OT_main.bl_idname)
+	if not main.WindowInstances.instances:main.WindowInstances.modal_ensure_operator_invoked_in_all_windows(context=bpy.context)
 	if bpy.app.timers.is_registered(_handler_load_post):bpy.app.timers.unregister(_handler_load_post)
 @persistent
 def _handler_save_pre(_=_A):scene_props:props.scene.SceneProps=bpy.context.scene.cpp;scene_props.version=bpy.app.version[0]*100+bpy.app.version[1]%100;main.Workflow.Mesh.remove_temp_data()
