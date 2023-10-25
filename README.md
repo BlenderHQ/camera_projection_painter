@@ -9,17 +9,22 @@
 
 ## About
 
+Add-on for Blender for working with photo scans and photogrammetry.
+
 ## How To Use the Addon
+
+To get started, you need to export data from your photogrammetry software. Next, run the "Setup Context" operator and follow a few simple steps to import data. After completing the setup, you can adjust the texture and camera data. That's in short. More detailed information can be found in the tooltips for operators and properties, and even more detailed information can be found on the [project documentation page](https://docs.camera-painter.com).
+
+If there are any issues with the add-on, or if you have suggestions for the development of the project, we will be happy to [read them on GitHub](https://github.com/BlenderHQ/camera_projection_painter/issues). The project was created and maintained with the support of patrons on our [Patreon](https://patreon.com/BlenderHQ).
+
 
 ## Release Notes
 
 <details open><summary>
-<b>Version 3.6.2</b>
+<b>Version 3.6</b>
 </summary>
 
-* First
-
-* Second
+* Initial release after years of development 😀
 
 </details>
 
