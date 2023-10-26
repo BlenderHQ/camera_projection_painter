@@ -1,5 +1,10 @@
 # Camera Projection Painter
 
+View in
+[🇺🇸](./README.md),
+[🇺🇦](./README_uk.md)
+.
+
 - [Camera Projection Painter](#camera-projection-painter)
   - [About](#about)
   - [How To Use the Addon](#how-to-use-the-addon)
