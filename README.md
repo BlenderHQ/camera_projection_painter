@@ -14,7 +14,7 @@ View in
 
 ## About
 
-Add-on for Blender for working with photo scans and photogrammetry.
+Add-on for Blender for working with photo scans and photogrammetry. It allows you to paint over the texture of the reconstructed object with a clone brush from the original photo.
 
 ## How To Use the Addon
 
