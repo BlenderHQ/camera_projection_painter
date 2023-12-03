@@ -16,6 +16,8 @@ View in
 
 Add-on for Blender for working with photo scans and photogrammetry. It allows you to paint over the texture of the reconstructed object with a clone brush from the original photo.
 
+![qs-complete](https://github.com/BlenderHQ/camera_projection_painter/assets/3924000/e8fc7191-04cb-4e9c-86f2-f8d309873ed9)
+
 ## How To Use the Addon
 
 To get started, you need to export data from your photogrammetry software. Next, run the "Setup Context" operator and follow a few simple steps to import data. After completing the setup, you can adjust the texture and camera data. That's in short. More detailed information can be found in the tooltips for operators and properties, and even more detailed information can be found on the [project documentation page](https://docs.camera-painter.com).
