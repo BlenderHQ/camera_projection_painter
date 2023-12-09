@@ -73,7 +73,7 @@ class RC_NXYZ(RC_CSV_Common):
 			for(name,camera)in common.IOProcessor.cached_export_items:camera_props:ObjectProps=camera.cpp;xyalt:RC_XYAltProps=camera_props.rc_xyalt;writer.writerow((name,*xyalt.as_array(R=options.R,S=options.S)))
 		return 1
 class RC_NXYZHPR(RC_CSV_Common):
-	io_format=common.IOFormat.RC_NXYZHPR;extension=_B;rc_csv_line='#name,x,y,z,omega,phi,kappa'
+	io_format=common.IOFormat.RC_NXYZHPR;extension=_B;rc_csv_line='#name,x,y,z,heading,pitch,roll'
 	@classmethod
 	def read(cls,*,file:TextIOWrapper,options:common.IOOptionsBaseT)->int:
 		reader=csv.reader(file,delimiter=_A);skipped=0
@@ -91,7 +91,7 @@ class RC_NXYZHPR(RC_CSV_Common):
 			for(name,camera)in common.IOProcessor.cached_export_items:camera_props:ObjectProps=camera.cpp;xyalt:RC_XYAltProps=camera_props.rc_xyalt;hpr:RC_HeadingPitchRollProps=camera_props.rc_hpr;writer.writerow((name,*xyalt.as_array(R=options.R,S=options.S),*hpr.as_array(R=options.R,S=options.S)))
 		return 1
 class RC_NXYZOPK(RC_CSV_Common):
-	io_format=common.IOFormat.RC_NXYZOPK;extension=_B;rc_csv_line='#name,x,y,z,heading,pitch,roll'
+	io_format=common.IOFormat.RC_NXYZOPK;extension=_B;rc_csv_line='#name,x,y,z,omega,phi,kappa'
 	@classmethod
 	def read(cls,*,file:TextIOWrapper,options:common.IOOptionsBaseT)->int:
 		reader=csv.reader(file,delimiter=_A);skipped=0

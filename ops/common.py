@@ -123,7 +123,7 @@ IOOptionsBaseT=TypeVar('IOOptionsBaseT',bound=IOOptionsBase)
 class IOFileHandler:
 	io_format:IOFormat;extension:str;size_max:int=-1;export_options:Type[IOOptionsBase]=IOOptionsBase
 	@classmethod
-	def check(*,file:TextIOWrapper)->bool:return _I
+	def check(cls,*,file:TextIOWrapper)->bool:return _I
 	@classmethod
 	def evaluate_filename(cls,*,name:str)->str:return name
 	@classmethod

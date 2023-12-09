@@ -26,7 +26,7 @@ __all__=_I,
 def check_additional_builtin_io_addons()->set:
 	ret=set()
 	if addon_utils.check('io_scene_fbx')[1]:ret.add(_C)
-	if addon_utils.check('io_scene_obj')[1]:ret.add(_D)
+	if bpy.app.build_options.io_wavefront_obj:ret.add(_D)
 	if bpy.app.build_options.collada:ret.add(_E)
 	return ret
 def get_prop_file_format_items(_self=None,_context=None):

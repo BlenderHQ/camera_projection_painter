@@ -9,11 +9,15 @@ _D=1.
 _C=.0
 _B='SKIP_SAVE'
 _A='SceneProps'
+from.import intern
 from..import Reports
 from..import constants
 from..import icons
+from..import register_class
 from bpy.types import PropertyGroup
 from bpy.props import BoolProperty,EnumProperty,FloatProperty,FloatVectorProperty,IntProperty,StringProperty
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:from typing import TypeVar;SceneProps=TypeVar(_A,bound=PropertyGroup)
 __all__=_A,
 class SceneProps(PropertyGroup):
 	version:IntProperty(options={_H},update=Reports.update_log_setting_changed(identifier='version'));units:EnumProperty(items=((_I,'Millimeters','Camera parameters in millimeters',icons.get_id('unit_mm'),1),('PIXELS','Pixels','Camera parameters relative to image sizes in pixels',icons.get_id('unit_px'),2)),default=_I,options={_B},translation_context=_A,update=Reports.update_log_setting_changed(identifier='units'),name='Unit',description='Display units of camera parameters')
@@ -25,3 +29,4 @@ class SceneProps(PropertyGroup):
 	def _set_highlight_border_facing(self,value:int):
 		if value:self[_G]=value
 	highlight_border_facing:EnumProperty(items=((constants.Facing.FRONT.name,'Front','Show the front of polygons',icons.get_id('facing_front'),constants.Facing.FRONT.value),(constants.Facing.BACK.name,'Back','Show the back of polygons',icons.get_id('facing_back'),constants.Facing.BACK.value)),default={constants.Facing.FRONT.name,constants.Facing.BACK.name},options={_J,_B},get=_get_highlight_border_facing,set=_set_highlight_border_facing,update=Reports.update_log_setting_changed(identifier=_G),name='Highlight Projected Border Facing',description='Which side of the polygons that are outside the frame of the projected image to display. Сan be useful for a scene where there is a closed space, for example a room or a street. At least one of the options should be selected');cameras_viewport_size:FloatProperty(default=_D,soft_min=.5,soft_max=5.,min=.1,step=.1,subtype='DISTANCE',options={_B},update=Reports.update_log_setting_changed(identifier='cameras_viewport_size'),translation_context=_A,name='Viewport Cameras Size',description='The size of the cameras in the viewport');current_image_alpha:FloatProperty(default=_C,soft_min=_C,soft_max=_D,step=1,subtype='FACTOR',options={_B},update=Reports.update_log_setting_changed(identifier='current_image_alpha'),translation_context=_A,name='Current Image Viewport Transparency',description='Transparency of the image when viewed from the camera')
+def create_props_scene()->SceneProps:return SceneProps
