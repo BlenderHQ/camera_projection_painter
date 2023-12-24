@@ -9,7 +9,7 @@ dt=time.time()
 from.lib import bhqab
 ADDON_PKG=bhqab.utils_ui.get_addon_package_name()
 DATA_DIR=os.path.join(os.path.dirname(__file__),'data')
-DOCS_BRANCH='double-precision-library'
+DOCS_BRANCH='latest'
 def get_addon_pref(context:Context)->props.pref.Preferences:return context.preferences.addons[ADDON_PKG].preferences
 class Reports(bhqab.reports.AddonLogger):0
 Reports.initialize(logger_name=bl_info['name'],directory=os.path.join(os.path.dirname(__file__),'logs'),max_num_logs=30)
