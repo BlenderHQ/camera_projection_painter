@@ -75,15 +75,13 @@ class FrameBufferFramework:
 class BatchPreset:
 	_unit_rectangle_tris_P_vbo:_A|GPUVertBuf=_A;_unit_rectangle_tris_P_ibo:_A|GPUIndexBuf=_A;_ndc_rectangle_tris_P_UV_vbo:_A|GPUVertBuf=_A;_ndc_rectangle_tris_P_UV_ibo:_A|GPUIndexBuf=_A
 	@classmethod
-	@property
-	def unit_rectangle_tris_P(cls)->GPUBatch:
+	def get_unit_rectangle_tris_P(cls)->GPUBatch:
 		if not cls._unit_rectangle_tris_P_vbo or not cls._unit_rectangle_tris_P_ibo:cls._update_unit_rectangle_tris_P_buffer_objects()
 		return GPUBatch(type=_E,buf=cls._unit_rectangle_tris_P_vbo,elem=cls._unit_rectangle_tris_P_ibo)
 	@classmethod
 	def _update_unit_rectangle_tris_P_buffer_objects(cls):vert_fmt=GPUVertFormat();vert_fmt.attr_add(id='P',comp_type=_F,len=2,fetch_mode=_G);vbo=GPUVertBuf(format=vert_fmt,len=4);vbo.attr_fill(id='P',data=((_C,_C),(_C,_B),(_B,_B),(_B,_C)));ibo=GPUIndexBuf(type=_E,seq=((0,1,2),(0,2,3)));cls._unit_rectangle_tris_P_vbo=vbo;cls._unit_rectangle_tris_P_ibo=ibo
 	@classmethod
-	@property
-	def ndc_rectangle_tris_P_UV(cls)->GPUBatch:
+	def get_ndc_rectangle_tris_P_UV(cls)->GPUBatch:
 		if not cls._ndc_rectangle_tris_P_UV_vbo or not cls._ndc_rectangle_tris_P_UV_ibo:cls._update_ndc_rectangle_tris_P_UV_buffer_objects()
 		return GPUBatch(type=_E,buf=cls._ndc_rectangle_tris_P_UV_vbo,elem=cls._ndc_rectangle_tris_P_UV_ibo)
 	@classmethod
@@ -93,8 +91,7 @@ class AABase:
 	__slots__='_preset','_preset_0';_preset:AAPreset;_preset_0:AAPreset;description:str=''
 	def __init__(self,*,area_type=_H,region_type=_I):self._preset=AAPreset.NONE;self._preset_0=AAPreset.NONE
 	@classmethod
-	@property
-	def name(cls)->str:return cls.__name__
+	def get_name(cls)->str:return cls.__name__
 	@property
 	def preset(self)->Literal['NONE','LOW',_J,'HIGH','ULTRA']:return self._preset.name
 	@preset.setter

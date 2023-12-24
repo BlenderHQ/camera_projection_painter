@@ -13,10 +13,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:from..props import WindowManager;from..props.wm import WMProps
 __all__=_A,
 def _do_data_cleanup(context:Context)->bool:return True
-def _do_import_scene(context:Context)->bool:return not main.Workflow.object_poll(main.Workflow.object)
+def _do_import_scene(context:Context)->bool:return not main.Workflow.object_poll(main.Workflow.get_object())
 def _do_ensure_canvas(context:Context)->bool:return True
-def _do_import_cameras(context:Context)->bool:return not main.Workflow.camera
-def _do_bind_images(context:Context)->bool:return not main.Workflow.image
+def _do_import_cameras(context:Context)->bool:return not main.Workflow.get_camera()
+def _do_bind_images(context:Context)->bool:return not main.Workflow.get_image()
 def _do_ensure_tool_settings(context:Context)->bool:return True
 _STAGE_CALLBACKS={constants.SetupStage.PRE_CLEANUP:(_do_data_cleanup,bpy.ops.cpp.data_cleanup,{}),constants.SetupStage.IMPORT_SCENE:(_do_import_scene,bpy.ops.cpp.import_scene,{}),constants.SetupStage.CHECK_CANVAS:(_do_ensure_canvas,bpy.ops.cpp.ensure_canvas,{}),constants.SetupStage.CHECK_CAMERAS:(_do_import_cameras,bpy.ops.cpp.import_cameras,{}),constants.SetupStage.CHECK_IMAGES:(_do_bind_images,bpy.ops.cpp.bind_images,dict(mode='ALL')),constants.SetupStage.CHECK_TOOL:(_do_ensure_tool_settings,bpy.ops.cpp.ensure_tool_settings,{})}
 PROGRESS_IDENTIFIER='setup_context'

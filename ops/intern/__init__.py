@@ -1,5 +1,5 @@
 from __future__ import annotations
-if'bpy'in locals():from importlib import reload;reload(rc_csv);reload(rc_xmp)
-else:from.import rc_csv,rc_xmp
+if'bpy'in locals():from importlib import reload;reload(rc)
+else:from.import rc
 import bpy
-__all__='rc_csv','rc_xmp'
+__all__='rc',

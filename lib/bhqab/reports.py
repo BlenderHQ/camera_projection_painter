@@ -97,8 +97,7 @@ class AddonLogger:
 		def _log_setting_changed(self,_context:Context):value=AddonLogger._get_value(item=self,identifier=identifier);value_fmt=AddonLogger._format_setting_value(value=value);log.debug(f"Setting updated '{self.bl_rna.name}.{identifier}': {value_fmt}")
 		return _log_setting_changed
 	@classmethod
-	@property
-	def prop_log_level(cls):
+	def get_prop_log_level(cls):
 		log=cls.log;_update_log_log_level=cls.update_log_setting_changed(identifier='log_level')
 		def _update_log_level(self,context:Context):
 			for handle in log.handlers:

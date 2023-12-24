@@ -63,7 +63,7 @@ def _apply_udim_materials_fix(context:Context,*,objects:set[Object]):
 				bpy.ops.object.material_slot_remove_unused()
 				while len(ob.material_slots)>1:bpy.ops.object.material_slot_remove()
 				if ob.material_slots:mat=ob.material_slots[0].material;mat.name=ob_name+'.<UDIM>'
-class CPP_OT_import_scene(common.IOFileBase_Params,metaclass=common.SetupContextOperator):
+class CPP_OT_import_scene(common.IOFileBaseParams,metaclass=common.SetupContextOperator):
 	bl_idname='cpp.import_scene';bl_label='Import Scene';bl_description='Import a scene from third-party software';bl_translation_context=_I;bl_options={'REGISTER','UNDO'}
 	def _get_file_fmt_filter_glob(self)->str:
 		ret=''

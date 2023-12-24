@@ -152,30 +152,24 @@ UPDATE_PROPS_ATTR_NAME='update_props'
 class PreferencesUpdateProperties(PropertyGroup):
 	auto_check:BoolProperty(default=_A,options={_C,_J},translation_context=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT,name='Check for Updates',description='Automatically check for updates when you open Blender');auth_token:StringProperty(maxlen=256,subtype='PASSWORD',options={_C},translation_context=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT,name='Authorization Token',description='Authorization token to increase the limit of responses during development');has_updates:BoolProperty(options={_C});url:StringProperty(options={_C},maxlen=256)
 	@classmethod
-	@property
-	def _addon_module_name(cls)->str:return __package__.split('.')[0]
+	def _get_addon_module_name(cls)->str:return __package__.split('.')[0]
 	@classmethod
-	@property
-	def _addon_clean_module_name(cls)->str:
-		module_name=cls._addon_module_name;match=re.match('^(.*?)(?:-.*)?$',module_name)
+	def _get_addon_clean_module_name(cls)->str:
+		module_name=cls._get_addon_module_name();match=re.match('^(.*?)(?:-.*)?$',module_name)
 		if match and match.groups:return match.group(1)
 		return module_name
 	@classmethod
-	@property
-	def _addon_module(cls)->dict:return sys.modules[cls._addon_module_name]
+	def _get_addon_module(cls)->dict:return sys.modules[cls._get_addon_module_name()]
 	@classmethod
-	@property
-	def _addon_int_version(cls)->int:return updater.eval_int_version(ver=cls._addon_module.bl_info.get(_K,(0,0,0)))
+	def _get_addon_int_version(cls)->int:return updater.eval_int_version(ver=cls._get_addon_module().bl_info.get(_K,(0,0,0)))
 	@classmethod
-	@property
-	def _addon_update_cache_directory(cls)->str:root=os.path.dirname(os.path.dirname(cls._addon_module.__file__));return os.path.join(root,f"{cls._addon_clean_module_name}_update_cache")
+	def _get_addon_update_cache_directory(cls)->str:root=os.path.dirname(os.path.dirname(cls._get_addon_module().__file__));return os.path.join(root,f"{cls._get_addon_clean_module_name()}_update_cache")
 	@classmethod
-	@property
-	def _addon_latest_release_url(cls)->str:import urllib.parse;doc_url=cls._addon_module.bl_info[_H];parsed=urllib.parse.urlparse(doc_url);owner,repo_name=parsed.path[1:].split('/');api_path=f"/repos/{owner}/{repo_name}/releases/latest";api_url=urllib.parse.urlunparse((parsed.scheme,'api.github.com',api_path,'','',''));return api_url
+	def _get_addon_latest_release_url(cls)->str:import urllib.parse;doc_url=cls._get_addon_module().bl_info[_H];parsed=urllib.parse.urlparse(doc_url);owner,repo_name=parsed.path[1:].split('/');api_path=f"/repos/{owner}/{repo_name}/releases/latest";api_url=urllib.parse.urlunparse((parsed.scheme,'api.github.com',api_path,'','',''));return api_url
 	@classmethod
 	def check_poll(cls)->bool:
 		if BHQAB_OT_check_addon_updates.proc:return _D
-		cache=updater.UpdateCache.get(directory=cls._addon_update_cache_directory)
+		cache=updater.UpdateCache.get(directory=cls._get_addon_update_cache_directory())
 		if cache.checked_at:
 			if cache.remaining>0:return _A
 			elif datetime.now()>datetime.fromtimestamp(cache.reset_at):return _A
@@ -184,7 +178,7 @@ class PreferencesUpdateProperties(PropertyGroup):
 	@staticmethod
 	def _format_timestamp(value:int|float):return datetime.fromtimestamp(value).strftime(_UI_TIME_FMT)
 	def draw(self,context:Context,layout:UILayout):
-		A='wm.path_open';cls=self.__class__;msgctxt=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT;cache_directory=cls._addon_update_cache_directory;cache=updater.UpdateCache.get(directory=cache_directory);checked_at_fmt=''
+		A='wm.path_open';cls=self.__class__;msgctxt=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT;cache_directory=cls._get_addon_update_cache_directory();cache=updater.UpdateCache.get(directory=cache_directory);checked_at_fmt=''
 		if cache.checked_at:checked_at_fmt=self._format_timestamp(cache.checked_at)
 		if cache.has_updates:prerelease_fmt=pgettext('Pre-release',msgctxt)if cache.tag_is_prerelease else'';text=pgettext('Released version {tag_name} {prerelease_fmt}({published_at}), last checked at {checked_at}\nRelease Notes:\n\n{body}',msgctxt).format(tag_name=cache.tag_name,prerelease_fmt=prerelease_fmt,published_at=self._format_timestamp(cache.tag_published_at),checked_at=checked_at_fmt,body=pgettext(cache.tag_body,msgctxt));draw_wrapped_text(context,layout,text=text);layout.operator(operator=BHQAB_OT_install_addon_update.bl_idname,text=pgettext('Update to {tag_name}',msgctxt).format(tag_name=cache.tag_name))
 		elif checked_at_fmt:draw_wrapped_text(context,layout,text=pgettext('You are using the latest version, checked at {checked_at}',msgctxt).format(checked_at=checked_at_fmt))
@@ -200,7 +194,7 @@ class BHQAB_OT_check_addon_updates(Operator):
 		msgctxt=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT
 		if PreferencesUpdateProperties.check_poll():return pgettext('Check for updates now',msgctxt)
 		else:
-			cache_filepath=PreferencesUpdateProperties._addon_update_cache_directory;cache=updater.UpdateCache.get(directory=cache_filepath)
+			cache_filepath=PreferencesUpdateProperties._get_addon_update_cache_directory();cache=updater.UpdateCache.get(directory=cache_filepath)
 			if not cache.remaining:return pgettext('Unable check for updates before {reset_at}, exceeded rate limit',msgctxt).format(reset_at=PreferencesUpdateProperties._format_timestamp(cache.reset_at))
 		return pgettext('Can not check for updates now',msgctxt)
 	@classmethod
@@ -213,17 +207,17 @@ class BHQAB_OT_check_addon_updates(Operator):
 			for timer in self.timers:wm.event_timer_remove(timer)
 		self.timers=_B
 	def invoke(self,context:Context,event:Event):
-		cls=self.__class__;module_name=PreferencesUpdateProperties._addon_module_name;addon_pref=context.preferences.addons[module_name].preferences;update_props:PreferencesUpdateProperties=getattr(addon_pref,UPDATE_PROPS_ATTR_NAME);cache=updater.UpdateCache.get(directory=update_props._addon_update_cache_directory);self.has_updates=cache.has_updates;update_localization(module=__package__,langs=cache.eval_tag_body_localization())
+		cls=self.__class__;module_name=PreferencesUpdateProperties._get_addon_module_name();addon_pref=context.preferences.addons[module_name].preferences;update_props:PreferencesUpdateProperties=getattr(addon_pref,UPDATE_PROPS_ATTR_NAME);cache=updater.UpdateCache.get(directory=update_props._get_addon_update_cache_directory());self.has_updates=cache.has_updates;update_localization(module=__package__,langs=cache.eval_tag_body_localization())
 		if not(self.force or update_props.auto_check):return{_E}
 		if not update_props.check_poll():return{_E}
-		updater.setup_logger(module_name=module_name);import subprocess;proc=subprocess.Popen([sys.executable,updater.__file__,module_name,update_props._addon_update_cache_directory,update_props._addon_latest_release_url,str(update_props._addon_int_version),update_props.auth_token],shell=_A,stdin=_B,stdout=subprocess.PIPE,universal_newlines=_A);cls.proc=proc;wm=context.window_manager;self.timers=list()
+		updater.setup_logger(module_name=module_name);import subprocess;proc=subprocess.Popen([sys.executable,updater.__file__,module_name,update_props._get_addon_update_cache_directory(),update_props._get_addon_latest_release_url(),str(update_props._get_addon_int_version()),update_props.auth_token],shell=_A,stdin=_B,stdout=subprocess.PIPE,universal_newlines=_A);cls.proc=proc;wm=context.window_manager;self.timers=list()
 		for window in wm.windows:self.timers.append(wm.event_timer_add(.1,window=window))
 		wm.modal_handler_add(self);return{'RUNNING_MODAL'}
 	def modal(self,context:Context,event:Event):
-		cls=self.__class__;msgctxt=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT;cache_filepath=PreferencesUpdateProperties._addon_update_cache_directory;cache=updater.UpdateCache.get(directory=cache_filepath)
+		cls=self.__class__;msgctxt=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT;cache_filepath=PreferencesUpdateProperties._get_addon_update_cache_directory();cache=updater.UpdateCache.get(directory=cache_filepath)
 		if cls.proc is _B:self.cancel(context);return{_E}
 		if cls.proc.poll()is _B:return{'PASS_THROUGH'}
-		module_name=PreferencesUpdateProperties._addon_module_name;addon_pref=context.preferences.addons[module_name].preferences;update_props:PreferencesUpdateProperties=getattr(addon_pref,UPDATE_PROPS_ATTR_NAME);update_props.has_updates=cache.has_updates;update_localization(module=__package__,langs=cache.eval_tag_body_localization())
+		module_name=PreferencesUpdateProperties._get_addon_module_name();addon_pref=context.preferences.addons[module_name].preferences;update_props:PreferencesUpdateProperties=getattr(addon_pref,UPDATE_PROPS_ATTR_NAME);update_props.has_updates=cache.has_updates;update_localization(module=__package__,langs=cache.eval_tag_body_localization())
 		if cls.proc.stdout and cls.proc.stdout.readable():
 			lines=cls.proc.stdout.readlines()
 			for line in reversed(lines):
@@ -236,9 +230,9 @@ class BHQAB_OT_install_addon_update(Operator):
 	@classmethod
 	def poll(cls,_context:Context):return PreferencesUpdateProperties.check_poll()
 	@staticmethod
-	def switch_to_manual_installation():doc_url=PreferencesUpdateProperties._addon_module.bl_info[_H];bpy.ops.wm.url_open(_I,url=doc_url)
+	def switch_to_manual_installation():doc_url=PreferencesUpdateProperties._get_addon_module().bl_info[_H];bpy.ops.wm.url_open(_I,url=doc_url)
 	def execute(self,context:Context):
-		A='WARNING';msgctxt=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT;doc_url=PreferencesUpdateProperties._addon_module.bl_info[_H];module_name=PreferencesUpdateProperties._addon_module_name;clean_module_name=PreferencesUpdateProperties._addon_clean_module_name;updater.setup_logger(module_name=module_name);log=logging.getLogger(module_name);module_directory=os.path.dirname(PreferencesUpdateProperties._addon_module.__file__);root_directory=os.path.dirname(module_directory);cache_directory=PreferencesUpdateProperties._addon_update_cache_directory;cache=updater.UpdateCache.get(directory=cache_directory);local_filename=cache.retrieved_filepath;data_root_dirname=updater.get_zipfile_base_dir(module_name=module_name,local_filename=local_filename)
+		A='WARNING';msgctxt=updater.BHQAB_PREFERENCES_UPDATES_MSGCTXT;doc_url=PreferencesUpdateProperties._get_addon_module().bl_info[_H];module_name=PreferencesUpdateProperties._get_addon_module_name();clean_module_name=PreferencesUpdateProperties._get_addon_clean_module_name();updater.setup_logger(module_name=module_name);log=logging.getLogger(module_name);module_directory=os.path.dirname(PreferencesUpdateProperties._get_addon_module().__file__);root_directory=os.path.dirname(module_directory);cache_directory=PreferencesUpdateProperties._get_addon_update_cache_directory();cache=updater.UpdateCache.get(directory=cache_directory);local_filename=cache.retrieved_filepath;data_root_dirname=updater.get_zipfile_base_dir(module_name=module_name,local_filename=local_filename)
 		if data_root_dirname is _B:self.report('Downloaded file can not be used for installation');return{_E}
 		backup_directory=os.path.join(cache_directory,'backup');result=updater.create_directory(module_name=module_name,directory=backup_directory,ensure_empty=_A)
 		if not result:self.report(type={A},message='Failed to create backup directory');return{_E}

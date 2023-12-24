@@ -2,21 +2,22 @@ from __future__ import annotations
 _C='LEFTMOUSE'
 _B='PRESS'
 _A=None
-bl_info={'name':'Camera Projection Painter','author':'Vlad Erium (ssh4), Ivan Perevala (ivpe)','version':(3,6,0),'blender':(3,6,0),'description':'Photogrammetry textures refinement','location':'Tool Settings > Camera Painter','support':'COMMUNITY','category':'Paint','doc_url':'https://github.com/BlenderHQ/camera_projection_painter'}
+bl_info={'name':'Camera Projection Painter','author':'Vlad Erium (ssh4), Ivan Perevala (ivpe)','version':(4,0,0),'blender':(4,0,0),'description':'Photogrammetry textures refinement','location':'Tool Settings > Camera Painter','support':'COMMUNITY','category':'Paint','doc_url':'https://github.com/BlenderHQ/camera_projection_painter'}
 import os,time
 from importlib import reload
 dt=time.time()
 from.lib import bhqab
 ADDON_PKG=bhqab.utils_ui.get_addon_package_name()
 DATA_DIR=os.path.join(os.path.dirname(__file__),'data')
+DOCS_BRANCH='double-precision-library'
 def get_addon_pref(context:Context)->props.pref.Preferences:return context.preferences.addons[ADDON_PKG].preferences
 class Reports(bhqab.reports.AddonLogger):0
 Reports.initialize(logger_name=bl_info['name'],directory=os.path.join(os.path.dirname(__file__),'logs'),max_num_logs=30)
 log=Reports.log
 def register_class(cls):bpy.utils.register_class(cls);_classes_registered.append(cls)
 def unregister_class(cls):bpy.utils.unregister_class(cls);_classes_registered.remove(cls)
-if'bpy'in locals():reload(bhqab);reload(bhqglsl);reload(constants);reload(icons);reload(props);reload(shaders);reload(main);reload(ops);reload(langs);reload(ui);reload(manual_map)
-else:_classes_registered=list();from.lib import bhqglsl;from.import constants;from.import icons;from.import props;from.import shaders;from.import main;from.import ops;from.import langs;from.import ui;from.import manual_map
+if'bpy'in locals():reload(bhqab);reload(bhqglsl);reload(bhqdbl);reload(constants);reload(icons);reload(props);reload(shaders);reload(main);reload(ops);reload(langs);reload(ui);reload(manual_map)
+else:_classes_registered=list();from.lib import bhqglsl,bhqdbl;from.import constants;from.import icons;from.import props;from.import shaders;from.import main;from.import ops;from.import langs;from.import ui;from.import manual_map
 HAS_BPY=False
 try:import bpy
 except ImportError:pass
@@ -46,9 +47,9 @@ def eval_manual_map():
 	pref=bpy.context.preferences;curr_language_code=pref.view.language[0:2];docs_locale='en'
 	if curr_language_code in langs.LANGS:docs_locale=curr_language_code;log.debug(f"Requested manual map with existing locale '{pref.view.language}'")
 	else:log.warning(f"Requested manual map with missing locale '{pref.view.language}'")
-	return f"https://docs.camera-painter.com/{docs_locale}/latest/",manual_map.MANUAL_MAP
+	return f"https://bhqcpp.readthedocs.io/{docs_locale}/{DOCS_BRANCH}/",manual_map.MANUAL_MAP
 _persistent_classes=ops.bind_history_remove.CPP_OT_bind_history_remove,ops.bind_images.CPP_OT_bind_images,ops.data_cleanup.CPP_OT_data_cleanup,ops.ensure_canvas.CPP_OT_canvas_new,ops.ensure_canvas.CPP_OT_quick_select_canvas,ops.ensure_canvas.CPP_OT_ensure_canvas,ops.ensure_tool_settings.CPP_OT_ensure_tool_settings,ops.export_cameras.CPP_OT_export_cameras,ops.import_cameras.CPP_OT_import_cameras,ops.import_scene.CPP_OT_import_scene
-_gpu_require_classes=main.CPP_OT_main,main.CPP_OT_draw,main.CPP_OT_select,main.CPP_OT_view_camera,ops.pref_show.CPP_OT_pref_show,ops.setup_context.CPP_OT_setup_context,ui.CPP_PT_dataset,ui.CPP_UL_bind_history_item,ui.CPP_PT_image,ui.CPP_PT_transform,ui.CPP_PT_transform_location_default,ui.CPP_PT_transform_location_rc_xyalt,ui.CPP_PT_transform_rotation,ui.CPP_PT_transform_rotation_rc_hpr,ui.CPP_PT_transform_rotation_rc_opk,ui.CPP_PT_rc_rc_xmp_params,ui.CPP_PT_transform_rotation_rc_rotation,ui.CPP_PT_calibration,ui.CPP_PT_lens_distortion,ui.CPP_PT_inspection,ui.CPP_PT_inspection_image_orientation,ui.CPP_PT_inspection_highlight_border,ui.CPP_PT_io_cameras_transform,ui.CPP_PT_unified_name_props,ui.CPP_PT_export_cameras_rc_csv,ui.CPP_PT_export_cameras_rc_metadata_xmp,ui.CPP_PT_io_import_scene
+_gpu_require_classes=main.CPP_OT_main,main.CPP_OT_draw,main.CPP_OT_select,main.CPP_OT_view_camera,ops.pref_show.CPP_OT_pref_show,ops.setup_context.CPP_OT_setup_context,ui.CPP_PT_dataset,ui.CPP_UL_bind_history_item,ui.CPP_PT_image,ui.CPP_PT_calibration,ui.CPP_PT_lens_distortion,ui.CPP_PT_inspection,ui.CPP_PT_inspection_image_orientation,ui.CPP_PT_inspection_highlight_border,ui.CPP_PT_io_cameras_transform,ui.CPP_PT_unified_name_props,ui.CPP_PT_export_cameras_rc_csv,ui.CPP_PT_export_cameras_rc_metadata_xmp,ui.CPP_PT_io_import_scene
 _classes=_persistent_classes
 if HAS_BPY and not bpy.app.background:_classes=_persistent_classes+_gpu_require_classes
 def _register_classes():

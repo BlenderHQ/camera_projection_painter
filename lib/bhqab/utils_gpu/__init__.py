@@ -21,26 +21,24 @@ FrameBufferFramework=_common.FrameBufferFramework
 class DrawFramework:
 	__slots__='_aa_instance','_fb_frameworks';__aa_methods_registry__:set[AABase]=set();_aa_instance:_A|AABase;_fb_frameworks:tuple[FrameBufferFramework];__shader_2d_image__:_A|GPUShader=_A
 	@classmethod
-	@property
-	def shader_2d_image(cls)->_A|GPUShader:
+	def get_shader_2d_image(cls)->_A|GPUShader:
 		A='VEC2'
 		if not cls.__shader_2d_image__ and not bpy.app.background:info=GPUShaderCreateInfo();info.vertex_in(0,A,'P');info.vertex_in(1,A,'UV');vs_out=GPUStageInterfaceInfo('image');vs_out.smooth(A,'v_UV');info.vertex_out(vs_out);info.push_constant('MAT4','ModelViewProjectionMatrix');info.sampler(0,'FLOAT_2D',_B);info.fragment_out(0,'VEC4','f_Color');info.vertex_source('\n                void main() {\n                    v_UV = UV;\n                    gl_Position = ModelViewProjectionMatrix * vec4(P, 0.0, 1.0);\n                }\n                ');info.fragment_source('void main() { f_Color = texture(u_Image, v_UV); }');cls.__shader_2d_image__=gpu.shader.create_from_info(info)
 		return cls.__shader_2d_image__
 	@classmethod
-	@property
-	def prop_aa_method(cls)->EnumProperty:return EnumProperty(items=tuple((_.name,_.name,_.description)for _ in cls.__aa_methods_registry__),options={'HIDDEN','SKIP_SAVE'},translation_context='BHQAB_Preferences',name='AA Method',description='Anti-aliasing method to be used')
+	def get_prop_aa_method(cls)->EnumProperty:return EnumProperty(items=tuple((_.get_name(),_.get_name(),_.description)for _ in cls.__aa_methods_registry__),options={'HIDDEN','SKIP_SAVE'},translation_context='BHQAB_Preferences',name='AA Method',description='Anti-aliasing method to be used')
 	@classmethod
 	def register_aa_method(cls,method_class:AABase):cls.__aa_methods_registry__.add(method_class)
 	@property
 	def aa_method(self)->str:
 		if self._aa_instance is _A:return'NONE'
-		return self._aa_instance.name
+		return self._aa_instance.get_name()
 	@aa_method.setter
 	def aa_method(self,value:str):
 		cls=self.__class__;area_type=self._fb_frameworks[0]._area_type;region_type=self._fb_frameworks[0]._region_type
-		if not self._aa_instance or self._aa_instance and self._aa_instance.name!=value:
+		if not self._aa_instance or self._aa_instance and self._aa_instance.get_name()!=value:
 			for item in cls.__aa_methods_registry__:
-				if item.name==value:self._aa_instance=item(area_type=area_type,region_type=region_type)
+				if item.get_name()==value:self._aa_instance=item(area_type=area_type,region_type=region_type)
 	@property
 	def aa(self)->AABase|_A:return self._aa_instance
 	def get(self,*,index:int=0)->FrameBufferFramework:return self._fb_frameworks[index]
@@ -51,7 +49,7 @@ class DrawFramework:
 	def draw(self,*,texture:GPUTexture)->_A:
 		cls=self.__class__;mvp_restore=gpu.matrix.get_projection_matrix()@gpu.matrix.get_model_view_matrix()
 		if self._aa_instance is _A or self._aa_instance._preset is AAPreset.NONE:
-			with gpu.matrix.push_pop():AABase._setup_gpu_state(alpha_premult=True);shader=cls.shader_2d_image;shader.uniform_sampler(_B,texture);BatchPreset.ndc_rectangle_tris_P_UV.draw(shader)
+			with gpu.matrix.push_pop():AABase._setup_gpu_state(alpha_premult=True);shader=cls.get_shader_2d_image();shader.uniform_sampler(_B,texture);BatchPreset.get_ndc_rectangle_tris_P_UV().draw(shader)
 		else:self._aa_instance.draw(texture=texture)
 		gpu.matrix.load_matrix(mvp_restore)
 	@classmethod

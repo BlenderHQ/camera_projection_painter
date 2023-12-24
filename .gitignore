@@ -1,5 +1,6 @@
 !.gitkeep
 
+lib/bhqdbl/test.py
 logs/*.txt
 
 __pycache__/

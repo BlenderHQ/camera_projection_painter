@@ -28,16 +28,16 @@ from importlib import reload
 from enum import auto,IntEnum,IntFlag
 from typing import TypeVar
 import OpenImageIO as oiio
-from..import Reports,log
-from..import constants
-from..import main
-from..import icons
+from...import Reports,log
+from...import constants
+from...import main
+from...import icons
 import bpy
 from bpy.types import Context,Event,Operator,OperatorFileListElement
 from bpy.props import CollectionProperty,EnumProperty,FloatProperty,StringProperty
 import bpy_extras
 from typing import TYPE_CHECKING
-if TYPE_CHECKING:from io import TextIOWrapper;from typing import Callable,Iterable,Type;from..props import Object,Float64ArrayT;from..props import Camera,Image;from..props.wm import WMProps;from..props.camera import CameraProps
+if TYPE_CHECKING:from io import TextIOWrapper;from typing import Callable,Iterable,Type;from...props import Object,Float64ArrayT;from...props import Camera,Image;from...props.wm import WMProps;from...props.camera import CameraProps
 __all__='IONameOptions','DEFAULT_IONameOptions','IMAGE_FILE_EXTENSIONS','InputName','InputNameCache','OutputName','IOObjectBase','IOObjectLocation','IOObjectRotation','IOObjectTransform',_Q,'IOFileFormat','IOExportParamsBase','IOTransformOptionsBase',_R,_S,'IOFileFormatHandler','ImportCamerasResult','ExportCamerasResult','BindImagesMode','BindImagesResult','IOProcessor',_T,'IOName_Params','IOFileBaseParams','IOFileParams','IOTransformParams','CENTERED_DIALOG_ICON_SCALE','CENTERED_DIALOG_PROPS_UI_UNITS_X','invoke_props_dialog_centered','StageStatus','SetupContextOperator'
 class IONameOptions(IntFlag):
 	IGNORE_LETTER_CASE=auto();IGNORE_EXTENSION=auto();USE_CAMERA_NAME=auto();USE_CAM_NAME=auto();USE_IMAGE_NAME=auto();USE_IMAGE_FILEPATH=auto()
@@ -328,7 +328,7 @@ class IOProcessor:
 		InputNameCache.reset();return res
 class IOParamsRegistry:fmt:bpy.types.EnumProperty
 if'rc'in locals():reload(rc)
-else:from.intern import rc
+else:from.import rc
 IOProcessor.register_file_format(rc.RC_METADATA_XMP)
 IOProcessor.register_file_format(rc.RC_IECP)
 IOProcessor.register_file_format(rc.RC_NXYZ)

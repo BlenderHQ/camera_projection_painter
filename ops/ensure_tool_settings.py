@@ -10,11 +10,11 @@ __all__=_A,
 class CPP_OT_ensure_tool_settings(metaclass=common.SetupContextOperator):
 	bl_idname='cpp.ensure_tool_settings';bl_label='Ensure Tool Settings';bl_translation_context=_A;options={'REGISTER'}
 	def execute(self,context:Context):
-		F='IMAGE';E='VIEW_3D';D='builtin_brush.Clone';C='TEXTURE_PAINT';B=False;A=True;cls=self.__class__;msgctxt=cls.bl_translation_context;ob=main.Workflow.object
+		F='IMAGE';E='VIEW_3D';D='builtin_brush.Clone';C='TEXTURE_PAINT';B=False;A=True;cls=self.__class__;msgctxt=cls.bl_translation_context;ob=main.Workflow.get_object()
 		if not main.Workflow.object_poll(ob):
 			for ob in context.visible_objects:
 				if main.Workflow.object_poll(ob):context.view_layer.objects.active=ob;break
-		is_ob_ok=A;ob=main.Workflow.object
+		is_ob_ok=A;ob=main.Workflow.get_object()
 		if not main.Workflow.object_poll(ob):
 			is_ob_ok=B
 			if ob:

@@ -1,13 +1,25 @@
 from __future__ import annotations
-_A='ObjectProps'
-from.import intern
-from..import register_class
+_A=None
+from..lib import bhqdbl
 from bpy.types import PropertyGroup
-from bpy.props import PointerProperty
 from typing import TYPE_CHECKING
-if TYPE_CHECKING:from typing import TypeVar;ObjectProps=TypeVar(_A,bound=PropertyGroup);from.intern.common import Float64ArrayT,RotationMatrixProps,LocationProps
-__all__='create_props_ob',
-def create_props_ob():
-	_annotations_dict=dict();RotationMatrixProps=intern.common.create_props_rotation_matrix();register_class(RotationMatrixProps);_annotations_dict['rotation_matrix']=PointerProperty(type=RotationMatrixProps,name='Rotation Matrix',translation_context=_A,description='Row-major object rotation matrix 3x3 in Blender (Cartesian) coordinate system. Properties are stored as double-precision floats, according to the IEEE-754 standard, so imported values \u200b\u200bwill not lose precision');LocationProps=intern.common.create_props_location();register_class(LocationProps);_annotations_dict['location']=PointerProperty(type=LocationProps,translation_context=_A,name='Location',description="The position of the object in Blender's Cartesian coordinate system. Properties are stored as double-precision floats, according to the IEEE-754 standard, so imported values \u200b\u200bwill not lose precision");RC_XYAltProps=intern.rc_csv.create_props_rc_xyalt();register_class(RC_XYAltProps);_annotations_dict['rc_xyalt']=PointerProperty(type=RC_XYAltProps,translation_context=_A,name='RC X, Y, Alt',description="Representation of object position as Reality Capture X, Y, Alt coordinates. Values \u200b\u200bare stored in double precision according to the IEEE-754 standard in Blender's coordinate system, but can also be displayed in double precision and converted as X, Y, Alt");RC_HeadingPitchRollProps=intern.rc_csv.create_props_rc_hpr();register_class(RC_HeadingPitchRollProps);_annotations_dict['rc_hpr']=PointerProperty(type=RC_HeadingPitchRollProps,translation_context=_A,name='RC Heading, Pitch, Roll',description="Representation of object orientation as Reality Capture Heading, Pitch, Roll. Values are stored in double precision according to the IEEE-754 standard in Blender's rotation matrix, but also can be displayed in double precision and converted as Heading, Pitch, Roll");RC_OmegaPhiKappaProps=intern.rc_csv.create_props_rc_opk();register_class(RC_OmegaPhiKappaProps);_annotations_dict['rc_opk']=PointerProperty(type=RC_OmegaPhiKappaProps,translation_context=_A,name='RC Omega, Phi, Kappa',description="Representation of object orientation as Reality Capture Omega, Phi, Kappa Euler angles. Values are stored in double precision according to the IEEE-754 standard in Blender's rotation matrix, but also can be displayed in double precision and converted as Omega, Phi, Kappa");RC_MetadataXMP_RotationComponentProps=intern.rc_xmp.create_props_rc_rotation();register_class(RC_MetadataXMP_RotationComponentProps);_annotations_dict['rc_rotation']=PointerProperty(type=RC_MetadataXMP_RotationComponentProps,name='RC Rotation Component',description="Representation of object orientation as Reality Capture rotation component. Values are stored in double precision according to the IEEE-754 standard in Blender's rotation matrix, but also can be displayed in double precision and converted as rotation component")
-	def _impl_apply_transform(self,*,R:None|Float64ArrayT,S:None|float):location:LocationProps=self.location;location.apply_transform(R=R,S=S);rotation:RotationMatrixProps=self.rotation_matrix;rotation.apply_transform(R=R,S=S)
-	return type(_A,(PropertyGroup,),{'__annotations__':_annotations_dict,'apply_transform':_impl_apply_transform})
+if TYPE_CHECKING:from.import Float64ArrayT,Object
+__all__='ObjectProps',
+class ObjectProps(PropertyGroup):
+	def _get_location(self):ob:Object=self.id_data;return ob.location
+	def _set_location(self,value):ob:Object=self.id_data;ob.matrix_world[0][3]=value[0];ob.matrix_world[1][3]=value[1];ob.matrix_world[2][3]=value[2]
+	location=bhqdbl.double_array('location',get=_get_location,set=_set_location,size=3,precision=6)
+	def _get_rotation(self):ob:Object=self.id_data;return ob.matrix_world.to_3x3()
+	def _set_rotation(self,value):ob:Object=self.id_data;ob.matrix_world[0][:3]=value[0];ob.matrix_world[1][:3]=value[1];ob.matrix_world[2][:3]=value[2]
+	rotation=bhqdbl.double_array(attr_name='rotation',get=_get_rotation,set=_set_rotation,size=(3,3))
+	def location_as_array(self,R:_A|Float64ArrayT,S:_A|float):
+		import numpy as np
+		if R is _A and S is _A:return self.location
+		ret=self.location
+		if R is not _A:ret=np.matmul(ret,R)
+		if S is _A:return ret
+		return ret*S
+	def rotation_as_array(self,R:_A|Float64ArrayT,S:_A|float):
+		import numpy as np
+		if R is _A:return self.rotation
+		return np.matmul(R,self.rotation)

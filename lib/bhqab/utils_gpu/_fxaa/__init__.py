@@ -19,11 +19,9 @@ __all__='FXAA',
 class FXAA(_common.AABase):
 	__slots__='_value','_value_0','_shader_eval';description:str='Fast approximate anti-aliasing';_shader_eval:_A|GPUShader;_cached_shader_code:tuple[str]=tuple();_value:float;_value_0:float;__quality_lookup__:tuple[tuple,tuple,tuple,tuple]=((10,11,12,13,14,15),(20,21,22,23,24,25),(26,27,28,29),(39,))
 	@classmethod
-	@property
-	def prop_preset(cls)->EnumProperty:return EnumProperty(items=((_common.AAPreset.NONE.name,'None','Do not use fast approximate anti-aliasing'),(_common.AAPreset.LOW.name,'Low','Default medium dither'),(_common.AAPreset.MEDIUM.name,'Medium','Less dither, faster'),(_common.AAPreset.HIGH.name,'High','Less dither, more expensive'),(_common.AAPreset.ULTRA.name,'Ultra','No dither, very expensive')),default=_common.AAPreset.HIGH.name,options={_B,_C},translation_context=_D,name='Preset',description='Fast approximate anti-aliasing quality preset')
+	def get_prop_preset(cls)->EnumProperty:return EnumProperty(items=((_common.AAPreset.NONE.name,'None','Do not use fast approximate anti-aliasing'),(_common.AAPreset.LOW.name,'Low','Default medium dither'),(_common.AAPreset.MEDIUM.name,'Medium','Less dither, faster'),(_common.AAPreset.HIGH.name,'High','Less dither, more expensive'),(_common.AAPreset.ULTRA.name,'Ultra','No dither, very expensive')),default=_common.AAPreset.HIGH.name,options={_B,_C},translation_context=_D,name='Preset',description='Fast approximate anti-aliasing quality preset')
 	@classmethod
-	@property
-	def prop_value(cls)->FloatProperty:return FloatProperty(min=0,max=1,default=1.,step=.001,subtype='PERCENTAGE',options={_B,_C},translation_context=_D,name='Quality',description='FXAA preset quality tuning')
+	def get_prop_value(cls)->FloatProperty:return FloatProperty(min=0,max=1,default=1.,step=.001,subtype='PERCENTAGE',options={_B,_C},translation_context=_D,name='Quality',description='FXAA preset quality tuning')
 	@property
 	def value(self)->float:return self._value
 	@value.setter
@@ -44,7 +42,7 @@ class FXAA(_common.AABase):
 	def __init__(self,*,mode:_common.Mode=_common.Mode.REGION,area_type='VIEW_3D',region_type='WINDOW'):super().__init__(area_type=area_type,region_type=region_type);self._value=.0;self._value_0=.0;self._shader_eval=_A
 	def draw(self,*,texture:GPUTexture)->_A:
 		shader=self._shader_eval;super().draw(texture=texture);viewport_metrics=_common.get_viewport_metrics()
-		with gpu.matrix.push_pop():self._setup_gpu_state();shader.uniform_sampler(_E,texture);shader.uniform_float(_F,viewport_metrics);_common.BatchPreset.ndc_rectangle_tris_P_UV.draw(shader)
+		with gpu.matrix.push_pop():self._setup_gpu_state();shader.uniform_sampler(_E,texture);shader.uniform_float(_F,viewport_metrics);_common.BatchPreset.get_ndc_rectangle_tris_P_UV().draw(shader)
 	@staticmethod
 	def ui_preferences(layout:UILayout,*,pref:AddonPreferences,**kwargs):attr_fxaa_preset=kwargs.get(_G,_H);layout.prop(pref,attr_fxaa_preset);fxaa_preset=getattr(pref,attr_fxaa_preset);row=layout.row();row.enabled=fxaa_preset!=_common.AAPreset.ULTRA.name;row.prop(pref,kwargs.get(_I,_J))
 	def update_from_preferences(self,*,pref:AddonPreferences,**kwargs):self.preset=getattr(pref,kwargs.get(_G,_H));self.value=getattr(pref,kwargs.get(_I,_J))
