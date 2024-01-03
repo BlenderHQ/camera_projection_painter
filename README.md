@@ -27,6 +27,12 @@ If there are any issues with the add-on, or if you have suggestions for the deve
 
 ## Release Notes
 
+<details open><summary>
+Version 4.0.0.
+</summary>
+
+* Fixed updates system. A separate repository and a separate testing system have been created for the new one.
+
 * Fixed the logging system to the file that held the logging file open while removing the addon (thank you Vlad, noticed it on stream)
 
 * A system is added to separate a particular region for work. It allows you to highlight the area of the large scene, for which the preview of the images will be generated, the cameras and the mesh projection will be visible. By default after the context is configured, the region will be set to the bounds of the current scene, taking into account the boundaries of the object and the position of the cameras. The appropriate operator to update the region has also been added.
