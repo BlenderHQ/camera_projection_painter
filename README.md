@@ -39,7 +39,6 @@ Version 4.0.0.
 
 ------------------------------------------------------------------------------------------------------------------------
 
-> [!WARNING]
 > This update breaks backward compatibility with `*.blend` files that have been saved using previous versions of the addon.Therefore, please test the addon with new files only.
 
 * The method of storing double precision values has been changed - this accelerates the operation of import/export operations and transformation of the scene. A separate library was created for this purpose [bhqdbl](https://github.com/ivan-perevala/bhqdbl).
