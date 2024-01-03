@@ -8,11 +8,11 @@ from..import constants
 from..import register_class
 from..lib import bhqdbl
 import bpy
-from bpy.types import Context,PropertyGroup,UILayout
+from bpy.types import Context,PropertyGroup
 from bpy.props import CollectionProperty,EnumProperty,FloatProperty,FloatVectorProperty,IntProperty,PointerProperty
 from mathutils import Vector
 from typing import TYPE_CHECKING
-if TYPE_CHECKING:from typing import TypeVar;CameraProps=TypeVar(_A,bound=PropertyGroup);from.import Image,Camera;from.image import ImageProps;from.scene import SceneProps
+if TYPE_CHECKING:from typing import TypeVar;CameraProps=TypeVar(_A,bound=PropertyGroup);from.import Image,Camera;from.image import ImageProps
 __all__='BindImageHistoryItem',_A,'create_props_camera'
 class CameraProps(PropertyGroup):
 	def _active_bind_index_update(self,_context:Context):

@@ -27,6 +27,12 @@ If there are any issues with the add-on, or if you have suggestions for the deve
 
 ## Release Notes
 
+* Fixed the logging system to the file that held the logging file open while removing the addon (thank you Vlad, noticed it on stream)
+
+* A system is added to separate a particular region for work. It allows you to highlight the area of the large scene, for which the preview of the images will be generated, the cameras and the mesh projection will be visible. By default after the context is configured, the region will be set to the bounds of the current scene, taking into account the boundaries of the object and the position of the cameras. The appropriate operator to update the region has also been added.
+
+------------------------------------------------------------------------------------------------------------------------
+
 > [!WARNING]
 > This update breaks backward compatibility with `*.blend` files that have been saved using previous versions of the addon.Therefore, please test the addon with new files only.
 
@@ -60,7 +66,7 @@ If there are any issues with the add-on, or if you have suggestions for the deve
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue)](https://www.gnu.org/licenses/gpl-3.0)
 
-Copyright © 2020-2023 Vlad Erium (ssh4), Ivan Perevala (ivpe).
+Copyright © 2020 Vladlen Kuzmin (ssh4), Ivan Perevala (ivpe).
 
 <details><summary>
 GNU GPL v3 License.
@@ -68,7 +74,7 @@ GNU GPL v3 License.
 
 ```
 Camera Projection Painter addon.
-Copyright (C) 2020-2023 Vlad Erium (ssh4), Ivan Perevala (ivpe)
+Copyright (C) 2020 Vladlen Kuzmin (ssh4), Ivan Perevala (ivpe)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

@@ -4,15 +4,14 @@ _C='SKIP_SAVE'
 _B=True
 _A='HIDDEN'
 import logging,os,time
-from..import Reports,log
+from..import Reports
 from.import common
 from..import main
-import bpy
 from bpy.types import Context,Event,Operator
 from bpy.props import BoolProperty,EnumProperty,StringProperty
 from bpy.app.translations import pgettext
 from typing import TYPE_CHECKING
-if TYPE_CHECKING:from..props import Image;from..props.camera import CameraProps;from..props.scene import SceneProps
+if TYPE_CHECKING:from..props.scene import SceneProps
 __all__=_D,
 class CPP_OT_bind_images(common.IOName_Params,metaclass=common.SetupContextOperator):
 	bl_idname='cpp.bind_images';bl_label='Bind Camera Images';bl_options={'REGISTER','UNDO'};bl_translation_context=_D;directory:StringProperty(subtype='DIR_PATH',maxlen=1024,options={_A},translation_context='CPP_IO',name='Directory');mode:EnumProperty(items=((common.BindImagesMode.ACTIVE.name,'Active',''),(common.BindImagesMode.ALL.name,'All','')),options={_A,_C});filter:BoolProperty(default=_B,options={_A,_C},name='',description='Filter items in File Browser');filter_image:BoolProperty(default=_B,options={_A,_C},name='',description='Show images in the File Browser')

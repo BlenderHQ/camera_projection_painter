@@ -1,10 +1,10 @@
-#pragma BHQGLSL_REQUIRE(space, tiles, sampler_map)
+#pragma BHQGLSL_REQUIRE(space, tiles, sampler_map, mask_vertex_stage)
 #ifndef USE_GPU_SHADER_CREATE_INFO
 in mat4 v_Data[];
 uniform mat4 ModelViewProjectionMatrix;
 uniform vec4 u_ViewportMetrics;
 uniform bool u_ShowActiveCamera;
-layout(binding = 1, std140) uniform u_Params { CameraCommonParams _u_Params; };
+layout(binding = 0, std140) uniform u_Params { CameraCommonParams _u_Params; };
 uniform sampler2D u_TileMapping;
 out vec4 g_Segment0;
 out vec4 g_Segment1;
@@ -25,6 +25,10 @@ preview_tile_index = int(_u_Params.data[3][3]);
 } else {
 unpack_camera_data(origin, rotation, lens, aspect, v_Data[0]);
 preview_tile_index = int(v_Data[0][3][3]);
+}
+if (bool(_u_Params.cage_flags & CAGE_USE) && bool(_u_Params.cage_flags & CAGE_USE_CAMERAS) &&
+!inside_box(origin, _u_Params.cage_matrix)) {
+return;
 }
 if (is_active_camera) {
 g_IsTriangle = 1;

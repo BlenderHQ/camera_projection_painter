@@ -1,4 +1,4 @@
-#pragma BHQGLSL_REQUIRE(space)
+#pragma BHQGLSL_REQUIRE(space, mask_vertex_stage)
 #ifndef USE_GPU_SHADER_CREATE_INFO
 in mat4 v_Data[];
 uniform mat4 ModelViewProjectionMatrix;
@@ -15,6 +15,10 @@ mat3 rotation;
 vec2 aspect;
 float lens;
 unpack_camera_data(origin, rotation, lens, aspect, v_Data[0]);
+if (bool(_u_Params.cage_flags & CAGE_USE) && bool(_u_Params.cage_flags & CAGE_USE_CAMERAS) &&
+!inside_box(origin, _u_Params.cage_matrix)) {
+return;
+}
 vec4 center;
 eval_vertex_clip_space(center, origin, ModelViewProjectionMatrix);
 mat4 packed_coo;

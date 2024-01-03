@@ -1,2 +1,0 @@
-Vlad Erium (ssh4) - the idea of creating an add-on, the organization of the work of the BlenderHQ project.
-Ivan Perevala (ivpe) - development of basic concepts of interaction with the add-on and code.

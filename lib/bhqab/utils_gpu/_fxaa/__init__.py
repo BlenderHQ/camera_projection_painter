@@ -10,11 +10,11 @@ _C='SKIP_SAVE'
 _B='HIDDEN'
 _A=None
 import os
+from..import _common
 from bpy.types import Context,AddonPreferences,UILayout
 from bpy.props import EnumProperty,FloatProperty
 import gpu
 from gpu.types import GPUShader,GPUTexture,GPUShaderCreateInfo,GPUStageInterfaceInfo
-from..import _common
 __all__='FXAA',
 class FXAA(_common.AABase):
 	__slots__='_value','_value_0','_shader_eval';description:str='Fast approximate anti-aliasing';_shader_eval:_A|GPUShader;_cached_shader_code:tuple[str]=tuple();_value:float;_value_0:float;__quality_lookup__:tuple[tuple,tuple,tuple,tuple]=((10,11,12,13,14,15),(20,21,22,23,24,25),(26,27,28,29),(39,))

@@ -31,6 +31,7 @@ class CPP_OT_ensure_tool_settings(metaclass=common.SetupContextOperator):
 		if tool.idname!=D:bpy.ops.wm.tool_set_by_id(name=D,cycle=B,space_type=E)
 		if imapaint.mode!=F:imapaint.mode=F
 		if not imapaint.use_clone_layer:imapaint.use_clone_layer=A
+		common.update_scene_editing_cage(context)
 		for area in context.screen.areas:
 			if area.type==E:area.spaces.active.shading.light='FLAT'
 		return{'FINISHED'}

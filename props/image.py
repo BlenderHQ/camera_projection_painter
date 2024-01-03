@@ -1,5 +1,5 @@
 from __future__ import annotations
-from..import log
+from..import Reports
 import bpy
 from bpy.types import PropertyGroup
 from bpy.props import IntVectorProperty
@@ -43,7 +43,7 @@ class ImageProps(PropertyGroup):
 				fp=bpy.path.abspath(image.filepath)
 				if fp:
 					inp=oiio.ImageInput.open(fp)
-					if not inp:log.error(oiio.geterror())
+					if not inp:Reports.log.error(oiio.geterror())
 					else:spec=inp.spec();self.static_size=spec.width,spec.height;inp.close();return
 		if not(force or self.valid):
 			self.static_size=image.size

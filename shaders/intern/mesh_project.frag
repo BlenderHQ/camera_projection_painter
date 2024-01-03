@@ -1,7 +1,12 @@
-#pragma BHQGLSL_REQUIRE(mask_fragment_stage, colorspace)
+#pragma BHQGLSL_REQUIRE(mask_vertex_stage, mask_fragment_stage, colorspace)
 void main() {
 if (frag_depth_greater_biased(u_DepthTexture, u_ViewportMetrics.zw)) {
 discard;
+}
+if (bool(u_CameraCommonParams.cage_flags & CAGE_USE) &&
+bool(u_CameraCommonParams.cage_flags & CAGE_USE_MESH_PREVIEW) &&
+!inside_box(v_P, u_CameraCommonParams.cage_matrix)) {
+return;
 }
 float brush_mask = 0.0;
 float dist = distance(u_BrushPos, gl_FragCoord.xy);

@@ -17,13 +17,12 @@ from xml.sax.handler import ContentHandler
 import xml.sax
 from math import asin,atan2
 from enum import IntEnum,auto
-from bpy.types import Context,UILayout
 from bpy.props import BoolProperty,IntProperty,EnumProperty
 from..import common
 from...import constants
-from...import log
+from...import Reports
 from typing import TYPE_CHECKING
-if TYPE_CHECKING:from typing import Generic,TypeVar;T=TypeVar('T');from...props import Object,Camera,Float64ArrayT;from...props.ob import ObjectProps;from...props.camera import CameraProps,RC_XMP_CameraProps
+if TYPE_CHECKING:from typing import Generic,TypeVar;T=TypeVar('T');from...props import Object,Camera,Float64ArrayT;from...props.ob import ObjectProps;from...props.camera import CameraProps
 __all__='RC_IECP','RC_NXYZ','RC_NXYZHPR','RC_NXYZOPK','RC_METADATA_XMP'
 class RC_Transform:
 	@staticmethod
@@ -44,7 +43,7 @@ class RC_Transform:
 	def set_rotation_component(*,camera_props:common.IOObjectRotation,data:str)->bool:
 		import numpy as np
 		try:arr:Float64ArrayT=np.fromstring(data,sep=_D,count=9,dtype=np.float64)
-		except ValueError as err:log.warning(f"Unable to read rotation component for reason:{err}");return _C
+		except ValueError as err:Reports.log.warning(f"Unable to read rotation component for reason:{err}");return _C
 		mapping=[1,4,7,0,3,6,2,5,8];signs=1,-1,-1,-1,1,1,1,-1,-1;camera_props.rotation=(arr[mapping]*signs).reshape((3,3));return _B
 class RC_CSV_ExportParams(common.IOExportParamsBase):rc_csv_write_num_cameras:BoolProperty(default=_C,options={_E},translation_context='RC_CSV_ExportParams',name='Number of Cameras',description='Write number of cameras into a file for Reality Capture CSV-like file formats')
 class RC_CSV_ExportOptions(common.IOTransformOptionsBase):
@@ -67,10 +66,10 @@ class RC_CSV_Common(common.IOFileFormatHandler):
 		for line in file.readlines():
 			if line[0]=='#':continue
 			sep_index=line.find(sep_character)
-			if sep_index==-1:log.warning(f'Unable to parse line: "{line}"');yield _A;continue
+			if sep_index==-1:Reports.log.warning(f'Unable to parse line: "{line}"');yield _A;continue
 			name=line[:sep_index];str_data=line[sep_index+1:]
 			try:data=np.fromstring(str_data,sep=sep_character,count=data_count,dtype=np.float64)
-			except ValueError as err:log.warning(f'Unable to convert string data as floating point numbers: "{str_data}" for reason: "{err}"');yield _A;continue
+			except ValueError as err:Reports.log.warning(f'Unable to convert string data as floating point numbers: "{str_data}" for reason: "{err}"');yield _A;continue
 			yield(name,data)
 	@classmethod
 	def write_header(cls,*,file:TextIOWrapper,options:RC_CSV_ExportOptions):
@@ -208,7 +207,7 @@ def find_xcr_value(root_elem:et.Element,attr_name:str)->_A|str:
 		if found.text:return found.text
 	attr=root_elem.get(_attr.name_eval)
 	if attr is not _A:return attr
-	log.warning(f'Unable to find attribute "{attr_name}"')
+	Reports.log.warning(f'Unable to find attribute "{attr_name}"')
 def get_value(*,as_type:T,root_elem:et.Element,attr_name:str,default:T)->Generic[T]:
 	str_val=find_xcr_value(root_elem=root_elem,attr_name=attr_name)
 	if str_val:
@@ -227,8 +226,8 @@ class RC_METADATA_XMP(common.IOFileFormatHandler):
 		handler=XMP_HandlerCheck();reader=xml.sax.make_parser();reader.setContentHandler(handler)
 		try:reader.parse(file)
 		except XMPAttributeFound as e:return _B
-		except XMPAttributeNotFound as e:log.warning(f"Not passed for reason: {e}")
-		except xml.sax.SAXParseException as e:log.warning(f"Not passed due to parsing exception: {e}");return _C
+		except XMPAttributeNotFound as e:Reports.log.warning(f"Not passed for reason: {e}")
+		except xml.sax.SAXParseException as e:Reports.log.warning(f"Not passed due to parsing exception: {e}");return _C
 		return _C
 	@classmethod
 	def evaluate_filename(cls,*,name:str)->str:return name
@@ -243,12 +242,12 @@ class RC_METADATA_XMP(common.IOFileFormatHandler):
 		str_data=find_xcr_value(desc,'DistortionCoeficients')
 		if str_data is not _A:
 			try:data=np.fromstring(str_data,dtype=np.float64,count=6,sep=_D)
-			except ValueError as err:log.warning(f'Unable to convert distortion coefficients array: "{err}"');return 0
+			except ValueError as err:Reports.log.warning(f'Unable to convert distortion coefficients array: "{err}"');return 0
 			c.k1,c.k2,c.k3,c.k4,c.p1,c.p2=data
 		do_transform=_C;str_data=find_xcr_value(desc,'Position')
 		if str_data is not _A:
 			try:data=np.fromstring(str_data,count=3,sep=_D,dtype=np.float64)
-			except ValueError as err:log.warning(f'Unable to convert position string data to float array: "{err}"');return 0
+			except ValueError as err:Reports.log.warning(f'Unable to convert position string data to float array: "{err}"');return 0
 			RC_Transform.set_xyalt(camera_props=c,xyalt=data);do_transform=_B
 		str_data=find_xcr_value(desc,'Rotation')
 		if str_data is not _A:

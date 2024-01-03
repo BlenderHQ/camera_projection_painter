@@ -9,11 +9,11 @@ _C='colorTex'
 _B='u_ViewportMetrics'
 _A=None
 import os
+from..import _common
 from bpy.types import Context,AddonPreferences,UILayout
 from bpy.props import EnumProperty
 import gpu
 from gpu.types import GPUShader,GPUTexture,GPUShaderCreateInfo,GPUStageInterfaceInfo
-from..import _common
 __all__='SMAA',
 class SMAA(_common.AABase):
 	__slots__='_fb_framework_stage_0','_fb_framework_stage_1','_shaders_eval';description:str='Sub-pixel morphological anti-aliasing';_fb_framework_stage_0:_common.FrameBufferFramework;_fb_framework_stage_1:_common.FrameBufferFramework;_shaders_eval:tuple[GPUShader];_cached_shader_code:tuple[str]=tuple();_search_texture:_A|GPUTexture=_A;_area_texture:_A|GPUTexture=_A

@@ -28,7 +28,7 @@ from importlib import reload
 from enum import auto,IntEnum,IntFlag
 from typing import TypeVar
 import OpenImageIO as oiio
-from..import Reports,log
+from..import Reports
 from..import constants
 from..import main
 from..import icons
@@ -36,8 +36,9 @@ import bpy
 from bpy.types import Context,Event,Operator,OperatorFileListElement
 from bpy.props import CollectionProperty,EnumProperty,FloatProperty,StringProperty
 import bpy_extras
+from mathutils import Vector,Matrix
 from typing import TYPE_CHECKING
-if TYPE_CHECKING:from io import TextIOWrapper;from typing import Callable,Iterable,Type;from..props import Object,Float64ArrayT;from..props import Camera,Image;from..props.wm import WMProps;from..props.camera import CameraProps
+if TYPE_CHECKING:from io import TextIOWrapper;from typing import Callable,Iterable,Type;from..props import Object,Float64ArrayT;from..props import Camera,Image,Scene;from..props.wm import WMProps;from..props.scene import SceneProps;from..props.camera import CameraProps
 __all__='IONameOptions','DEFAULT_IONameOptions','IMAGE_FILE_EXTENSIONS','InputName','InputNameCache','OutputName','IOObjectBase','IOObjectLocation','IOObjectRotation','IOObjectTransform',_Q,'IOFileFormat','IOExportParamsBase','IOTransformOptionsBase',_R,_S,'IOFileFormatHandler','ImportCamerasResult','ExportCamerasResult','BindImagesMode','BindImagesResult','IOProcessor',_T,'IOName_Params','IOFileBaseParams','IOFileParams','IOTransformParams','CENTERED_DIALOG_ICON_SCALE','CENTERED_DIALOG_PROPS_UI_UNITS_X','invoke_props_dialog_centered','StageStatus','SetupContextOperator'
 class IONameOptions(IntFlag):
 	IGNORE_LETTER_CASE=auto();IGNORE_EXTENSION=auto();USE_CAMERA_NAME=auto();USE_CAM_NAME=auto();USE_IMAGE_NAME=auto();USE_IMAGE_FILEPATH=auto()
@@ -377,7 +378,7 @@ class SetupContextOperator(type):
 		return _wrapper
 	@staticmethod
 	def __invoke_wrapped(label:str,func:Callable):
-		def _wrapper(self,context:Context,event:Event):log.debug('"{label}" invoke begin'.format(label=label));dt=time.time();ret=func(self,context,event);log.debug('"{label}" invoke end as {flag} in {elapsed:.6f} second(s)'.format(label=label,flag=ret,elapsed=time.time()-dt));return ret
+		def _wrapper(self,context:Context,event:Event):Reports.log.debug('"{label}" invoke begin'.format(label=label));dt=time.time();ret=func(self,context,event);Reports.log.debug('"{label}" invoke end as {flag} in {elapsed:.6f} second(s)'.format(label=label,flag=ret,elapsed=time.time()-dt));return ret
 		return _wrapper
 	@staticmethod
 	def __execute_wrapped(func:Callable):
@@ -393,3 +394,15 @@ class SetupContextOperator(type):
 		dct[A]=func_cancel;func_invoke=dct.get(B,_A)
 		if func_invoke is not _A:dct[B]=cls.__invoke_wrapped(label=dct['bl_label'],func=func_invoke)
 		func_execute=dct.get(C,_A);dct[C]=cls.__execute_wrapped(func_execute);return type(name,bases,dct)
+def update_scene_editing_cage(context:Context):
+	scene:Scene=context.scene;scene_props:SceneProps=scene.cpp;p0=_A;p1=_A
+	def intern_calc_p_minmax(vec:Vector):
+		nonlocal p0,p1
+		if p0 is _A:p0=vec;p1=vec.copy()
+		else:p0.x=min(p0.x,vec.x);p0.y=min(p0.y,vec.y);p0.z=min(p0.z,vec.z);p1.x=max(p1.x,vec.x);p1.y=max(p1.y,vec.y);p1.z=max(p1.z,vec.z)
+	ob=main.Workflow.get_object()
+	if ob:
+		for i in ob.bound_box:vec:Vector=ob.matrix_world@Vector(i);intern_calc_p_minmax(vec)
+	for camera in scene.objects:
+		if main.Workflow.camera_poll(camera):intern_calc_p_minmax(camera.location)
+	if p0 and p1:scale=p1-p0;origin=p1-scale*.5;T=Matrix.Translation(origin);S=Matrix.Diagonal(scale.to_4d());M=T@S;scene_props.cage_matrix_world=M

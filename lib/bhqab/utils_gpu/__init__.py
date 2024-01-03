@@ -19,7 +19,7 @@ get_depth_map=_common.get_depth_map
 get_viewport_metrics=_common.get_viewport_metrics
 FrameBufferFramework=_common.FrameBufferFramework
 class DrawFramework:
-	__slots__='_aa_instance','_fb_frameworks';__aa_methods_registry__:set[AABase]=set();_aa_instance:_A|AABase;_fb_frameworks:tuple[FrameBufferFramework];__shader_2d_image__:_A|GPUShader=_A
+	__slots__='_aa_instance','_fb_frameworks';__aa_methods_registry__:list[AABase]=list();_aa_instance:_A|AABase;_fb_frameworks:tuple[FrameBufferFramework];__shader_2d_image__:_A|GPUShader=_A
 	@classmethod
 	def get_shader_2d_image(cls)->_A|GPUShader:
 		A='VEC2'
@@ -28,7 +28,7 @@ class DrawFramework:
 	@classmethod
 	def get_prop_aa_method(cls)->EnumProperty:return EnumProperty(items=tuple((_.get_name(),_.get_name(),_.description)for _ in cls.__aa_methods_registry__),options={'HIDDEN','SKIP_SAVE'},translation_context='BHQAB_Preferences',name='AA Method',description='Anti-aliasing method to be used')
 	@classmethod
-	def register_aa_method(cls,method_class:AABase):cls.__aa_methods_registry__.add(method_class)
+	def register_aa_method(cls,method_class:AABase):cls.__aa_methods_registry__.append(method_class)
 	@property
 	def aa_method(self)->str:
 		if self._aa_instance is _A:return'NONE'
@@ -65,5 +65,5 @@ from.import _smaa
 from.import _fxaa
 SMAA=_smaa.SMAA
 FXAA=_fxaa.FXAA
-DrawFramework.register_aa_method(FXAA)
 DrawFramework.register_aa_method(SMAA)
+DrawFramework.register_aa_method(FXAA)

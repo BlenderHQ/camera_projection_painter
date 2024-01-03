@@ -1,0 +1,26 @@
+{
+  "name": "Path Tool",
+  "blender": [
+    3,
+    6,
+    2
+  ],
+  "version": [
+    3,
+    6,
+    2
+  ],
+  "checked_at": 1704284637,
+  "tag_name": "v3_6_2",
+  "release_description": "• Fixed an issue with flipped normals in the viewport.\r\n• Updated the shader system to the new Blender development design standards (maintenance update).\r\n• Fixed an issue with control point opacity in edge mode.\r\n• Increased accuracy of depth and color to 32-bit float - this reduces polygon depth fighting in the viewport.\r\n• Fixed different distance between \"Select\", \"Seam\", \"Sharp\" options in tool settings and radial menu.\r\n• Brought back module reload support.\r\n• Added localization support, with initial `uk_UA` translations. Users can create their own translations in other languages ​​using fields from this dictionary.\r\n• Now, while working with paths, the addon's UI will become inactive, as access to it is not possible at this time and this should be reflected in the UI. This also applies to keymap preferences.\r\n",
+  "release_description_translations": {
+    "uk": "• Виправлено неполадку стосовно вивернутих нормалей у вікні перегляду.\r\n• Оновлено систему шейдерів до нових стандартів розробки Blender (технічне оновлення).\r\n• Виправлено неполадку стосовно прозорості контрольних елементів у режимі редагування ребер.\r\n• Підвищено точність текстур глибини і кольору до 32-бітної - це зменшує можливість некоректного відображення елементів у переглядачі.\r\n• Виправлено неполадку стосовно різної відстані між опціями \"Виділення\", \"Шов\" і \"Гострота\" в налаштуваннях інструменту і круговому меню.\r\n• Повернено підтримку перезавантаження модуля.\r\n• Додано підтримку локалізації інтерфейсу, для початку `uk_UA`. Користувачі можуть створювати власні переклади їх мовами використовуючи поля з цього словника як шаблон.\r\n• Тепер під час роботи користувацький інтерфейс ставатиме неактивним, оскільки доступ до нього обмежено і це повинно бути відображено. Це стосується і налаштувань клавіш."
+  },
+  "release_published_at": 1692778825,
+  "release_is_pre": false,
+  "release_zipball_url": "https://api.github.com/repos/BlenderHQ/path_tool/zipball/v3_6_2",
+  "retrieved_filepath": "F:\\addons\\path_tool_addon\\src\\lib\\bhqupd\\cache\\path-tool_v3_6_2.zip",
+  "rate_limit": 60,
+  "remaining": 43,
+  "reset_at": 1704287362
+}

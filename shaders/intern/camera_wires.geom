@@ -1,4 +1,4 @@
-#pragma BHQGLSL_REQUIRE(space)
+#pragma BHQGLSL_REQUIRE(space, mask_vertex_stage)
 #ifndef USE_GPU_SHADER_CREATE_INFO
 in mat4 v_Data[];
 layout(binding = 0, std140) uniform u_Params { CameraCommonParams _u_Params; };
@@ -40,6 +40,10 @@ g_Flags |= CAMERA_WIRES_FLAG_PORTRAIT;
 g_Flags |= CAMERA_WIRES_FLAG_LANDSCAPE;
 }
 }
+}
+if (bool(_u_Params.cage_flags & CAGE_USE) && bool(_u_Params.cage_flags & CAGE_USE_CAMERAS) &&
+!inside_box(origin, _u_Params.cage_matrix)) {
+return;
 }
 vec2 half_res = u_ViewportMetrics.zw * 0.5;
 mat4 packed_coo;

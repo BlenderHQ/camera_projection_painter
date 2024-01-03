@@ -11,17 +11,15 @@ _B=1.
 _A=None
 from typing import Literal
 from enum import auto,Enum,IntEnum
-if'bpy'in locals():from importlib import reload;reload(utils_wm)
-else:from..import utils_wm
+from..import utils_wm
 import bpy
 from bpy.types import AddonPreferences,Context,Region,UILayout
 from mathutils import Vector,Matrix
 import gpu
 from gpu.types import GPUBatch,GPUBatch,GPUFrameBuffer,GPUIndexBuf,GPUOffScreen,GPUTexture,GPUVertBuf,GPUVertFormat
-from gpu_extras.batch import batch_for_shader
-__all__='FrameBufferFramework','get_depth_map','get_viewport_metrics','iter_area_regions','iter_area_spaces','iter_areas'
+__all__='FrameBufferFramework','get_depth_map','get_viewport_metrics'
 def get_viewport_metrics()->Vector:viewport=gpu.state.viewport_get();w,h=viewport[2],viewport[3];return Vector((_B/w,_B/h,w,h))
-def get_depth_map(*,depth_format:str='DEPTH_COMPONENT32F')->GPUTexture:fb=gpu.state.active_framebuffer_get();return gpu.types.GPUTexture(gpu.state.viewport_get()[2:],data=fb.read_depth(*fb.viewport_get()),format=depth_format)
+def get_depth_map(*,depth_format:str='DEPTH_COMPONENT32F')->GPUTexture:fb:GPUFrameBuffer=gpu.state.active_framebuffer_get();return gpu.types.GPUTexture(gpu.state.viewport_get()[2:],data=fb.read_depth(*fb.viewport_get()),format=depth_format)
 class Mode(Enum):REGION=auto();TEXTURE=auto()
 class FrameBufferFramework:
 	__slots__='_mode','_region_framebuffer','_area_type','_region_type','_texture_offscreen_data';_mode:Mode;_region_framebuffer:dict[Region,tuple[GPUFrameBuffer,_A|GPUTexture,_A|GPUTexture]];_area_type:str;_region_type:str;_texture_offscreen_data:_A|GPUOffScreen

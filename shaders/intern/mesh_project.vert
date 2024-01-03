@@ -19,6 +19,8 @@ v_ProjectedDistortedUV = texture(u_UVProjectTexture, tex_coo).xy;
 v_ProjectedDistortedUV = texture(u_UVProjectTexture, tex_coo).zw;
 }
 }
-gl_Position = ModelViewProjectionMatrix * u_MeshProjectParams.model_matrix * vec4(P, 1.0);
+vec4 pos = u_MeshProjectParams.model_matrix * vec4(P, 1.0);
+v_P = pos.xyz / pos.w;
+gl_Position = ModelViewProjectionMatrix * pos;
 gl_Position.w += BHQGLSL_EXP;
 }

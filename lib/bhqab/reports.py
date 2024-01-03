@@ -44,6 +44,10 @@ class AddonLogger:
 			for filename in _logs_to_remove:
 				try:os.remove(os.path.join(cls.directory,filename))
 				except OSError:break
+	@classmethod
+	def shutdown(cls):
+		for handler in cls.log.handlers:handler.close()
+		cls.log.handlers.clear();cls.log=_A;cls.directory='';cls.filename=''
 	@staticmethod
 	def _filter_paths_from_keywords(*,keywords:dict[str,Any])->dict[str,Any]:
 		C='filename';B='directory';A='filepath';_str_hidden='(hidden for security reasons)';arg_filepath=keywords.get(A,_A);arg_directory=keywords.get(B,_A);arg_filename=keywords.get(C,_A)
@@ -66,12 +70,11 @@ class AddonLogger:
 			case logging.ERROR|logging.CRITICAL:operator.report(type={'ERROR'},message=report_message)
 	@classmethod
 	def log_execution_helper(cls,ot_execute_method:FunctionType[Operator,Context])->FunctionType[Operator,Context]:
-		log=cls.log
 		def execute(operator:Operator,context:Context):
-			cls=operator.__class__;props=operator.as_keywords()
-			if props:props_fmt=textwrap.indent(pprint.pformat(AddonLogger._filter_paths_from_keywords(keywords=props),indent=4,compact=False),prefix=' '*40);log.debug('"{label}" execution begin with properties:\n{props}'.format(label=cls.bl_label,props=props_fmt)).push_indent()
-			else:log.debug('"{label}" execution begin'.format(label=cls.bl_label)).push_indent()
-			dt=time.time();ret=ot_execute_method(operator,context);log.pop_indent().debug('"{label}" execution ended as {flag} in {elapsed:.6f} second(s)'.format(label=cls.bl_label,flag=ret,elapsed=time.time()-dt));return ret
+			props=operator.as_keywords()
+			if props:props_fmt=textwrap.indent(pprint.pformat(AddonLogger._filter_paths_from_keywords(keywords=props),indent=4,compact=False),prefix=' '*40);cls.log.debug('"{label}" execution begin with properties:\n{props}'.format(label=operator.bl_label,props=props_fmt)).push_indent()
+			else:cls.log.debug('"{label}" execution begin'.format(label=operator.bl_label)).push_indent()
+			dt=time.time();ret=ot_execute_method(operator,context);cls.log.pop_indent().debug('"{label}" execution ended as {flag} in {elapsed:.6f} second(s)'.format(label=operator.bl_label,flag=ret,elapsed=time.time()-dt));return ret
 		return execute
 	@staticmethod
 	def _get_value(*,item:object,identifier:str):return getattr(item,identifier,'(readonly)')
@@ -105,4 +108,4 @@ class AddonLogger:
 			_update_log_log_level(self,context)
 		return EnumProperty(items=((logging.getLevelName(logging.DEBUG),'Debug','Debug messages (low priority)',0,logging.DEBUG),(logging.getLevelName(logging.INFO),'Info','Informational messages',0,logging.INFO),(logging.getLevelName(logging.WARNING),'Warning','Warning messages (medium priority)',0,logging.WARNING),(logging.getLevelName(logging.ERROR),'Error','Error messages (high priority)',0,logging.ERROR),(logging.getLevelName(logging.CRITICAL),'Critical','Critical error messages',0,logging.CRITICAL)),default=logging.getLevelName(logging.WARNING),update=_update_log_level,options={'SKIP_SAVE'},translation_context=_B,name='Log Level',description='The level of the log that will be output to the console. For log to file, this level value will not change')
 	@classmethod
-	def template_ui_draw_paths(cls,layout:UILayout):A='wm.path_open';layout.operator(operator=A,text='Open Log Files Directory',text_ctxt=_B).filepath=cls.directory;layout.operator(operator=A,text=pgettext('Open Log: "{filename}"',_B).format(filename=cls.filename)).filepath=os.path.join(cls.directory,cls.filename)
+	def template_ui_draw_paths(cls,layout:UILayout):A='wm.path_open';layout.operator(operator=A,text='Open Log Files Directory',text_ctxt=_B).filepath=cls.directory;layout.operator(operator=A,text=pgettext('Open Log: "{filename}"',msgctxt=_B).format(filename=cls.filename)).filepath=os.path.join(cls.directory,cls.filename)

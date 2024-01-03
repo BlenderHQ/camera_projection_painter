@@ -5,6 +5,7 @@ UI_COMPATIBILITY_MODES:set[str]={'OBJECT','PAINT_TEXTURE'}
 MAX_FRAGMENT_SAMPLER_UNIFORMS=25
 class BorderType(IntEnum):NONE=auto();FILL=auto();CHECKER=auto();LINES=auto()
 class Facing(IntFlag):FRONT=auto();BACK=auto()
+class Cage(IntFlag):USE=auto();USE_CAMERAS=auto();USE_PREVIEWS=auto();USE_MESH_PREVIEW=auto()
 class SetupStage(IntEnum):PASS_THROUGH=auto();INVOKED=auto();PRE_CLEANUP=auto();IMPORT_SCENE=auto();CHECK_CANVAS=auto();CHECK_CAMERAS=auto();CHECK_IMAGES=auto();CHECK_TOOL=auto();FINISHED=auto()
 class DistortionModel(IntEnum):NONE=auto();DIVISION=auto();POLYNOMIAL=auto();BROWN=auto()
 class IEEE754:FLT_DIG:int=6;FLT_EXP:float=float(f"1e-{FLT_DIG}");FLT_MAX:float=3.402823e38;INT_MAX:int=2147483647
