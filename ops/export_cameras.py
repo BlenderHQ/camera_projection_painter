@@ -16,7 +16,7 @@ from bpy.props import BoolProperty,EnumProperty
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:from..props.wm import WMProps
 __all__=_B,
-class CPP_OT_export_cameras(Operator,common.IOFileBaseParams,common.IOFileParams,common.IOTransformParams,common.IOParamsRegistry):
+class CPP_OT_export_cameras(Operator,common.IOFileBaseParams,common.IOFileParams,common.IOTransformParams,common.ExportParamsRegistry):
 	bl_idname='cpp.export_cameras';bl_label='Export Cameras';bl_description='Export camera data';bl_options={'REGISTER','UNDO','PRESET'};bl_translation_context=_B;check_existing:BoolProperty(default=_A,options={_C},translation_context=_B,name='Check Existing',description='Check and warn on overwriting existing files');fmt_locked:BoolProperty(description='',default=_A,options={_C},translation_context=_B,name='Format Locked');open_directory:BoolProperty(default=_A,options={_C},translation_context=_B,name='Open Directory',description='Open directory after export');name_source:EnumProperty(items=((common.IONameOptions.USE_CAMERA_NAME.name,'Use Object Name','Use camera object name as source'),(common.IONameOptions.USE_CAM_NAME.name,'Use Camera Name','Use camera data name as source'),(common.IONameOptions.USE_IMAGE_NAME.name,'Use Image Name','Use image data-block name as source'),(common.IONameOptions.USE_IMAGE_FILEPATH.name,'Use Image File Name','Use image file name as source')),default=common.IONameOptions.USE_CAMERA_NAME.name,options={_C},translation_context=_B,name='Name Source',description='Name source for export')
 	def _check_filepath(self):
 		format=common.IOFileFormat[self.fmt];ext=common.IOProcessor.extension_of(format=format);basename=os.path.basename(self.filepath)

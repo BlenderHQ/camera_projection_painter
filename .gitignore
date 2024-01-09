@@ -1,4 +1,5 @@
 lib/bhqdbl/test.py
+lib/bhqupd/cache/
 logs/*.txt
 
 __pycache__/

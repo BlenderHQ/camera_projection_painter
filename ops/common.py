@@ -3,7 +3,7 @@ _X='EXEC_DEFAULT'
 _W='name_source'
 _V='filename'
 _U='num_files'
-_T='IOParamsRegistry'
+_T='ExportParamsRegistry'
 _S='IOExportOptionsBaseT'
 _R='IOExportParamsBaseT'
 _Q='PROP_UN_FLAGS'
@@ -39,7 +39,7 @@ import bpy_extras
 from mathutils import Vector,Matrix
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:from io import TextIOWrapper;from typing import Callable,Iterable,Type;from..props import Object,Float64ArrayT;from..props import Camera,Image,Scene;from..props.wm import WMProps;from..props.scene import SceneProps;from..props.camera import CameraProps
-__all__='IONameOptions','DEFAULT_IONameOptions','IMAGE_FILE_EXTENSIONS','InputName','InputNameCache','OutputName','IOObjectBase','IOObjectLocation','IOObjectRotation','IOObjectTransform',_Q,'IOFileFormat','IOExportParamsBase','IOTransformOptionsBase',_R,_S,'IOFileFormatHandler','ImportCamerasResult','ExportCamerasResult','BindImagesMode','BindImagesResult','IOProcessor',_T,'IOName_Params','IOFileBaseParams','IOFileParams','IOTransformParams','CENTERED_DIALOG_ICON_SCALE','CENTERED_DIALOG_PROPS_UI_UNITS_X','invoke_props_dialog_centered','StageStatus','SetupContextOperator'
+__all__='IONameOptions','DEFAULT_IONameOptions','IMAGE_FILE_EXTENSIONS','InputName','InputNameCache','OutputName','IOObjectBase','IOObjectLocation','IOObjectRotation','IOObjectTransform','IOFileFormatPossibilities',_Q,'IOFileFormat','IOExportParamsBase','IOTransformOptionsBase',_R,_S,'IOFileFormatHandler','ImportCamerasResult','ExportCamerasResult','BindImagesMode','BindImagesResult','IOProcessor',_T,'IOName_Params','IOFileBaseParams','IOFileParams','IOTransformParams','CENTERED_DIALOG_ICON_SCALE','CENTERED_DIALOG_PROPS_UI_UNITS_X','invoke_props_dialog_centered','StageStatus','SetupContextOperator'
 class IONameOptions(IntFlag):
 	IGNORE_LETTER_CASE=auto();IGNORE_EXTENSION=auto();USE_CAMERA_NAME=auto();USE_CAM_NAME=auto();USE_IMAGE_NAME=auto();USE_IMAGE_FILEPATH=auto()
 	@staticmethod
@@ -151,7 +151,8 @@ class IOObjectTransform(IOObjectLocation,IOObjectRotation):
 		if R is _A and S is _A:return
 		elif R is not _A:self.rotation=np.matmul(R,self.rotation);self.location=np.matmul(self.location,R)
 		if S is not _A:self.location*=S
-class IOFileFormat(IntEnum):UNKNOWN=auto();RC_IECP=auto();RC_NXYZ=auto();RC_NXYZHPR=auto();RC_NXYZOPK=auto();RC_METADATA_XMP=auto()
+class IOFileFormatPossibilities(IntFlag):IMPORT=auto();EXPORT=auto()
+class IOFileFormat(IntEnum):UNKNOWN=auto();RC_IECP=auto();RC_NXYZ=auto();RC_NXYZHPR=auto();RC_NXYZOPK=auto();RC_METADATA_XMP=auto();MS_XML=auto();MS_PIDXYZOPK=auto()
 class IOExportParamsBase:0
 class IOTransformOptionsBase:
 	__slots__='has_transform','R','S';has_transform:bool;R:Float64ArrayT;S:float
@@ -165,7 +166,7 @@ class IOTransformOptionsBase:
 IOExportParamsBaseT=TypeVar(_R,bound=IOExportParamsBase)
 IOExportOptionsBaseT=TypeVar(_S,bound=IOTransformOptionsBase)
 class IOFileFormatHandler(metaclass=abc.ABCMeta):
-	name:str;icon:str;io_format:IOFileFormat;extension:str;size_max:int=-1;export_params:IOExportParamsBaseT=IOExportParamsBase;export_options:IOExportOptionsBaseT=IOTransformOptionsBase
+	name:str;icon:str;io_format:IOFileFormat;possibilities:IOFileFormatPossibilities;extension:str;size_max:int=-1;export_params:IOExportParamsBaseT;export_options:IOExportOptionsBaseT
 	@classmethod
 	@abc.abstractmethod
 	def check(cls,*,file:TextIOWrapper)->bool:raise NotImplementedError()
@@ -178,6 +179,30 @@ class IOFileFormatHandler(metaclass=abc.ABCMeta):
 	@classmethod
 	@abc.abstractmethod
 	def write(cls,*,directory:str,filename:str,options:Type[IOTransformOptionsBase])->int:raise NotImplementedError()
+class CSV_FileFormatHandlerBase(IOFileFormatHandler):
+	check_num_line_start:str;csv_description_line:str;sep_character:str;comment_character:str='#';float_data_count:int
+	@classmethod
+	def check(cls,*,file:TextIOWrapper)->bool:
+		if len(file.read(1))>0:
+			file.seek(0);line=file.readline()
+			if line.startswith(cls.check_num_line_start):line=file.readline()
+			line=line.replace('\n','').replace('\r','');return line==cls.csv_description_line
+		return _B
+	@classmethod
+	def iter_lines(cls,*,file:TextIOWrapper):
+		import numpy as np
+		for line in file.readlines():
+			if line[0]==cls.comment_character:continue
+			sep_index=line.find(cls.sep_character)
+			if sep_index==-1:Reports.log.warning(f'Unable to parse line: "{line}"');yield _A;continue
+			name=line[:sep_index];str_data=line[sep_index+1:]
+			try:data=np.fromstring(str_data,sep=cls.sep_character,count=cls.float_data_count,dtype=np.float64)
+			except ValueError as err:Reports.log.warning(f'Unable to convert string data as floating point numbers: "{str_data}" for reason: "{err}"');yield _A;continue
+			yield(name,data)
+	@classmethod
+	def write_header(cls,*,file:TextIOWrapper,num_format:_A|str):
+		if num_format:file.write(num_format.format(num=len(OutputNameCache.cached_camera_names)))
+		file.write(cls.csv_description_line+'\n')
 class ImportCamerasResult:
 	__slots__=_U,_O,'num_cameras_created';num_files:int;num_cameras:int;num_cameras_created:int
 	def __init__(self):self.num_files=0;self.num_cameras=0;self.num_cameras_created=0
@@ -224,7 +249,8 @@ class IOProcessor:
 	@classmethod
 	def eval_io_third_party_params(cls)->object:
 		fmt_items=list();export_params_bases_set=set()
-		for item in cls.__format_registry:export_params_bases_set.add(item.export_params);fmt_items.append((item.io_format.name,item.name,'',item.icon,item.io_format.value))
+		for item in cls.__format_registry:
+			if item.possibilities&IOFileFormatPossibilities.EXPORT:export_params_bases_set.add(item.export_params);fmt_items.append((item.io_format.name,item.name,'',icons.get_id(item.icon),item.io_format.value))
 		prop_fmt=EnumProperty(items=fmt_items,options={_E},translation_context='IOFormat',name='Format');return type(_T,tuple(export_params_bases_set),dict(__annotations__=dict(fmt=prop_fmt)))
 	@classmethod
 	def eval_filter_glob(cls)->str:
@@ -327,15 +353,19 @@ class IOProcessor:
 							else:res.num_opening_failed+=1
 							break
 		InputNameCache.reset();return res
-class IOParamsRegistry:fmt:bpy.types.EnumProperty
+class ExportParamsRegistry:fmt:bpy.types.EnumProperty
 if'rc'in locals():reload(rc)
 else:from.intern import rc
+if'ms'in locals():reload(ms)
+else:from.intern import ms
 IOProcessor.register_file_format(rc.RC_METADATA_XMP)
 IOProcessor.register_file_format(rc.RC_IECP)
 IOProcessor.register_file_format(rc.RC_NXYZ)
 IOProcessor.register_file_format(rc.RC_NXYZHPR)
 IOProcessor.register_file_format(rc.RC_NXYZOPK)
-IOParamsRegistry=IOProcessor.eval_io_third_party_params()
+IOProcessor.register_file_format(ms.MS_XML)
+IOProcessor.register_file_format(ms.MS_PIDXYZOPK)
+ExportParamsRegistry=IOProcessor.eval_io_third_party_params()
 class IOName_Params:
 	def _get_name_flags(self):return self.get(_H,DEFAULT_IONameOptions)
 	def _set_name_flags(self,value:int):

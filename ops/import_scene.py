@@ -2,11 +2,11 @@ from __future__ import annotations
 _J='FINISHED'
 _I='CPP_OT_import_scene'
 _H='HIDDEN'
-_G='EXEC_DEFAULT'
-_F='CANCELLED'
-_E='dae'
-_D='obj'
-_C='fbx'
+_G='CANCELLED'
+_F='dae'
+_E='obj'
+_D='fbx'
+_C='EXEC_DEFAULT'
 _B=True
 _A=False
 import logging,os,re
@@ -25,15 +25,15 @@ if TYPE_CHECKING:from..props import Object;from..props.wm import WMProps
 __all__=_I,
 def check_additional_builtin_io_addons()->set:
 	ret=set()
-	if addon_utils.check('io_scene_fbx')[1]:ret.add(_C)
-	if bpy.app.build_options.io_wavefront_obj:ret.add(_D)
-	if bpy.app.build_options.collada:ret.add(_E)
+	if addon_utils.check('io_scene_fbx')[1]:ret.add(_D)
+	if bpy.app.build_options.io_wavefront_obj:ret.add(_E)
+	if bpy.app.build_options.collada:ret.add(_F)
 	return ret
 def get_prop_file_format_items(_self=None,_context=None):
 	ret=[];additional_io_addons_set=check_additional_builtin_io_addons()
-	if _C in additional_io_addons_set:ret.append((_C,'Autodesk (*.fbx)',''))
-	if _D in additional_io_addons_set:ret.append((_D,'Wavefront (*.obj)',''))
-	if _E in additional_io_addons_set:ret.append((_E,'Collada (*.dae)',''))
+	if _D in additional_io_addons_set:ret.append((_D,'Autodesk (*.fbx)',''))
+	if _E in additional_io_addons_set:ret.append((_E,'Wavefront (*.obj)',''))
+	if _F in additional_io_addons_set:ret.append((_F,'Collada (*.dae)',''))
 	return ret
 def _get_file_fmt_enum_item_name_from_fp(fp:str)->str:
 	if fp:
@@ -43,12 +43,15 @@ def _get_file_fmt_enum_item_name_from_fp(fp:str)->str:
 				if ext==f".{enum_str}":return enum_str
 def _ot_result_to_bool(result:set)->bool:
 	if result=={_J}:return _B
-	elif result=={_F}:return _A
+	elif result=={_G}:return _A
 	else:raise AssertionError('Operator should be executed default, not running modal.')
-def _cb_REALITY_CAPTURE_FBX(context:Context,abs_fp:str)->bool:ret=bpy.ops.import_scene.fbx(_G,filepath=abs_fp,use_manual_orientation=_A,global_scale=1.,bake_space_transform=_A,use_custom_normals=_B,use_image_search=_A,use_alpha_decals=_A,use_anim=_B,anim_offset=1.,use_subsurf=_A,use_custom_props=_B,use_custom_props_enum_as_string=_B,ignore_leaf_bones=_A,force_connect_children=_A,automatic_bone_orientation=_A,primary_bone_axis='Y',secondary_bone_axis='X',use_prepost_rot=_B,axis_forward='-Z',axis_up='Y');return _ot_result_to_bool(ret)
-def _cb_REALITY_CAPTURE_OBJ(context:Context,abs_fp:str)->bool:ret=bpy.ops.wm.obj_import(_G,filepath=abs_fp,global_scale=1.,clamp_size=.0,forward_axis='NEGATIVE_Z',up_axis='Y',use_split_objects=_B,use_split_groups=_A,import_vertex_groups=_A,validate_meshes=_A);return _ot_result_to_bool(ret)
-def _cb_REALITY_CAPTURE_DAE(context:Context,abs_fp:str)->bool:ret=bpy.ops.wm.collada_import(_G,filepath=abs_fp,import_units=_A,fix_orientation=_A,find_chains=_A,auto_connect=_A,min_chain_length=0,keep_bind_info=_A);return _ot_result_to_bool(ret)
-_CALLBACKS={'REALITY_CAPTURE':{_C:_cb_REALITY_CAPTURE_FBX,_D:_cb_REALITY_CAPTURE_OBJ,_E:_cb_REALITY_CAPTURE_DAE}}
+def _cb_REALITY_CAPTURE_FBX(context:Context,abs_fp:str)->bool:ret=bpy.ops.import_scene.fbx(_C,filepath=abs_fp,use_manual_orientation=_A,global_scale=1.,bake_space_transform=_A,use_custom_normals=_B,use_image_search=_A,use_alpha_decals=_A,use_anim=_B,anim_offset=1.,use_subsurf=_A,use_custom_props=_B,use_custom_props_enum_as_string=_B,ignore_leaf_bones=_A,force_connect_children=_A,automatic_bone_orientation=_A,primary_bone_axis='Y',secondary_bone_axis='X',use_prepost_rot=_B,axis_forward='-Z',axis_up='Y');return _ot_result_to_bool(ret)
+def _cb_REALITY_CAPTURE_OBJ(context:Context,abs_fp:str)->bool:ret=bpy.ops.wm.obj_import(_C,filepath=abs_fp,global_scale=1.,clamp_size=.0,forward_axis='NEGATIVE_Z',up_axis='Y',use_split_objects=_B,use_split_groups=_A,import_vertex_groups=_A,validate_meshes=_A);return _ot_result_to_bool(ret)
+def _cb_REALITY_CAPTURE_DAE(context:Context,abs_fp:str)->bool:ret=bpy.ops.wm.collada_import(_C,filepath=abs_fp,import_units=_A,fix_orientation=_A,find_chains=_A,auto_connect=_A,min_chain_length=0,keep_bind_info=_A);return _ot_result_to_bool(ret)
+def _cb_METASHAPE_FBX(context:Context,abs_fp:str)->bool:ret=bpy.ops.import_scene.fbx(_C,filepath=abs_fp,use_manual_orientation=_A,global_scale=1.,bake_space_transform=_A,use_custom_normals=_B,use_image_search=_A,use_alpha_decals=_A,use_anim=_B,anim_offset=1.,use_subsurf=_A,use_custom_props=_B,use_custom_props_enum_as_string=_B,ignore_leaf_bones=_A,force_connect_children=_A,automatic_bone_orientation=_A,primary_bone_axis='Y',secondary_bone_axis='X',use_prepost_rot=_B,axis_forward='-Z',axis_up='Y');return _ot_result_to_bool(ret)
+def _cb_METASHAPE_OBJ(context:Context,abs_fp:str)->bool:ret=bpy.ops.wm.obj_import(_C,filepath=abs_fp,global_scale=1.,clamp_size=.0,forward_axis='Y',up_axis='Z',use_split_objects=_B,use_split_groups=_A,import_vertex_groups=_A,validate_meshes=_A);return _ot_result_to_bool(ret)
+def _cb_METASHAPE_DAE(context:Context,abs_fp:str)->bool:ret=bpy.ops.wm.collada_import(_C,filepath=abs_fp,import_units=_A,fix_orientation=_A,find_chains=_A,auto_connect=_A,min_chain_length=0,keep_bind_info=_A);return _ot_result_to_bool(ret)
+_CALLBACKS={'REALITY_CAPTURE':{_D:_cb_REALITY_CAPTURE_FBX,_E:_cb_REALITY_CAPTURE_OBJ,_F:_cb_REALITY_CAPTURE_DAE},'METASHAPE':{_D:_cb_METASHAPE_FBX,_E:_cb_METASHAPE_OBJ,_F:_cb_METASHAPE_DAE}}
 def _apply_udim_materials_fix(context:Context,*,objects:set[Object]):
 	for ob in objects:
 		if main.Workflow.object_poll(ob):
@@ -82,9 +85,9 @@ class CPP_OT_import_scene(common.IOFileBaseParams,metaclass=common.SetupContextO
 	def invoke(self,context:Context,_event:Event):wm=context.window_manager;wm.fileselect_add(self);return{'RUNNING_MODAL'}
 	def execute(self,context:Context):
 		cls=self.__class__;msgctxt=cls.bl_translation_context
-		if not self.filename:return{_F}
-		if self.is_filepath_recognized is _A:Reports.report_and_log(self,level=logging.WARNING,message='Unable to import file with unknown file extension',msgctxt=msgctxt);return{_F}
+		if not self.filename:return{_G}
+		if self.is_filepath_recognized is _A:Reports.report_and_log(self,level=logging.WARNING,message='Unable to import file with unknown file extension',msgctxt=msgctxt);return{_G}
 		addon_pref=get_addon_pref(context);wm=context.window_manager;wm_props:WMProps=wm.cpp;initial_objects=set(context.scene.objects);result=_CALLBACKS[addon_pref.preferred_software_workflow][self.file_format](context,self.filepath);imported_objects=set(context.scene.objects)-initial_objects
 		if wm_props.configure_udim:_apply_udim_materials_fix(context,objects=imported_objects)
 		if result is _B:Reports.report_and_log(self,level=logging.INFO,message='Imported "{filepath}"',msgctxt=msgctxt,filepath=os.path.basename(self.filepath));return{_J}
-		else:Reports.report_and_log(self,level=logging.WARNING,message='Import Failed "{filepath}"',msgctxt=msgctxt,filepath=self.filepath);return{_F}
+		else:Reports.report_and_log(self,level=logging.WARNING,message='Import Failed "{filepath}"',msgctxt=msgctxt,filepath=self.filepath);return{_G}

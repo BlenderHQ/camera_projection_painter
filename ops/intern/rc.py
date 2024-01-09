@@ -1,9 +1,8 @@
 from __future__ import annotations
-_J='RC_MetadataXMP_ExportParams'
-_I='RC_MetadataXMP_Params'
-_H='.csv'
-_G='utf-8'
-_F='reality_capture'
+_I='RC_MetadataXMP_ExportParams'
+_H='reality_capture'
+_G='RC_MetadataXMP_Params'
+_F='utf-8'
 _E='SKIP_SAVE'
 _D=' '
 _C=False
@@ -49,32 +48,15 @@ class RC_CSV_ExportParams(common.IOExportParamsBase):rc_csv_write_num_cameras:Bo
 class RC_CSV_ExportOptions(common.IOTransformOptionsBase):
 	__slots__='write_num_cameras',;write_num_cameras:bool
 	def __init__(self,**kwargs):super().__init__(**kwargs);self.write_num_cameras=kwargs['rc_csv_write_num_cameras']
-class RC_CSV_Common(common.IOFileFormatHandler):
-	rc_csv_line:str;export_params=RC_CSV_ExportParams;export_options=RC_CSV_ExportOptions
-	@classmethod
-	def check(cls,*,file:TextIOWrapper,a=1)->bool:
-		if len(file.read(1))>0:
-			file.seek(0);line=file.readline()
-			if line.startswith('#cameras '):line=file.readline()
-			line=line.replace('\n','').replace('\r','');return line==cls.rc_csv_line
-		return _C
+class RC_CSV_Common(common.CSV_FileFormatHandlerBase):
+	icon=_H;extension='.csv';check_num_line_start='#cameras ';sep_character=',';comment_character='#';possibilities=common.IOFileFormatPossibilities.IMPORT|common.IOFileFormatPossibilities.EXPORT;export_params=RC_CSV_ExportParams;export_options=RC_CSV_ExportOptions
 	@classmethod
 	def evaluate_filename(cls,*,name:str)->str:return name.replace(_D,'_')
-	@staticmethod
-	def iter_lines(*,file:TextIOWrapper,data_count:int):
-		import numpy as np;sep_character=','
-		for line in file.readlines():
-			if line[0]=='#':continue
-			sep_index=line.find(sep_character)
-			if sep_index==-1:Reports.log.warning(f'Unable to parse line: "{line}"');yield _A;continue
-			name=line[:sep_index];str_data=line[sep_index+1:]
-			try:data=np.fromstring(str_data,sep=sep_character,count=data_count,dtype=np.float64)
-			except ValueError as err:Reports.log.warning(f'Unable to convert string data as floating point numbers: "{str_data}" for reason: "{err}"');yield _A;continue
-			yield(name,data)
 	@classmethod
-	def write_header(cls,*,file:TextIOWrapper,options:RC_CSV_ExportOptions):
-		if options.write_num_cameras:file.write(f"#cameras {len(common.OutputNameCache.cached_camera_names)}\n")
-		file.write(cls.rc_csv_line+'\n')
+	def write_rc_optional_header(cls,*,file:TextIOWrapper,options:RC_CSV_ExportOptions):
+		num_format=_A
+		if options.write_num_cameras:num_format='#cameras {num}\n'
+		super().write_header(file=file,num_format=num_format)
 class RC_IECP_Camera(common.IOObjectTransform):
 	lens:float;principal_x:float;principal_y:float;distortion_model:constants.DistortionModel;k1:float;k2:float;k3:float;k4:float;p1:float;p2:float
 	def set_camera_data(self,*,camera:Object):camera_props:ObjectProps=camera.cpp;cam:Camera=camera.data;cam_props:CameraProps=cam.cpp;cam.sensor_fit='AUTO';cam.sensor_width=36.;cam.sensor_height=36.;camera_props.location=self.location;camera_props.rotation=self.rotation;cam_props.lens=self.lens;cam_props.principal_x=self.principal_x;cam_props.principal_y=self.principal_y;cam_props.distortion_model=self.distortion_model.name;cam_props.k1=self.k1;cam_props.k2=self.k2;cam_props.k3=self.k3;cam_props.k4=self.k4;cam_props.p1=self.p1;cam_props.p2=self.p2
@@ -83,17 +65,17 @@ class RC_NXYZ_Camera(common.IOObjectLocation):
 class RC_NXYZROT_Camera(common.IOObjectTransform):
 	def set_camera_data(self,*,camera:Object):camera_props:ObjectProps=camera.cpp;camera_props.location=self.location;camera_props.rotation=self.rotation
 class RC_IECP(RC_CSV_Common):
-	name='Internal/External camera parameters';icon=_F;io_format=common.IOFileFormat.RC_IECP;extension=_H;rc_csv_line='#name,x,y,alt,heading,pitch,roll,f,px,py,k1,k2,k3,k4,t1,t2'
+	name='Internal/External camera parameters';io_format=common.IOFileFormat.RC_IECP;csv_description_line='#name,x,y,alt,heading,pitch,roll,f,px,py,k1,k2,k3,k4,t1,t2';float_data_count=16
 	@classmethod
 	def read(cls,*,r_data:list,file:TextIOWrapper,options:common.IOExportOptionsBaseT)->int:
 		import numpy as np;skipped=0
-		for(i,line)in enumerate(cls.iter_lines(file=file,data_count=16)):
+		for(i,line)in enumerate(cls.iter_lines(file=file)):
 			if line is _A:skipped+=1
 			else:
 				name,data=line;un=common.InputNameCache.eval_unified_name_from_cache(name=name)
 				if un is _A:skipped+=1;continue
 				c=RC_IECP_Camera();c.name=un;RC_Transform.set_xyalt(camera_props=c,xyalt=data[:3]);RC_Transform.set_hpr(camera_props=c,hpr=data[3:6])
-				if options.has_transform:c.apply_transform(options.R,options.S)
+				if options.has_transform:c.apply_transform(R=options.R,S=options.S)
 				c.lens,c.principal_x,c.principal_y,c.k1,c.k2,c.k3,c.k4,c.p1,c.p2=data[6:15]
 			if np.any(data[9:15]):c.distortion_model=constants.DistortionModel.BROWN
 			else:c.distortion_model=constants.DistortionModel.NONE
@@ -101,16 +83,16 @@ class RC_IECP(RC_CSV_Common):
 		return i-skipped
 	@classmethod
 	def write(cls,*,directory:str,filename:str,options:RC_CSV_ExportOptions):
-		with open(os.path.join(directory,filename),'w',encoding=_G,newline='')as file:
-			cls.write_header(file=file,options=options);writer=csv.writer(file,delimiter=',')
+		with open(os.path.join(directory,filename),'w',encoding=_F,newline='')as file:
+			cls.write_rc_optional_header(file=file,options=options);writer=csv.writer(file,delimiter=cls.sep_character)
 			for(name,camera)in common.OutputNameCache.cached_camera_names:camera_props:ObjectProps=camera.cpp;cam:Camera=camera.data;cam_props:CameraProps=cam.cpp;writer.writerow((name,*RC_Transform.get_xyalt(camera_props=camera_props,options=options),*RC_Transform.get_hpr(camera_props=camera_props,options=options),cam_props.lens,cam_props.principal_x,cam_props.principal_y,cam_props.k1,cam_props.k2,cam_props.k3,cam_props.k4,cam_props.p1,cam_props.p2))
 		return 1
 class RC_NXYZ(RC_CSV_Common):
-	name='Comma-separated Name, X, Y, Z';icon=_F;io_format=common.IOFileFormat.RC_NXYZ;extension=_H;rc_csv_line='#name,x,y,z'
+	name='Comma-separated Name, X, Y, Z';io_format=common.IOFileFormat.RC_NXYZ;csv_description_line='#name,x,y,z';float_data_count=3
 	@classmethod
 	def read(cls,*,r_data:list,file:TextIOWrapper,options:common.IOExportOptionsBaseT)->int:
 		skipped=0
-		for(i,line)in enumerate(cls.iter_lines(file=file,data_count=3)):
+		for(i,line)in enumerate(cls.iter_lines(file=file)):
 			if line is _A:skipped+=1
 			else:
 				name,data=line;un=common.InputNameCache.eval_unified_name_from_cache(name=name)
@@ -121,55 +103,55 @@ class RC_NXYZ(RC_CSV_Common):
 		return i-skipped
 	@classmethod
 	def write(cls,*,directory:str,filename:str,options:RC_CSV_ExportOptions):
-		with open(os.path.join(directory,filename),'w',encoding=_G,newline='')as file:
-			cls.write_header(file=file,options=options);writer=csv.writer(file,delimiter=',')
+		with open(os.path.join(directory,filename),'w',encoding=_F,newline='')as file:
+			cls.write_rc_optional_header(file=file,options=options);writer=csv.writer(file,delimiter=cls.sep_character)
 			for(name,camera)in common.OutputNameCache.cached_camera_names:camera_props:ObjectProps=camera.cpp;writer.writerow((name,*RC_Transform.get_xyalt(camera_props=camera_props,options=options)))
 		return 1
 class RC_NXYZHPR(RC_CSV_Common):
-	name='Comma-separated Name, X, Y, Z, Heading, Pitch, Roll';icon=_F;io_format=common.IOFileFormat.RC_NXYZHPR;extension=_H;rc_csv_line='#name,x,y,z,heading,pitch,roll'
+	name='Comma-separated Name, X, Y, Z, Heading, Pitch, Roll';io_format=common.IOFileFormat.RC_NXYZHPR;csv_description_line='#name,x,y,z,heading,pitch,roll';float_data_count=6
 	@classmethod
 	def read(cls,*,r_data:list,file:TextIOWrapper,options:common.IOExportOptionsBaseT)->int:
 		skipped=0
-		for(i,line)in enumerate(cls.iter_lines(file=file,data_count=6)):
+		for(i,line)in enumerate(cls.iter_lines(file=file)):
 			if line is _A:skipped+=1
 			else:
 				name,data=line;un=common.InputNameCache.eval_unified_name_from_cache(name=name)
 				if un is _A:skipped+=1;continue
 				c=RC_NXYZROT_Camera();c.name=un;RC_Transform.set_xyalt(camera_props=c,xyalt=data[:3]);RC_Transform.set_hpr(camera_props=c,hpr=data[3:6])
-				if options.has_transform:c.apply_transform(options.R,options.S)
+				if options.has_transform:c.apply_transform(R=options.R,S=options.S)
 				r_data.append(c)
 		return i-skipped
 	@classmethod
 	def write(cls,*,directory:str,filename:str,options:RC_CSV_ExportOptions):
-		with open(os.path.join(directory,filename),'w',encoding=_G,newline='')as file:
-			cls.write_header(file=file,options=options);writer=csv.writer(file,delimiter=',')
+		with open(os.path.join(directory,filename),'w',encoding=_F,newline='')as file:
+			cls.write_rc_optional_header(file=file,options=options);writer=csv.writer(file,delimiter=cls.sep_character)
 			for(name,camera)in common.OutputNameCache.cached_camera_names:camera_props:ObjectProps=camera.cpp;writer.writerow((name,*RC_Transform.get_xyalt(camera_props=camera_props,options=options),*RC_Transform.get_hpr(camera_props=camera_props,options=options)))
 		return 1
 class RC_NXYZOPK(RC_CSV_Common):
-	name='Comma-separated Name, X, Y, Z, Omega, Phi, Kappa';icon=_F;io_format=common.IOFileFormat.RC_NXYZOPK;extension=_H;rc_csv_line='#name,x,y,z,omega,phi,kappa'
+	name='Comma-separated Name, X, Y, Z, Omega, Phi, Kappa';io_format=common.IOFileFormat.RC_NXYZOPK;csv_description_line='#name,x,y,z,omega,phi,kappa';float_data_count=6
 	@classmethod
 	def read(cls,*,r_data:list,file:TextIOWrapper,options:common.IOExportOptionsBaseT)->int:
 		skipped=0
-		for(i,line)in enumerate(cls.iter_lines(file=file,data_count=6)):
+		for(i,line)in enumerate(cls.iter_lines(file=file)):
 			if line is _A:skipped+=1
 			else:
 				name,data=line;un=common.InputNameCache.eval_unified_name_from_cache(name=name)
 				if un is _A:skipped+=1;continue
 				c=RC_NXYZROT_Camera();c.name=un;RC_Transform.set_xyalt(camera_props=c,xyalt=data[:3]);RC_Transform.set_opk(camera_props=c,opk=data[3:6])
-				if options.has_transform:c.apply_transform(options.R,options.S)
+				if options.has_transform:c.apply_transform(R=options.R,S=options.S)
 				r_data.append(c)
 		return i-skipped
 	@classmethod
 	def write(cls,*,directory:str,filename:str,options:RC_CSV_ExportOptions):
-		with open(os.path.join(directory,filename),'w',encoding=_G,newline='')as file:
-			cls.write_header(file=file,options=options);writer=csv.writer(file,delimiter=',')
+		with open(os.path.join(directory,filename),'w',encoding=_F,newline='')as file:
+			cls.write_rc_optional_header(file=file,options=options);writer=csv.writer(file,delimiter=cls.sep_character)
 			for(name,camera)in common.OutputNameCache.cached_camera_names:camera_props:ObjectProps=camera.cpp;writer.writerow((name,*RC_Transform.get_xyalt(camera_props=camera_props,options=options),*RC_Transform.get_opk(camera_props=camera_props,options=options)))
 		return 1
 class RC_METADATA_XMP_PosePrior(IntEnum):initial=auto();exact=auto();locked=auto()
 class RC_METADATA_XMP_CalibrationPrior(IntEnum):initial=auto();exact=auto()
 class RC_METADATA_XMP_Coordinates(IntEnum):absolute=auto();relative=auto()
 class RC_METADATA_XMP_ExportMode(IntEnum):DO_NOT_EXPORT=auto();DRAFT=auto();EXACT=auto();LOCKED=auto()
-class RC_MetadataXMP_ExportParams(common.IOExportParamsBase):rc_metadata_xmp_use_calibration_groups:BoolProperty(default=_B,options={_E},translation_context=_J,name='Calibration Groups',description='Select to export the information on the created calibration groups for Reality Capture (XMP)');rc_metadata_xmp_include_editor_options:BoolProperty(default=_B,options={_E},translation_context=_J,name='Include Editor Options',description='Export editor states, e.g. enabled/disabled flags for texturing, meshing, and similar for Reality Capture (XMP)');rc_metadata_xmp_export_mode:EnumProperty(items=((RC_METADATA_XMP_ExportMode.DO_NOT_EXPORT.name,'Do Not Export','Do not export camera poses'),(RC_METADATA_XMP_ExportMode.DRAFT.name,'Draft','This will treat poses as an imperfect draft to be optimized in the future. The draft mode functions also as a flight log'),(RC_METADATA_XMP_ExportMode.EXACT.name,'Exact','If you trust the alignment absolutely. By choosing this option, you are saying to the application that poses are precise, but the global position, orientation, and scale is not known'),(RC_METADATA_XMP_ExportMode.LOCKED.name,'Locked','This is the same as the exact option with the difference that the camera position and calibration will not be changed, when locked')),default=RC_METADATA_XMP_ExportMode.DRAFT.name,options={_E},translation_context='RC_METADATA_XMP_ExportMode',name='Export Mode',description='Depending on how much you trust your registration, you can select the following options or you can also choose not to export camera poses for Reality Capture (XMP)');rc_metadata_xmp_calibration_group:IntProperty(default=-1,min=-1,options={_E},translation_context=_I,name='Calibration Group',description='By defining a group for Reality Capture (XMP) we state that all images in this group have the same calibration properties, e.g. the same focal length, the same principal point. Use "-1" if you do not want to group the parameters');rc_metadata_xmp_distortion_group:IntProperty(default=-1,min=-1,options={_E},translation_context=_I,name='Distortion Group',description='By defining a group for Reality Capture (XMP) we state that all images in this group have the same lens properties, e.g. the same lens distortion coefficients. Use "-1" if you do not want to group the parameters');rc_metadata_xmp_in_texturing:BoolProperty(default=_B,options={_E},translation_context=_I,name='In Texturing',description='Whether to use an image to create an object texture for Reality Capture (XMP)');rc_metadata_xmp_in_meshing:BoolProperty(default=_B,options={_E},translation_context=_I,name='In Meshing',description='Whether to use an image to create the object mesh data for Reality Capture (XMP)')
+class RC_MetadataXMP_ExportParams(common.IOExportParamsBase):rc_metadata_xmp_use_calibration_groups:BoolProperty(default=_B,options={_E},translation_context=_I,name='Calibration Groups',description='Select to export the information on the created calibration groups for Reality Capture (XMP)');rc_metadata_xmp_include_editor_options:BoolProperty(default=_B,options={_E},translation_context=_I,name='Include Editor Options',description='Export editor states, e.g. enabled/disabled flags for texturing, meshing, and similar for Reality Capture (XMP)');rc_metadata_xmp_export_mode:EnumProperty(items=((RC_METADATA_XMP_ExportMode.DO_NOT_EXPORT.name,'Do Not Export','Do not export camera poses'),(RC_METADATA_XMP_ExportMode.DRAFT.name,'Draft','This will treat poses as an imperfect draft to be optimized in the future. The draft mode functions also as a flight log'),(RC_METADATA_XMP_ExportMode.EXACT.name,'Exact','If you trust the alignment absolutely. By choosing this option, you are saying to the application that poses are precise, but the global position, orientation, and scale is not known'),(RC_METADATA_XMP_ExportMode.LOCKED.name,'Locked','This is the same as the exact option with the difference that the camera position and calibration will not be changed, when locked')),default=RC_METADATA_XMP_ExportMode.DRAFT.name,options={_E},translation_context='RC_METADATA_XMP_ExportMode',name='Export Mode',description='Depending on how much you trust your registration, you can select the following options or you can also choose not to export camera poses for Reality Capture (XMP)');rc_metadata_xmp_calibration_group:IntProperty(default=-1,min=-1,options={_E},translation_context=_G,name='Calibration Group',description='By defining a group for Reality Capture (XMP) we state that all images in this group have the same calibration properties, e.g. the same focal length, the same principal point. Use "-1" if you do not want to group the parameters');rc_metadata_xmp_distortion_group:IntProperty(default=-1,min=-1,options={_E},translation_context=_G,name='Distortion Group',description='By defining a group for Reality Capture (XMP) we state that all images in this group have the same lens properties, e.g. the same lens distortion coefficients. Use "-1" if you do not want to group the parameters');rc_metadata_xmp_in_texturing:BoolProperty(default=_B,options={_E},translation_context=_G,name='In Texturing',description='Whether to use an image to create an object texture for Reality Capture (XMP)');rc_metadata_xmp_in_meshing:BoolProperty(default=_B,options={_E},translation_context=_G,name='In Meshing',description='Whether to use an image to create the object mesh data for Reality Capture (XMP)')
 class RC_MetadataXMP_ExportOptions(common.IOTransformOptionsBase):
 	__slots__='use_calibration_groups','use_include_editor_options','export_mode','calibration_group','distortion_group','in_texturing','in_meshing';use_calibration_groups:bool;use_include_editor_options:bool;export_mode:RC_METADATA_XMP_ExportMode;calibration_group:int;distortion_group:int;in_texturing:bool;in_meshing:bool
 	def __init__(self,**kwargs):super().__init__(**kwargs);self.use_calibration_groups=kwargs['rc_metadata_xmp_use_calibration_groups'];self.use_include_editor_options=kwargs['rc_metadata_xmp_include_editor_options'];self.export_mode=RC_METADATA_XMP_ExportMode[kwargs['rc_metadata_xmp_export_mode']];self.calibration_group=kwargs['rc_metadata_xmp_calibration_group'];self.distortion_group=kwargs['rc_metadata_xmp_distortion_group'];self.in_texturing=kwargs['rc_metadata_xmp_in_texturing'];self.in_meshing=kwargs['rc_metadata_xmp_in_meshing']
@@ -220,7 +202,7 @@ class RC_METADATA_XMP_Camera(common.IOObjectTransform):
 	name:common.InputName;lens:float;principal_x:float;principal_y:float;skew:float;aspect:float;distortion_model:constants.DistortionModel;k1:float;k2:float;k3:float;k4:float;p1:float;p2:float
 	def set_camera_data(self,*,camera:Object):camera_props:ObjectProps=camera.cpp;cam:Camera=camera.data;cam_props:CameraProps=cam.cpp;cam.sensor_fit='AUTO';cam.sensor_width=36.;cam.sensor_height=36.;cam.clip_start=.1;cam.clip_end=1e3;camera_props.location=self.location;camera_props.rotation=self.rotation;cam_props.lens=self.lens;cam_props.principal_x=self.principal_x;cam_props.principal_y=self.principal_y;cam_props.skew=self.skew;cam_props.aspect=self.aspect;cam_props.distortion_model=self.distortion_model.name;cam_props.k1=self.k1;cam_props.k2=self.k2;cam_props.k3=self.k3;cam_props.k4=self.k4;cam_props.p1=self.p1;cam_props.p2=self.p2
 class RC_METADATA_XMP(common.IOFileFormatHandler):
-	name='Metadata (XMP)';icon=_F;io_format=common.IOFileFormat.RC_METADATA_XMP;extension='.xmp';size_max=2000;export_params=RC_MetadataXMP_ExportParams;export_options=RC_MetadataXMP_ExportOptions
+	name='Metadata (XMP)';icon=_H;io_format=common.IOFileFormat.RC_METADATA_XMP;possibilities=common.IOFileFormatPossibilities.IMPORT|common.IOFileFormatPossibilities.EXPORT;extension='.xmp';size_max=2000;export_params=RC_MetadataXMP_ExportParams;export_options=RC_MetadataXMP_ExportOptions
 	@classmethod
 	def check(cls,*,file:TextIOWrapper)->bool:
 		handler=XMP_HandlerCheck();reader=xml.sax.make_parser();reader.setContentHandler(handler)
@@ -274,5 +256,5 @@ class RC_METADATA_XMP(common.IOFileFormatHandler):
 					if cam_props.p1 or cam_props.p2:dm+='t2'
 					desc.attrib[_attr.distortion_model]=dm;coeff=str(cam_props.k1),str(cam_props.k2),str(cam_props.k3),str(cam_props.k4),str(cam_props.p1),str(cam_props.p2)
 				distortion_coeff.text=_D.join(coeff);xyalt=RC_Transform.get_xyalt(camera_props=camera_props,options=options);position.text=_D.join(str(_)for _ in xyalt);rot=RC_Transform.get_rotation_component(camera_props=camera_props,options=options);rotation.text=_D.join(str(_)for _ in rot)
-			et.indent(tree,space=_D*4,level=0);tree.write(fp,encoding=_G,short_empty_elements=_C);num_files+=1
+			et.indent(tree,space=_D*4,level=0);tree.write(fp,encoding=_F,short_empty_elements=_C);num_files+=1
 		return num_files
